@@ -1,0 +1,44 @@
+[
+  {
+    "objectID": "notebooks.html",
+    "href": "notebooks.html",
+    "title": "Notebooks",
+    "section": "",
+    "text": "The analysis is split across five notebooks, run in order. Click any notebook to view it on GitHub.\n\n\n\nNotebook\nDescription\n\n\n\n\n1. Exploratory Data Analysis\nDistribution of claim amounts, feature relationships, frequency vs severity patterns\n\n\n2. GLM (Baseline)\nGamma GLM for severity, Poisson GLM for frequency — the actuarial industry standard\n\n\n3. XGBoost\nGradient boosted trees capturing non-linear feature interactions\n\n\n4. Neural Network\nFeedforward PyTorch network for both frequency and severity\n\n\n5. Model Comparison\nSide-by-side comparison and pure premium estimator"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Insurance Claims Predictor",
+    "section": "",
+    "text": "This project builds a pure premium estimation framework for motor insurance using the French Motor Third-Party Liability (MTPL) dataset. The goal is to predict the expected cost of insuring a given policy by modelling two separate but related questions:\n\nFrequency: Given a policy, what is the probability that a claim occurs?\nSeverity: Given that a claim occurs, how much will it cost?\n\nThe pure premium is the product of these two estimates:\n\\[\\text{Pure Premium} = P(\\text{claim}) \\times E(\\text{claim amount} \\mid \\text{claim occurred})\\]\nThis two-stage approach mirrors how insurance pricing works in practice. Actuaries separate frequency and severity because the drivers of each are different — a high-risk driver (high BonusMalus) claims more often, but when a claim occurs the repair bill is not necessarily larger than a careful driver’s."
+  },
+  {
+    "objectID": "index.html#overview",
+    "href": "index.html#overview",
+    "title": "Insurance Claims Predictor",
+    "section": "",
+    "text": "This project builds a pure premium estimation framework for motor insurance using the French Motor Third-Party Liability (MTPL) dataset. The goal is to predict the expected cost of insuring a given policy by modelling two separate but related questions:\n\nFrequency: Given a policy, what is the probability that a claim occurs?\nSeverity: Given that a claim occurs, how much will it cost?\n\nThe pure premium is the product of these two estimates:\n\\[\\text{Pure Premium} = P(\\text{claim}) \\times E(\\text{claim amount} \\mid \\text{claim occurred})\\]\nThis two-stage approach mirrors how insurance pricing works in practice. Actuaries separate frequency and severity because the drivers of each are different — a high-risk driver (high BonusMalus) claims more often, but when a claim occurs the repair bill is not necessarily larger than a careful driver’s."
+  },
+  {
+    "objectID": "index.html#models",
+    "href": "index.html#models",
+    "title": "Insurance Claims Predictor",
+    "section": "Models",
+    "text": "Models\nThree modelling approaches of increasing complexity are benchmarked:\n\n\n\n\n\n\n\n\nModel\nType\nInterpretability\n\n\n\n\nGamma / Poisson GLM\nActuarial industry standard\nHigh — coefficients map directly to pricing relativities\n\n\nXGBoost\nGradient boosted trees\nMedium — feature importance and partial dependence plots\n\n\nNeural Network\nFeedforward network (PyTorch)\nLow — most flexible, least interpretable"
+  },
+  {
+    "objectID": "index.html#dataset",
+    "href": "index.html#dataset",
+    "title": "Insurance Claims Predictor",
+    "section": "Dataset",
+    "text": "Dataset\nSource: French Motor Third-Party Liability dataset (freMTPL2freq and freMTPL2sev), publicly available via OpenML.\nSize: 679,513 policies, of which 26,439 resulted in at least one claim (3.9% claim rate).\n\n\n\n\n\n\n\nFeature\nDescription\n\n\n\n\nBonusMalus\nClaims history score. 50 = clean record, increases with each claim\n\n\nDrivAge\nAge of the driver in years\n\n\nVehAge\nAge of the vehicle in years\n\n\nVehPower\nEngine power of the vehicle\n\n\nDensity\nPopulation density of the policyholder’s area\n\n\nArea\nGeographic risk zone (A to F)\n\n\nVehBrand\nAnonymised vehicle brand code\n\n\nVehGas\nFuel type (Diesel or Regular)\n\n\nRegion\nFrench administrative region (22 categories)\n\n\nExposure\nFraction of the year the policy was active"
+  },
+  {
+    "objectID": "index.html#key-findings",
+    "href": "index.html#key-findings",
+    "title": "Insurance Claims Predictor",
+    "section": "Key Findings",
+    "text": "Key Findings\n\nClaim amounts are heavily right-skewed (mean 1,569 EUR vs median 1,172 EUR). Policy features are weak predictors of individual claim cost — this is a fundamental data limitation, not a modelling problem.\nFrequency shows much clearer patterns. BonusMalus is the strongest predictor, with drivers scoring 150+ claiming at 24% vs 3% for clean-record drivers.\nXGBoost captures the non-linear DrivAge relationship (young driver spike at 18-22) that the GLM misses entirely, with real pricing implications.\nAll three severity models produce flat predictions clustered around the mean, confirming that policy features do not explain what drives individual claim costs."
+  }
+]
