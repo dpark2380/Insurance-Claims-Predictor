@@ -1,0 +1,32 @@
+project:
+  type: website
+
+website:
+  title: "Insurance Claims Predictor"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+    right:
+      - text: Notebooks
+        menu:
+          - href: notebooks/01_eda.ipynb
+            text: "1. Exploratory Data Analysis"
+          - href: notebooks/02_glm.ipynb
+            text: "2. GLM (Baseline)"
+          - href: notebooks/03_xgboost.ipynb
+            text: "3. XGBoost"
+          - href: notebooks/04_neural_net.ipynb
+            text: "4. Neural Network"
+          - href: notebooks/05_comparison.ipynb
+            text: "5. Model Comparison"
+      - icon: github
+        href: https://github.com/dpark2380/insurance_claims_predictor
+
+format:
+  html:
+    theme: darkly
+    css: styles.css
+
+execute:
+  freeze: auto

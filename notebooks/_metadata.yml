@@ -1,0 +1,6 @@
+# Freeze notebook execution — notebooks are pre-run and outputs are used as-is.
+# This prevents Quarto from re-executing notebooks during the build,
+# which would require the full dataset and Python environment to be available in CI.
+freeze: true
+
+title-block-banner: true

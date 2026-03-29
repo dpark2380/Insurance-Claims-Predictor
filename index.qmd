@@ -1,0 +1,61 @@
+---
+title: "Insurance Claims Predictor"
+subtitle: "A frequency-severity modelling framework for motor insurance using the French MTPL dataset"
+page-layout: full
+title-block-banner: true
+---
+
+## Overview
+
+This project builds a **pure premium estimation framework** for motor insurance using the French Motor Third-Party Liability (MTPL) dataset. The goal is to predict the expected cost of insuring a given policy by modelling two separate but related questions:
+
+1. **Frequency:** Given a policy, what is the probability that a claim occurs?
+2. **Severity:** Given that a claim occurs, how much will it cost?
+
+The pure premium is the product of these two estimates:
+
+$$\text{Pure Premium} = P(\text{claim}) \times E(\text{claim amount} \mid \text{claim occurred})$$
+
+This two-stage approach mirrors how insurance pricing works in practice. Actuaries separate frequency and severity because the drivers of each are different — a high-risk driver (high BonusMalus) claims more often, but when a claim occurs the repair bill is not necessarily larger than a careful driver's.
+
+---
+
+## Models
+
+Three modelling approaches of increasing complexity are benchmarked:
+
+| Model | Type | Interpretability |
+|---|---|---|
+| Gamma / Poisson GLM | Actuarial industry standard | High — coefficients map directly to pricing relativities |
+| XGBoost | Gradient boosted trees | Medium — feature importance and partial dependence plots |
+| Neural Network | Feedforward network (PyTorch) | Low — most flexible, least interpretable |
+
+---
+
+## Dataset
+
+**Source:** French Motor Third-Party Liability dataset (freMTPL2freq and freMTPL2sev), publicly available via OpenML.
+
+**Size:** 679,513 policies, of which 26,439 resulted in at least one claim (3.9% claim rate).
+
+| Feature | Description |
+|---|---|
+| BonusMalus | Claims history score. 50 = clean record, increases with each claim |
+| DrivAge | Age of the driver in years |
+| VehAge | Age of the vehicle in years |
+| VehPower | Engine power of the vehicle |
+| Density | Population density of the policyholder's area |
+| Area | Geographic risk zone (A to F) |
+| VehBrand | Anonymised vehicle brand code |
+| VehGas | Fuel type (Diesel or Regular) |
+| Region | French administrative region (22 categories) |
+| Exposure | Fraction of the year the policy was active |
+
+---
+
+## Key Findings
+
+- Claim amounts are heavily right-skewed (mean 1,569 EUR vs median 1,172 EUR). Policy features are weak predictors of individual claim cost — this is a fundamental data limitation, not a modelling problem.
+- Frequency shows much clearer patterns. BonusMalus is the strongest predictor, with drivers scoring 150+ claiming at 24% vs 3% for clean-record drivers.
+- XGBoost captures the non-linear DrivAge relationship (young driver spike at 18-22) that the GLM misses entirely, with real pricing implications.
+- All three severity models produce flat predictions clustered around the mean, confirming that policy features do not explain what drives individual claim costs.
