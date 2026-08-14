@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>project_brief – Insurance Claims Predictor</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-3a0730cdd9a625ae55dc35d4063f4b4c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Insurance Claims Predictor</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-notebooks" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Notebooks</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-notebooks">    
+        <li>
+    <a class="dropdown-item" href="./notebooks/01_eda.html">
+ <span class="dropdown-text">1. Exploratory Data Analysis</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./notebooks/02_glm.html">
+ <span class="dropdown-text">2. GLM (Baseline)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./notebooks/03_xgboost.html">
+ <span class="dropdown-text">3. XGBoost</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./notebooks/04_neural_net.html">
+ <span class="dropdown-text">4. Neural Network</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./notebooks/05_comparison.html">
+ <span class="dropdown-text">5. Model Comparison</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/dpark2380/insurance_claims_predictor"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+
+
+
+
+<section id="insurance-claims-predictor-project-brief" class="level1">
+<h1>Insurance Claims Predictor — Project Brief</h1>
+<p>A reference document describing the project’s purpose, content, and technical implementation. Intended as context for downstream prompts that will draft resume bullets, interview talking points, or a portfolio writeup framed around <strong>insurance pricing roles</strong> (e.g.&nbsp;Allianz, IAG, Suncorp, QBE, Munich Re graduate pricing programs).</p>
+<hr>
+<section id="why-this-project-exists" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-project-exists">1. Why this project exists</h2>
+<section id="the-framing-problem-in-the-prior-resume" class="level3">
+<h3 class="anchored" data-anchor-id="the-framing-problem-in-the-prior-resume">The framing problem in the prior resume</h3>
+<p>The previous “car pricing” project demonstrated technical capability — scraping, XGBoost, a React dashboard — but it doesn’t speak the language of the team that would hire for a pricing role. A pricing actuary at Allianz does not care that you can build an ML pipeline; they care whether you understand:</p>
+<ol type="1">
+<li>The <em>purpose</em> of the model (charge each policyholder a fair, sustainable price)</li>
+<li>The <em>trade-offs</em> between models in a regulated context (accuracy vs interpretability vs defensibility)</li>
+<li>The <em>business consequence</em> of model choices (under-pricing tail risk → solvency issues; over-pricing → adverse selection / lost market share)</li>
+<li>How to <em>communicate</em> model decisions to non-technical stakeholders</li>
+</ol>
+<p>This project is built to demonstrate all four. It is structured deliberately as the same workflow a graduate at a pricing desk would run: load loss data, benchmark a regulatory-friendly baseline against modern ML, justify a hybrid production design, and deliver an interactive comparison artifact for non-technical reviewers.</p>
+</section>
+<section id="the-actuarial-concept-being-modelled" class="level3">
+<h3 class="anchored" data-anchor-id="the-actuarial-concept-being-modelled">The actuarial concept being modelled</h3>
+<p>The fundamental quantity in insurance pricing is <strong>pure premium</strong>:</p>
+<pre><code>Pure Premium = E[Frequency] × E[Severity | claim occurred]
+              = P(claim)    × E[claim cost | claim]</code></pre>
+<p>It is the expected annual loss per policy <em>before</em> expenses, profit margin, or capital loading. Every motor insurer in Australia and Europe estimates this quantity in some form. The choice of model determines:</p>
+<ul>
+<li>How fairly individual policyholders are priced (segmentation power)</li>
+<li>How resilient the book is to adverse selection</li>
+<li>How the model performs at the tails (where solvency capital is set)</li>
+<li>Whether the model can pass APRA / EIOPA regulatory review</li>
+</ul>
+<p>This is the bread-and-butter problem the project solves. The dataset (French motor third-party liability, <code>freMTPL2freq</code> + <code>freMTPL2sev</code>) is the canonical academic benchmark for this exact task.</p>
+<hr>
+</section>
+</section>
+<section id="what-the-project-actually-contains" class="level2">
+<h2 class="anchored" data-anchor-id="what-the-project-actually-contains">2. What the project actually contains</h2>
+<p>A five-notebook analysis, a comparison study, and a production-style interactive dashboard. Organised top-to-bottom in the order a pricing analyst would work.</p>
+<section id="notebooks-in-notebooks" class="level3">
+<h3 class="anchored" data-anchor-id="notebooks-in-notebooks">Notebooks (in <code>notebooks/</code>)</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 21%">
+<col style="width: 19%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Notebook</th>
+<th>Purpose</th>
+<th>Key actuarial concept</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>01</td>
+<td><code>01_eda.ipynb</code></td>
+<td>Exploratory data analysis on 679,513 policies and 26,439 claims</td>
+<td>Loss distribution shape; feature-vs-frequency relationships</td>
+</tr>
+<tr class="even">
+<td>02</td>
+<td><code>02_glm.ipynb</code></td>
+<td>Industry-standard baseline: Poisson GLM (frequency) + Gamma GLM (severity), with <code>log(Exposure)</code> as offset</td>
+<td>Two-stage frequency-severity decomposition; exposure as offset; multiplicative rating factors</td>
+</tr>
+<tr class="odd">
+<td>03</td>
+<td><code>03_xgboost.ipynb</code></td>
+<td>Gradient boosted trees for both stages — same target, more flexible functional form</td>
+<td>Non-linear effects; tree-based monotonicity constraints</td>
+</tr>
+<tr class="even">
+<td>04</td>
+<td><code>04_neural_net.ipynb</code></td>
+<td>PyTorch feedforward network — most flexible, least interpretable</td>
+<td>Tabular deep learning trade-offs</td>
+</tr>
+<tr class="odd">
+<td>05</td>
+<td><code>05_comparison.ipynb</code></td>
+<td>Head-to-head comparison + pure premium synthesis + risk discrimination</td>
+<td>Gini / Lorenz curves; regulatory interpretability assessment</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="dashboard-in-dashboard" class="level3">
+<h3 class="anchored" data-anchor-id="dashboard-in-dashboard">Dashboard (in <code>dashboard/</code>)</h3>
+<p>A FastAPI + React app that lets a non-technical user enter a policy profile and see all three models’ predicted pure premium side-by-side, with per-feature attribution (SHAP for XGBoost, coefficient × value for GLM, gradient × input for the neural net). This is the artifact you would demo in an interview — it shows the end-to-end pipeline and communicates the model trade-off visually.</p>
+</section>
+<section id="quarto-site-_quarto.yml-notebooks.qmd" class="level3">
+<h3 class="anchored" data-anchor-id="quarto-site-_quarto.yml-notebooks.qmd">Quarto site (<code>_quarto.yml</code>, <code>notebooks.qmd</code>)</h3>
+<p>The whole analysis publishes as a static site via Quarto. Demonstrates the ability to communicate technical work to a broader audience — the skill a pricing team needs when presenting to underwriting, finance, or APRA.</p>
+<hr>
+</section>
+</section>
+<section id="key-findings-the-substance-worth-talking-about" class="level2">
+<h2 class="anchored" data-anchor-id="key-findings-the-substance-worth-talking-about">3. Key findings — the substance worth talking about</h2>
+<p>These are the project’s <em>load-bearing</em> outputs. Every resume bullet or interview answer should be traceable back to one of these.</p>
+<section id="finding-1-pure-premium-estimates-diverge-substantially-across-model-families" class="level3">
+<h3 class="anchored" data-anchor-id="finding-1-pure-premium-estimates-diverge-substantially-across-model-families">Finding 1: Pure premium estimates diverge substantially across model families</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Model</th>
+<th>Mean pure premium</th>
+<th>Frequency Gini</th>
+<th>Pure Premium Gini</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>GLM</td>
+<td><strong>€220</strong></td>
+<td>0.265</td>
+<td>0.110</td>
+</tr>
+<tr class="even">
+<td>XGBoost</td>
+<td>€135</td>
+<td><strong>0.381</strong></td>
+<td><strong>0.179</strong></td>
+</tr>
+<tr class="odd">
+<td>Neural Net</td>
+<td>€129</td>
+<td>0.321</td>
+<td>0.103</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why this matters:</strong> the GLM systematically over-prices the portfolio by ~60% relative to XGBoost. In a competitive market this is the difference between gaining and losing market share. The GLM’s frequency Gini being 0.265 vs XGBoost’s 0.381 (a <strong>44% relative improvement</strong> in risk discrimination) means XGBoost can charge high-risk drivers more and low-risk drivers less, capturing the same expected loss with better fairness.</p>
+</section>
+<section id="finding-2-the-glm-extrapolates-dangerously-in-the-bonusmalus-tail" class="level3">
+<h3 class="anchored" data-anchor-id="finding-2-the-glm-extrapolates-dangerously-in-the-bonusmalus-tail">Finding 2: The GLM extrapolates dangerously in the BonusMalus tail</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>BonusMalus band</th>
+<th>GLM</th>
+<th>XGBoost</th>
+<th>Neural Net</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>50–60 (clean)</td>
+<td>€170</td>
+<td>€106</td>
+<td>€107</td>
+</tr>
+<tr class="even">
+<td>150+ (worst)</td>
+<td><strong>€3,317</strong></td>
+<td>€786</td>
+<td>€1,168</td>
+</tr>
+</tbody>
+</table>
+<p>The GLM’s log-link multiplies expected claims by <code>exp(β·ΔBM)</code> — for sparse tail observations this produces premiums 4× higher than XGBoost. This is not a bug, it’s the log-linear assumption colliding with sparse data. Real pricing teams cap GLM predictions or use credibility blending for exactly this reason. The finding shows you understand <em>why</em> GLMs are not just “a baseline” but a parametric assumption with consequences.</p>
+</section>
+<section id="finding-3-severity-is-data-limited-not-model-limited" class="level3">
+<h3 class="anchored" data-anchor-id="finding-3-severity-is-data-limited-not-model-limited">Finding 3: Severity is data-limited, not model-limited</h3>
+<p>All three severity models converge to similar MAE (€938–€1,079). Adding complexity from GLM → XGBoost → neural net moves the needle by ~2%. <strong>The ceiling is the data, not the model.</strong> Policy features predict <em>whether</em> a claim happens but not <em>how much</em> it costs. A more accurate severity model is not the optimisation target — better external data (vehicle valuations, repair cost indices) would be.</p>
+</section>
+<section id="finding-4-hybrid-design-wins-and-the-neural-net-loses" class="level3">
+<h3 class="anchored" data-anchor-id="finding-4-hybrid-design-wins-and-the-neural-net-loses">Finding 4: Hybrid design wins — and the neural net loses</h3>
+<p>The recommended production design is <strong>XGBoost for frequency, GLM for severity</strong> — best of both. The neural net trails XGBoost on every frequency metric, ties on severity, and has the <em>worst</em> end-to-end pure premium Gini (0.103 — behind even the GLM at 0.110). On structured tabular insurance data, gradient boosted trees beat neural networks consistently. Knowing when <em>not</em> to reach for deep learning is a senior judgment call.</p>
+</section>
+<section id="finding-5-regulatory-defensibility-shapes-the-choice" class="level3">
+<h3 class="anchored" data-anchor-id="finding-5-regulatory-defensibility-shapes-the-choice">Finding 5: Regulatory defensibility shapes the choice</h3>
+<p>Under APRA Prudential Standard GPS 116, premium rating factors must be documented and defensible. The hybrid is regulator-friendly:</p>
+<ul>
+<li><strong>GLM severity</strong> — standard actuarial practice, coefficients audit-ready</li>
+<li><strong>XGBoost frequency</strong> — SHAP for individual explanations, monotonicity constraints on BonusMalus to guarantee worse driving never lowers premium</li>
+<li><strong>Neural net</strong> — would need significantly more explanation tooling; not worth the cost given it does not outperform XGBoost</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="technical-implementation-details" class="level2">
+<h2 class="anchored" data-anchor-id="technical-implementation-details">4. Technical implementation details</h2>
+<p>For prompts that need accurate details about <em>how</em> things were built.</p>
+<section id="data" class="level3">
+<h3 class="anchored" data-anchor-id="data">Data</h3>
+<ul>
+<li><strong>Dataset:</strong> French Motor Third-Party Liability (<code>freMTPL2freq</code>, <code>freMTPL2sev</code>) via OpenML</li>
+<li><strong>Size:</strong> 679,513 policies, 26,439 claims, 3.9% claim rate</li>
+<li><strong>Features:</strong> VehPower (4–15), VehAge (0–100), DrivAge (18–100), BonusMalus (50–230), Density (1–27,000), Area (A–F), VehBrand (B1–B14), VehGas (Regular/Diesel), Region (R11–R94, 22 levels)</li>
+<li><strong>Targets:</strong> <code>ClaimNb</code> for frequency (Poisson); <code>ClaimAmount</code> for severity (Gamma), capped at the 99th percentile (€16,451)</li>
+<li><strong>Encoding:</strong> One-hot with <code>drop_first=True</code>, severity matrix reindexed to the frequency schema so a single input vector drives both stages</li>
+<li><strong>Split:</strong> 80/20 train/test, <code>random_state=42</code>, same split used by all six models for direct comparability</li>
+</ul>
+</section>
+<section id="models" class="level3">
+<h3 class="anchored" data-anchor-id="models">Models</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Stage / target</th>
+<th>GLM</th>
+<th>XGBoost</th>
+<th>Neural Net</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Frequency</strong> (<code>ClaimNb</code>, Poisson)</td>
+<td><code>statsmodels.GLM</code>, Poisson family, log link, <code>log(Exposure)</code> offset</td>
+<td><code>XGBRegressor(objective='count:poisson')</code>, 500 trees, depth 4, sample-weighted by exposure, early stopping</td>
+<td>PyTorch <code>Linear(42→64→32→1)</code> + ReLU + Dropout(0.2); 20 epochs, batch 4096; trained on <code>ClaimNb/Exposure</code> with exposure-weighted MSE</td>
+</tr>
+<tr class="even">
+<td><strong>Severity</strong> (<code>ClaimAmount</code>, Gamma)</td>
+<td><code>statsmodels.GLM</code>, Gamma family, log link</td>
+<td><code>XGBRegressor(objective='reg:squarederror')</code>, 500 trees, depth 4, trained on <code>log(ClaimAmount)</code>, early stopping</td>
+<td>Same architecture as frequency net, trained on <code>log1p(ClaimAmount)</code>, 30 epochs batch 256</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="metrics" class="level3">
+<h3 class="anchored" data-anchor-id="metrics">Metrics</h3>
+<ul>
+<li><strong>Frequency:</strong> MAE, RMSE, Poisson Deviance (actuarially correct distributional metric)</li>
+<li><strong>Severity:</strong> MAE, RMSE, Gamma Deviance (calibration to the Gamma family)</li>
+<li><strong>End-to-end:</strong> Mean pure premium, pure premium distribution, Gini coefficient (frequency Gini and pure premium Gini), Lorenz curves, decile lift charts</li>
+<li><strong>Risk segmentation:</strong> Mean pure premium by BonusMalus band and by driver age band</li>
+</ul>
+</section>
+<section id="dashboard-architecture" class="level3">
+<h3 class="anchored" data-anchor-id="dashboard-architecture">Dashboard architecture</h3>
+<pre><code>scripts/
+├── 01_train_glm_xgb.py    GLM + XGBoost (~8s)
+├── 02_train_nn.py         Neural net (~5s)
+├── 03_compute_stats.py    Portfolio stats (~1s)
+└── train_all.sh           Wrapper running all three sequentially
+
+dashboard/backend/         FastAPI on :8000
+├── main.py                Three routes: /api/health, /api/schema, /api/predict
+├── models_loader.py       Loads pickled artifacts at startup; runs inference + SHAP
+└── schemas.py             Pydantic request/response models
+
+dashboard/frontend/        React + Vite on :5173
+└── src/components/        PolicyForm, PremiumCards, BandContext, AttributionGrid
+
+models/                    All artifacts loaded once at backend startup
+├── glm_freq.pkl, glm_sev.pkl       (statsmodels coefficient arrays)
+├── xgb_freq.json, xgb_sev.json     (native XGBoost format)
+├── nn_freq.pt, nn_sev.pt           (torch state dicts + scaler params)
+├── preprocessing.pkl                (feature schema, vocab, ranges)
+├── portfolio_stats.json             (mean PP per model, band means)
+└── shap_background.npy              (100-row reference for NN attribution)</code></pre>
+<p><strong>Attribution methods</strong> differ per model and are all reported in the UI: - <strong>GLM:</strong> <code>β_i × x_i</code> per feature — exact, analytic - <strong>XGBoost:</strong> TreeSHAP via <code>shap.TreeExplainer</code> — exact for tree ensembles - <strong>Neural net:</strong> <code>gradient × (input − background mean)</code> — a SHAP-style approximation</p>
+<p><strong>Note on the macOS quirk:</strong> training is split into three sequential Python processes because importing <code>torch</code> after <code>xgboost</code> in the same interpreter causes an OpenMP runtime deadlock on Apple Silicon. Each subprocess gets a fresh interpreter. The serving backend imports both safely because it only does single-sample inference.</p>
+</section>
+<section id="stack" class="level3">
+<h3 class="anchored" data-anchor-id="stack">Stack</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Layer</th>
+<th>Tools</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Modelling</td>
+<td><code>statsmodels</code> (GLM), <code>xgboost</code>, <code>torch</code>, <code>scikit-learn</code></td>
+</tr>
+<tr class="even">
+<td>Explainability</td>
+<td><code>shap</code> (TreeExplainer for XGBoost)</td>
+</tr>
+<tr class="odd">
+<td>Data</td>
+<td><code>pandas</code>, <code>numpy</code></td>
+</tr>
+<tr class="even">
+<td>API</td>
+<td><code>fastapi</code>, <code>uvicorn</code>, <code>pydantic</code> v2</td>
+</tr>
+<tr class="odd">
+<td>Frontend</td>
+<td>React 18, Vite, Recharts</td>
+</tr>
+<tr class="even">
+<td>Publishing</td>
+<td>Quarto (renders the notebooks as a static site)</td>
+</tr>
+<tr class="odd">
+<td>Environment</td>
+<td>Python 3.14, Node 18+, macOS / Linux</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="skills-demonstrated-mapped-to-a-pricing-role-jd" class="level2">
+<h2 class="anchored" data-anchor-id="skills-demonstrated-mapped-to-a-pricing-role-jd">5. Skills demonstrated — mapped to a pricing-role JD</h2>
+<p>For mapping bullets to specific job requirements.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Required skill (typical pricing JD)</th>
+<th>How this project demonstrates it</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>GLM modelling for insurance pricing</td>
+<td>Poisson frequency + Gamma severity GLMs with <code>log(Exposure)</code> offset, the textbook actuarial setup</td>
+</tr>
+<tr class="even">
+<td>Understanding of frequency-severity decomposition</td>
+<td>The entire project is structured around it; comparison notebook synthesises both stages into pure premium</td>
+</tr>
+<tr class="odd">
+<td>Familiarity with ML methods used by modern pricing teams (GBM, neural nets)</td>
+<td>XGBoost and PyTorch implementations alongside the GLM baseline, with calibration and Gini comparison</td>
+</tr>
+<tr class="even">
+<td>Model selection in a regulated context</td>
+<td>Notebook 05 part 4: explicit accuracy vs interpretability radar chart, APRA GPS 116 framing in the conclusion</td>
+</tr>
+<tr class="odd">
+<td>Communication of technical results to non-technical audiences</td>
+<td>Interactive dashboard with cards, band context, and per-feature attribution; Quarto publishing for the writeup</td>
+</tr>
+<tr class="even">
+<td>Python programming</td>
+<td>All notebooks, training scripts, FastAPI backend</td>
+</tr>
+<tr class="odd">
+<td>Data manipulation (pandas/SQL)</td>
+<td>EDA notebook; one-hot encoding pipeline that aligns severity to frequency schema</td>
+</tr>
+<tr class="even">
+<td>Risk segmentation analysis</td>
+<td>BonusMalus band table, driver age band table, Gini coefficients</td>
+</tr>
+<tr class="odd">
+<td>Knowledge of common metrics (deviance, Gini, lift)</td>
+<td>All used in notebook 05, reported in the dashboard</td>
+</tr>
+<tr class="even">
+<td>Working with industry-standard datasets</td>
+<td>French MTPL is the canonical benchmark in academic actuarial literature</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="resume-bullet-starter-ideas" class="level2">
+<h2 class="anchored" data-anchor-id="resume-bullet-starter-ideas">6. Resume-bullet starter ideas</h2>
+<p>Rough drafts to be polished by a downstream prompt. Each bullet should lead with <strong>business impact</strong> and back-fill with technique.</p>
+<ul>
+<li><em>Benchmarked Poisson/Gamma GLM, XGBoost, and PyTorch neural network on French MTPL pure premium estimation — found XGBoost delivered a 44% relative improvement in risk-discrimination Gini (0.381 vs 0.265) over the regulatory baseline.</em></li>
+<li><em>Quantified the cost of GLM tail extrapolation, showing the log-link produced predictions 4× higher than XGBoost in the BonusMalus 150+ band — a finding directly informing the recommended hybrid pricing design.</em></li>
+<li><em>Designed a hybrid two-stage pricer (XGBoost frequency + GLM severity) framed against APRA Prudential Standard GPS 116, balancing predictive lift against regulatory interpretability.</em></li>
+<li><em>Demonstrated that on structured tabular insurance data, neural networks under-perform gradient boosted trees on every frequency metric (Poisson Deviance 44,368 vs 43,579) — a pragmatic finding against the “deeper is better” default.</em></li>
+<li><em>Built a FastAPI + React dashboard letting non-technical reviewers enter a policy profile and compare all three models’ pure premium estimates side-by-side, with per-feature SHAP attribution.</em></li>
+<li><em>Identified severity as data-limited rather than model-limited (all three models within 2% on MAE), redirecting effort toward feature engineering on external vehicle/repair-cost data.</em></li>
+</ul>
+<hr>
+</section>
+<section id="why-this-replaces-the-car-pricing-project" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-replaces-the-car-pricing-project">7. Why this replaces the car-pricing project</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Car pricing project</th>
+<th>This project</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Domain relevance to insurance roles</td>
+<td>Adjacent — uses similar ML tooling but not actuarial</td>
+<td>Direct — pure premium estimation is the central task of P&amp;C pricing</td>
+</tr>
+<tr class="even">
+<td>Demonstrates regulatory awareness</td>
+<td>No</td>
+<td>Yes — APRA / GPS 116 framing, interpretability radar, defensibility analysis</td>
+</tr>
+<tr class="odd">
+<td>Uses canonical actuarial dataset</td>
+<td>No</td>
+<td>Yes — French MTPL is the academic benchmark</td>
+</tr>
+<tr class="even">
+<td>Two-stage frequency-severity decomposition</td>
+<td>No (single regression)</td>
+<td>Yes — entire project is built on it</td>
+</tr>
+<tr class="odd">
+<td>Distributional metrics (deviance, Gini, lift)</td>
+<td>RMSE/MAE only</td>
+<td>Poisson/Gamma deviance, Gini, Lorenz, decile lift</td>
+</tr>
+<tr class="even">
+<td>Risk-segmentation analysis</td>
+<td>No</td>
+<td>BonusMalus and DrivAge band breakdowns</td>
+</tr>
+<tr class="odd">
+<td>Interpretability story</td>
+<td>Implicit</td>
+<td>Explicit — SHAP for XGBoost, coefficients for GLM, gradient × input for NN, side-by-side in the dashboard</td>
+</tr>
+<tr class="even">
+<td>Business framing</td>
+<td>Consumer use case</td>
+<td>Insurer use case (the same work a pricing analyst does day-to-day)</td>
+</tr>
+</tbody>
+</table>
+<p>The car-pricing project is well-built but reads as a “data science project.” This project reads as an “actuarial pricing analysis.” For a pricing graduate role at Allianz, the difference is exactly the framing the resume is currently missing.</p>
+<hr>
+</section>
+<section id="tone-notes-for-downstream-prompts" class="level2">
+<h2 class="anchored" data-anchor-id="tone-notes-for-downstream-prompts">8. Tone notes for downstream prompts</h2>
+<p>When writing resume bullets or interview answers off this brief:</p>
+<ul>
+<li>Lead with the <em>finding</em> or <em>business consequence</em>, not the <em>technique</em>.
+<ul>
+<li>Bad: “Built a Poisson GLM with exposure offset.”</li>
+<li>Good: “Established a regulatory-baseline frequency model, then quantified its 44%-relative-Gini gap to XGBoost — supporting a hybrid production design.”</li>
+</ul></li>
+<li>Use <em>actuarial language</em> where appropriate: pure premium, exposure, risk discrimination, segmentation power, distributional fit, calibration, tail behaviour, credibility, loss ratio.</li>
+<li>Reference <em>real numbers</em> from this project where possible — they signal that the work was actually done.</li>
+<li>Tie technical choices to <em>regulatory</em> and <em>commercial</em> consequences (APRA GPS 116, adverse selection, capital adequacy, market share).</li>
+<li>Avoid resume clichés like “leveraged” / “utilised” — pricing teams write technical memos, they don’t write LinkedIn posts.</li>
+</ul>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/dpark2380\.github\.io\/Insurance-Claims-Predictor\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

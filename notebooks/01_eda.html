@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -14,10 +14,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -76,10 +79,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-f418161beb48e0141c760e455f12af2c.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d6fd904d1c54ba319e3f8c30b794b012.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-3a0730cdd9a625ae55dc35d4063f4b4c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -160,7 +163,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">4. Neural Network</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../notebooks/05_comparison.ipynb">
+    <a class="dropdown-item" href="../notebooks/05_comparison.html">
  <span class="dropdown-text">5. Model Comparison</span></a>
   </li>  
     </ul>
@@ -216,8 +219,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>—title: “Exploratory Data Analysis”description: “Distribution of claim amounts, feature relationships, and frequency vs severity patterns in the French MTPL dataset.”date: “2026-03-28”—</p>
-<div id="cf61559a" class="cell" data-execution_count="40">
+<div id="cf61559a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:11.780509Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:11.780380Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:13.572831Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:13.572283Z&quot;}}" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -234,7 +236,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>Part 2 — Frequency:</strong> Which policies result in a claim (679k policies)</li>
 </ul>
 <p>Both parts feed into separate models that are later combined to estimate a pure premium.</p>
-<div id="96ae96d8" class="cell" data-execution_count="41">
+<div id="96ae96d8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:13.573913Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:13.573811Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:13.845734Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:13.845312Z&quot;}}" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fetching the severity dataset</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Fetching freMTPL2sev from OpenML...'</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> fetch_openml(name<span class="op">=</span><span class="st">'freMTPL2sev'</span>, version<span class="op">=</span><span class="dv">1</span>, as_frame<span class="op">=</span><span class="va">True</span>)</span>
@@ -255,7 +257,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>Fetching freMTPL2sev from OpenML...</code></pre>
 </div>
 </div>
-<div id="22cc2dd0" class="cell" data-execution_count="42">
+<div id="22cc2dd0" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:13.846755Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:13.846700Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:13.907688Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:13.907408Z&quot;}}" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename severity column for clarity                                                              </span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>df_sev <span class="op">=</span> df  <span class="co"># the 26k claims dataset you already loaded                                       </span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -286,7 +288,7 @@ All policies:         679,513
 Policies with claims: 26,444
 Claim rate:           3.9%</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="42">
+<div class="cell-output cell-output-display" data-execution_count="3">
 <div>
 
 
@@ -401,7 +403,7 @@ Claim rate:           3.9%</code></pre>
 <section id="part-1.-severity-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="part-1.-severity-analysis">Part 1. Severity Analysis</h2>
 <p>Dataset. 26,439 claims (policies where at least one claim was made)</p>
-<div id="4de8cc91" class="cell" data-execution_count="43">
+<div id="4de8cc91" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:13.908771Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:13.908708Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:14.126660Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:14.126341Z&quot;}}" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Raw distribution capped at 99th percentile</span></span>
@@ -441,7 +443,7 @@ Claim rate:           3.9%</code></pre>
 <li>Log-transforming the target when training the neural network</li>
 </ol>
 <p>Many claims cluster at round amounts (1,204 EUR, 1,128 EUR, 1,172 EUR), likely standardised repair tariffs rather than individually assessed claims. This is a known characteristic of this dataset.</p>
-<div id="814dd3de" class="cell" data-execution_count="44">
+<div id="814dd3de" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:14.127632Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:14.127564Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:14.130821Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:14.130539Z&quot;}}" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_claims[<span class="st">'ClaimAmount'</span>].describe())                                                                            </span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Top 5 largest claims:"</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_claims[<span class="st">'ClaimAmount'</span>].nlargest(<span class="dv">5</span>).values)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -460,9 +462,9 @@ Top 5 largest claims:
 [16451.224 16451.224 16451.224 16451.224 16451.224]</code></pre>
 </div>
 </div>
-<div id="2d613449" class="cell" data-execution_count="45">
+<div id="2d613449" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:14.131682Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:14.131632Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:14.144815Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:14.144417Z&quot;}}" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df_claims.describe(include<span class="op">=</span><span class="st">'all'</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="45">
+<div class="cell-output cell-output-display" data-execution_count="6">
 <div>
 
 
@@ -668,7 +670,7 @@ Top 5 largest claims:
 </div>
 </div>
 </div>
-<div id="7a4ee7af" class="cell" data-execution_count="46">
+<div id="7a4ee7af" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:14.148260Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:14.148181Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:14.151891Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:14.151548Z&quot;}}" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"VehAge == 99:  </span><span class="sc">{</span>(df_claims[<span class="st">'VehAge'</span>] <span class="op">==</span> <span class="dv">99</span>)<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"DrivAge == 99: </span><span class="sc">{</span>(df_claims[<span class="st">'DrivAge'</span>] <span class="op">==</span> <span class="dv">99</span>)<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -685,7 +687,7 @@ Remaining records: 26,439</code></pre>
 <section id="data-quality" class="level2">
 <h2 class="anchored" data-anchor-id="data-quality">Data Quality</h2>
 <p>5 records with placeholder values (VehAge or DrivAge = 99) were removed, leaving <strong>26,439 clean records</strong>. No missing values were found elsewhere in the dataset.</p>
-<div id="10eef66f" class="cell" data-execution_count="47">
+<div id="10eef66f" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:14.152694Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:14.152647Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:14.544863Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:14.544504Z&quot;}}" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">10</span>))                                                                      </span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>axes <span class="op">=</span> axes.flatten()                                                                                                 </span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                                                                                                                    </span>
@@ -709,7 +711,7 @@ Remaining records: 26,439</code></pre>
 </div>
 </div>
 </div>
-<div id="d3b80cb2" class="cell" data-execution_count="48">
+<div id="d3b80cb2" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:14.546130Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:14.546047Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:14.919298Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:14.919003Z&quot;}}" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>num_features <span class="op">=</span> [<span class="st">'BonusMalus'</span>, <span class="st">'DrivAge'</span>, <span class="st">'VehAge'</span>, <span class="st">'VehPower'</span>, <span class="st">'Density'</span>]</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">10</span>))</span>
@@ -734,15 +736,15 @@ Remaining records: 26,439</code></pre>
 <span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/02_feature_vs_claim.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
 <span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/Users/danielpark/Documents/insurance_claims_severity/venv/lib/python3.14/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names
+<pre><code>/Users/danielpark/Documents/insurance_claims_predictor/venv/lib/python3.14/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names
   warnings.warn(
-/Users/danielpark/Documents/insurance_claims_severity/venv/lib/python3.14/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names
+/Users/danielpark/Documents/insurance_claims_predictor/venv/lib/python3.14/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names
   warnings.warn(
-/Users/danielpark/Documents/insurance_claims_severity/venv/lib/python3.14/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names
+/Users/danielpark/Documents/insurance_claims_predictor/venv/lib/python3.14/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names
   warnings.warn(
-/Users/danielpark/Documents/insurance_claims_severity/venv/lib/python3.14/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names
+/Users/danielpark/Documents/insurance_claims_predictor/venv/lib/python3.14/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names
   warnings.warn(
-/Users/danielpark/Documents/insurance_claims_severity/venv/lib/python3.14/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names
+/Users/danielpark/Documents/insurance_claims_predictor/venv/lib/python3.14/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names
   warnings.warn(</code></pre>
 </div>
 <div class="cell-output cell-output-display">
@@ -759,7 +761,7 @@ Remaining records: 26,439</code></pre>
 <p>All individual features show near-zero R² against ClaimAmount. This is expected and is a fundamental property of insurance severity modelling — these features predict <strong>whether</strong> a claim happens (frequency), not <strong>how much</strong> it costs (severity).</p>
 <p>For example, BonusMalus (claims history score) predicts that a risky driver will crash more often, but when they do crash, the repair bill isn’t systematically larger than a careful driver’s.</p>
 <p>The signal in severity modelling comes from <strong>combining features together</strong>, which is what the GLM, XGBoost, and neural network will do in the following notebooks.</p>
-<div id="ecbc899d" class="cell" data-execution_count="49">
+<div id="ecbc899d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:14.920472Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:14.920397Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:14.926241Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:14.925827Z&quot;}}" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df_merged[<span class="st">'HasClaim'</span>] <span class="op">=</span> (df_merged[<span class="st">'ClaimAmount'</span>].notna()).astype(<span class="bu">int</span>)                                                </span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                                                                                                                    </span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'--- Claim Frequency Summary ---'</span>)                                                                              </span>
@@ -790,7 +792,7 @@ ClaimNb
 Name: count, dtype: int64</code></pre>
 </div>
 </div>
-<div id="30cmkric10y" class="cell" data-execution_count="50">
+<div id="30cmkric10y" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:14.927108Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:14.927056Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:15.341915Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:15.341433Z&quot;}}" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">10</span>))</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>axes <span class="op">=</span> axes.flatten()</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -823,7 +825,7 @@ Name: count, dtype: int64</code></pre>
 <section id="part-2.-frequency-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="part-2.-frequency-analysis">Part 2. Frequency Analysis</h2>
 <p>Dataset. 679,513 policies (the full dataset including policies with no claims)</p>
-<div id="k8he5a2jyj" class="cell" data-execution_count="51">
+<div id="k8he5a2jyj" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:15.342877Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:15.342809Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:16.453652Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:16.453205Z&quot;}}" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Save cleaned datasets for modelling notebooks</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>df_claims.to_csv(<span class="st">'../data/claims_cleaned.csv'</span>, index<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>df_merged.to_csv(<span class="st">'../data/policies_cleaned.csv'</span>, index<span class="op">=</span><span class="va">False</span>)</span>

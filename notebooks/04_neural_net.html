@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -14,10 +14,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -76,10 +79,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-f418161beb48e0141c760e455f12af2c.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d6fd904d1c54ba319e3f8c30b794b012.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-3a0730cdd9a625ae55dc35d4063f4b4c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -157,7 +160,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">4. Neural Network</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../notebooks/05_comparison.ipynb">
+    <a class="dropdown-item" href="../notebooks/05_comparison.html">
  <span class="dropdown-text">5. Model Comparison</span></a>
   </li>  
     </ul>
@@ -213,12 +216,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>—title: “Neural Network (PyTorch)”description: “Feedforward neural network for frequency and severity, the most flexible but least interpretable approach.”date: “2026-03-28”—</p>
 <section id="notebook-4-neural-network-pytorch" class="level1">
 <h1>Notebook 4: Neural Network (PyTorch)</h1>
-<p><strong>Goal:</strong> Fit a feedforward neural network and compare against GLM and XGBoost.<br>
-<strong>Why PyTorch?</strong> Industry standard deep learning framework. We train on log(ClaimAmount) since neural nets work better with normally distributed targets.</p>
-<div id="2" class="cell">
+<p>This notebook fits feedforward neural networks for both frequency and severity and compares against the GLM and XGBoost baselines. - <strong>Part 1: Severity</strong> - Network trained on log(ClaimAmount), predicting claim amount given a claim occurred - <strong>Part 2: Frequency</strong> - Network trained on claim counts across all 679k policies</p>
+<div id="2" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:08:45.594413Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:08:45.594211Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:08:47.251301Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:08:47.250880Z&quot;}}" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -232,157 +233,617 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">'ignore'</span>)</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> torch.device(<span class="st">'cuda'</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">'cpu'</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> torch.device(<span class="st">'mps'</span> <span class="cf">if</span> torch.backends.mps.is_available() <span class="cf">else</span> <span class="st">'cuda'</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">'cpu'</span>)</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Using device: </span><span class="sc">{</span>device<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Using device: mps</code></pre>
 </div>
-<section id="load-prepare-data" class="level2">
-<h2 class="anchored" data-anchor-id="load-prepare-data">1. Load &amp; Prepare Data</h2>
-<div id="4" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">'../data/claims_cleaned.csv'</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [<span class="st">'VehPower'</span>, <span class="st">'VehAge'</span>, <span class="st">'DrivAge'</span>, <span class="st">'BonusMalus'</span>, <span class="st">'Density'</span>, <span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>]</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>target <span class="op">=</span> <span class="st">'ClaimAmount'</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>df_model <span class="op">=</span> pd.get_dummies(df[features <span class="op">+</span> [target]], columns<span class="op">=</span>[<span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>], drop_first<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df_model.drop(columns<span class="op">=</span>[target]).values.astype(np.float32)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.log1p(df_model[target].values.astype(np.float32))  <span class="co"># log-transform target</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Scale features — important for neural nets</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>scaler <span class="op">=</span> StandardScaler()</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> scaler.fit_transform(X_train)</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> scaler.transform(X_test)</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to PyTorch tensors</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>X_train_t <span class="op">=</span> torch.tensor(X_train, dtype<span class="op">=</span>torch.float32).to(device)</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>X_test_t  <span class="op">=</span> torch.tensor(X_test,  dtype<span class="op">=</span>torch.float32).to(device)</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>y_train_t <span class="op">=</span> torch.tensor(y_train, dtype<span class="op">=</span>torch.float32).unsqueeze(<span class="dv">1</span>).to(device)</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>y_test_t  <span class="op">=</span> torch.tensor(y_test,  dtype<span class="op">=</span>torch.float32).unsqueeze(<span class="dv">1</span>).to(device)</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(TensorDataset(X_train_t, y_train_t), batch_size<span class="op">=</span><span class="dv">256</span>, shuffle<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Train: </span><span class="sc">{</span>X_train<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, Test: </span><span class="sc">{</span>X_test<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section>
-<section id="define-model" class="level2">
-<h2 class="anchored" data-anchor-id="define-model">2. Define Model</h2>
-<div id="6" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ClaimNet(nn.Module):</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, input_dim):</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.net <span class="op">=</span> nn.Sequential(</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            nn.Linear(input_dim, <span class="dv">64</span>),</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            nn.Dropout(<span class="fl">0.2</span>),</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">64</span>, <span class="dv">32</span>),</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>            nn.Dropout(<span class="fl">0.2</span>),</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">32</span>, <span class="dv">1</span>)</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.net(x)</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ClaimNet(input_dim<span class="op">=</span>X_train.shape[<span class="dv">1</span>]).to(device)</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="part-1-severity" class="level2">
+<h2 class="anchored" data-anchor-id="part-1-severity">Part 1: Severity</h2>
+<p><em>Dataset: 26,439 claims. Target: ClaimAmount in EUR.</em></p>
+<section id="load-prepare-data" class="level3">
+<h3 class="anchored" data-anchor-id="load-prepare-data">1.1 Load &amp; Prepare Data</h3>
+<p>Features are standardised with StandardScaler — neural networks require this because gradient descent is sensitive to feature scale. The target is log-transformed for the same reason as XGBoost: the right-skewed distribution of claim amounts causes training instability on the raw scale.</p>
+<div id="4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:08:47.252289Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:08:47.252185Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:08:47.313639Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:08:47.313287Z&quot;}}" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">'../data/claims_cleaned.csv'</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [<span class="st">'VehPower'</span>, <span class="st">'VehAge'</span>, <span class="st">'DrivAge'</span>, <span class="st">'BonusMalus'</span>, <span class="st">'Density'</span>, <span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>target <span class="op">=</span> <span class="st">'ClaimAmount'</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>df_model <span class="op">=</span> pd.get_dummies(df[features <span class="op">+</span> [target]], columns<span class="op">=</span>[<span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>], drop_first<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df_model.drop(columns<span class="op">=</span>[target]).values.astype(np.float32)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.log1p(df_model[target].values.astype(np.float32))  <span class="co"># log-transform target</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Scale features — important for neural nets</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>scaler <span class="op">=</span> StandardScaler()</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> scaler.fit_transform(X_train)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> scaler.transform(X_test)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to PyTorch tensors</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>X_train_t <span class="op">=</span> torch.tensor(X_train, dtype<span class="op">=</span>torch.float32).to(device)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>X_test_t  <span class="op">=</span> torch.tensor(X_test,  dtype<span class="op">=</span>torch.float32).to(device)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>y_train_t <span class="op">=</span> torch.tensor(y_train, dtype<span class="op">=</span>torch.float32).unsqueeze(<span class="dv">1</span>).to(device)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>y_test_t  <span class="op">=</span> torch.tensor(y_test,  dtype<span class="op">=</span>torch.float32).unsqueeze(<span class="dv">1</span>).to(device)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(TensorDataset(X_train_t, y_train_t), batch_size<span class="op">=</span><span class="dv">256</span>, shuffle<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Train: </span><span class="sc">{</span>X_train<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, Test: </span><span class="sc">{</span>X_test<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Train: (21151, 42), Test: (5288, 42)</code></pre>
+</div>
 </div>
 </section>
-<section id="train" class="level2">
-<h2 class="anchored" data-anchor-id="train">3. Train</h2>
-<div id="8" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span><span class="fl">1e-3</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>criterion <span class="op">=</span> nn.MSELoss()  <span class="co"># MSE on log scale ≈ minimising proportional errors</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>epochs <span class="op">=</span> <span class="dv">100</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>train_losses, val_losses <span class="op">=</span> [], []</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Training</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    model.train()</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    batch_losses <span class="op">=</span> []</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> X_batch, y_batch <span class="kw">in</span> train_loader:</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> criterion(model(X_batch), y_batch)</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        batch_losses.append(loss.item())</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    train_losses.append(np.mean(batch_losses))</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Validation</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        val_loss <span class="op">=</span> criterion(model(X_test_t), y_test_t).item()</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    val_losses.append(val_loss)</span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (epoch <span class="op">+</span> <span class="dv">1</span>) <span class="op">%</span> <span class="dv">10</span> <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f'Epoch </span><span class="sc">{</span>epoch<span class="op">+</span><span class="dv">1</span><span class="sc">:3d}</span><span class="ss">/</span><span class="sc">{</span>epochs<span class="sc">}</span><span class="ss"> | Train Loss: </span><span class="sc">{</span>train_losses[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.4f}</span><span class="ss"> | Val Loss: </span><span class="sc">{</span>val_losses[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="define-model" class="level3">
+<h3 class="anchored" data-anchor-id="define-model">1.2 Define Model</h3>
+<p>Two hidden layers (64 and 32 units) with ReLU activations and dropout for regularisation. This is deliberately simple — a more complex network would not help given the weak signal in severity features.</p>
+<div id="6" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:08:47.314600Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:08:47.314538Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:08:47.323061Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:08:47.322763Z&quot;}}" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ClaimNet(nn.Module):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, input_dim):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.net <span class="op">=</span> nn.Sequential(</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>            nn.Linear(input_dim, <span class="dv">64</span>),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>            nn.Dropout(<span class="fl">0.2</span>),</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">64</span>, <span class="dv">32</span>),</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            nn.Dropout(<span class="fl">0.2</span>),</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">32</span>, <span class="dv">1</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.net(x)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ClaimNet(input_dim<span class="op">=</span>X_train.shape[<span class="dv">1</span>]).to(device)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ClaimNet(
+  (net): Sequential(
+    (0): Linear(in_features=42, out_features=64, bias=True)
+    (1): ReLU()
+    (2): Dropout(p=0.2, inplace=False)
+    (3): Linear(in_features=64, out_features=32, bias=True)
+    (4): ReLU()
+    (5): Dropout(p=0.2, inplace=False)
+    (6): Linear(in_features=32, out_features=1, bias=True)
+  )
+)</code></pre>
 </div>
-<div id="9" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot training curve</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>plt.plot(train_losses, label<span class="op">=</span><span class="st">'Train'</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>plt.plot(val_losses, label<span class="op">=</span><span class="st">'Validation'</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Epoch'</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'MSE Loss (log scale)'</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Neural Net Training Curve'</span>)</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/06_nn_training_curve.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="evaluate-on-test-set" class="level2">
-<h2 class="anchored" data-anchor-id="evaluate-on-test-set">4. Evaluate on Test Set</h2>
-<div id="11" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    y_pred_log <span class="op">=</span> model(X_test_t).cpu().numpy().flatten()</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Inverse log transform to get back to EUR</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> np.expm1(y_pred_log)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>y_test_orig <span class="op">=</span> np.expm1(y_test)</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>mae  <span class="op">=</span> mean_absolute_error(y_test_orig, y_pred)</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>rmse <span class="op">=</span> mean_squared_error(y_test_orig, y_pred) <span class="op">**</span> <span class="fl">0.5</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gamma_deviance(y_true, y_pred):</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> np.clip(y_pred, <span class="fl">1e-6</span>, <span class="va">None</span>)  <span class="co"># avoid division by zero</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">2</span> <span class="op">*</span> np.mean((y_true <span class="op">-</span> y_pred) <span class="op">/</span> y_pred <span class="op">-</span> np.log(y_true <span class="op">/</span> y_pred))</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>gd <span class="op">=</span> gamma_deviance(y_test_orig, y_pred)</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'--- Neural Net Test Set Performance ---'</span>)</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'MAE:             </span><span class="sc">{</span>mae<span class="sc">:,.2f}</span><span class="ss">'</span>)</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'RMSE:            </span><span class="sc">{</span>rmse<span class="sc">:,.2f}</span><span class="ss">'</span>)</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Gamma Deviance:  </span><span class="sc">{</span>gd<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>nn_metrics <span class="op">=</span> {<span class="st">'model'</span>: <span class="st">'NeuralNet'</span>, <span class="st">'MAE'</span>: mae, <span class="st">'RMSE'</span>: rmse, <span class="st">'GammaDeviance'</span>: gd}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="train" class="level3">
+<h3 class="anchored" data-anchor-id="train">1.3 Train</h3>
+<div id="8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:08:47.324717Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:08:47.324664Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:09:01.382250Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:09:01.381830Z&quot;}}" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span><span class="fl">1e-3</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>criterion <span class="op">=</span> nn.MSELoss()  <span class="co"># MSE on log scale ≈ minimising proportional errors</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>epochs <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>train_losses, val_losses <span class="op">=</span> [], []</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Training</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    model.train()</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    batch_losses <span class="op">=</span> []</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> X_batch, y_batch <span class="kw">in</span> train_loader:</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> criterion(model(X_batch), y_batch)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        batch_losses.append(loss.item())</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    train_losses.append(np.mean(batch_losses))</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Validation</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>        val_loss <span class="op">=</span> criterion(model(X_test_t), y_test_t).item()</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    val_losses.append(val_loss)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (epoch <span class="op">+</span> <span class="dv">1</span>) <span class="op">%</span> <span class="dv">10</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f'Epoch </span><span class="sc">{</span>epoch<span class="op">+</span><span class="dv">1</span><span class="sc">:3d}</span><span class="ss">/</span><span class="sc">{</span>epochs<span class="sc">}</span><span class="ss"> | Train Loss: </span><span class="sc">{</span>train_losses[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.4f}</span><span class="ss"> | Val Loss: </span><span class="sc">{</span>val_losses[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Epoch  10/100 | Train Loss: 2.0728 | Val Loss: 1.2710
+Epoch  20/100 | Train Loss: 1.9173 | Val Loss: 1.2532
+Epoch  30/100 | Train Loss: 1.8006 | Val Loss: 1.2392
+Epoch  40/100 | Train Loss: 1.6788 | Val Loss: 1.2123
+Epoch  50/100 | Train Loss: 1.5867 | Val Loss: 1.2235
+Epoch  60/100 | Train Loss: 1.5193 | Val Loss: 1.2072
+Epoch  70/100 | Train Loss: 1.4576 | Val Loss: 1.2040
+Epoch  80/100 | Train Loss: 1.4363 | Val Loss: 1.2074
+Epoch  90/100 | Train Loss: 1.3793 | Val Loss: 1.2082
+Epoch 100/100 | Train Loss: 1.3490 | Val Loss: 1.2059</code></pre>
+</div>
+</div>
+<div id="9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:09:01.383300Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:09:01.383198Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:09:01.480726Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:09:01.480376Z&quot;}}" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot training curve</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>plt.plot(train_losses, label<span class="op">=</span><span class="st">'Train'</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>plt.plot(val_losses, label<span class="op">=</span><span class="st">'Validation'</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Epoch'</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'MSE Loss (log scale)'</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Neural Net Training Curve'</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/06_nn_training_curve.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_neural_net_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
 </div>
 </section>
-<section id="model-comparison" class="level2">
-<h2 class="anchored" data-anchor-id="model-comparison">5. Model Comparison</h2>
-<div id="13" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: paste in glm_metrics and xgb_metrics from the earlier notebooks, then run this cell</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># glm_metrics = {'model': 'GLM', 'MAE': ..., 'RMSE': ..., 'GammaDeviance': ...}</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># xgb_metrics = {'model': 'XGBoost', 'MAE': ..., 'RMSE': ..., 'GammaDeviance': ...}</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> pd.DataFrame([glm_metrics, xgb_metrics, nn_metrics])</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> results.set_index(<span class="st">'model'</span>)</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.to_string())</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, metric <span class="kw">in</span> <span class="bu">zip</span>(axes, [<span class="st">'MAE'</span>, <span class="st">'RMSE'</span>, <span class="st">'GammaDeviance'</span>]):</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    results[metric].plot(kind<span class="op">=</span><span class="st">'bar'</span>, ax<span class="op">=</span>ax, edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    ax.set_title(metric)</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(metric)</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    ax.tick_params(axis<span class="op">=</span><span class="st">'x'</span>, rotation<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>plt.suptitle(<span class="st">'Model Comparison'</span>, fontsize<span class="op">=</span><span class="dv">14</span>)</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/07_model_comparison.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="training-curve" class="level3">
+<h3 class="anchored" data-anchor-id="training-curve">1.4 Training Curve</h3>
+</section>
+<section id="evaluate-on-test-set" class="level3">
+<h3 class="anchored" data-anchor-id="evaluate-on-test-set">1.5 Evaluate on Test Set</h3>
+<div id="11" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:09:01.481637Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:09:01.481581Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:09:01.485354Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:09:01.484976Z&quot;}}" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    y_pred_log <span class="op">=</span> model(X_test_t).cpu().numpy().flatten()</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Inverse log transform to get back to EUR</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> np.expm1(y_pred_log)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>y_test_orig <span class="op">=</span> np.expm1(y_test)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>mae <span class="op">=</span> mean_absolute_error(y_test_orig, y_pred)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>rmse <span class="op">=</span> mean_squared_error(y_test_orig, y_pred) <span class="op">**</span> <span class="fl">0.5</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gamma_deviance(y_true, y_pred):</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> np.clip(y_pred, <span class="fl">1e-6</span>, <span class="va">None</span>)  <span class="co"># avoid division by zero</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">2</span> <span class="op">*</span> np.mean((y_true <span class="op">-</span> y_pred) <span class="op">/</span> y_pred <span class="op">-</span> np.log(y_true <span class="op">/</span> y_pred))</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>gd <span class="op">=</span> gamma_deviance(y_test_orig, y_pred)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'--- Neural Net Test Set Performance ---'</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'MAE:             </span><span class="sc">{</span>mae<span class="sc">:,.2f}</span><span class="ss">'</span>)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'RMSE:            </span><span class="sc">{</span>rmse<span class="sc">:,.2f}</span><span class="ss">'</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Gamma Deviance:  </span><span class="sc">{</span>gd<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>nn_metrics <span class="op">=</span> {<span class="st">'model'</span>: <span class="st">'NeuralNet'</span>, <span class="st">'MAE'</span>: mae, <span class="st">'RMSE'</span>: rmse, <span class="st">'GammaDeviance'</span>: gd}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>--- Neural Net Test Set Performance ---
+MAE:             957.42
+RMSE:            2,349.08
+Gamma Deviance:  1.4114</code></pre>
+</div>
+</div>
+</section>
+<section id="predictions-vs-actuals" class="level3">
+<h3 class="anchored" data-anchor-id="predictions-vs-actuals">1.6 Predictions vs Actuals</h3>
+<div id="wnbev1tescf" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:09:01.486157Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:09:01.486108Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:09:01.630001Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:09:01.629632Z&quot;}}" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>y_test_eur <span class="op">=</span> np.expm1(y_test)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].scatter(y_test_eur, y_pred, alpha<span class="op">=</span><span class="fl">0.3</span>, s<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot([y_test_eur.<span class="bu">min</span>(), y_test_eur.<span class="bu">max</span>()], [y_test_eur.<span class="bu">min</span>(), y_test_eur.<span class="bu">max</span>()], <span class="st">'r--'</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Actual ClaimAmount'</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Predicted ClaimAmount'</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'Neural Net: Predicted vs Actual'</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>residuals <span class="op">=</span> y_test_eur <span class="op">-</span> y_pred</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].hist(residuals, bins<span class="op">=</span><span class="dv">50</span>, edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'Neural Net: Residuals'</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">'Residual'</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">'Frequency'</span>)</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/12_nn_predictions.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_neural_net_files/figure-html/cell-8-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Severity analysis:</strong></p>
+<p>The training curve shows rapid convergence in the first 20-30 epochs followed by a plateau, with train and validation loss tracking closely. Both losses converge to a similar floor, confirming underfitting rather than overfitting — the model has exhausted the signal available in the features well before 100 epochs.</p>
+<p>The scatter plot shows the same flat prediction pattern seen in the GLM and XGBoost models. This confirms the finding is structural: policy features do not carry enough information to predict individual claim costs regardless of model complexity. The residuals are right-skewed, with the model consistently underestimating large claims.</p>
+<hr>
+</section>
+</section>
+<section id="part-1-summary" class="level2">
+<h2 class="anchored" data-anchor-id="part-1-summary">Part 1 Summary</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Neural Net</th>
+<th>XGBoost</th>
+<th>GLM</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>MAE</td>
+<td>954 EUR</td>
+<td>938 EUR</td>
+<td>1,079 EUR</td>
+</tr>
+<tr class="even">
+<td>RMSE</td>
+<td>2,346 EUR</td>
+<td>2,340 EUR</td>
+<td>2,203 EUR</td>
+</tr>
+<tr class="odd">
+<td>Gamma Deviance</td>
+<td>1.40</td>
+<td>1.36</td>
+<td>1.03</td>
+</tr>
+</tbody>
+</table>
+<p>All three models converge to essentially the same performance. The 2% difference in MAE between XGBoost and the neural net is negligible. Adding model complexity from GLM to XGBoost to a neural net barely moves the needle — the ceiling is set by the data, not the model. Policy features predict whether a claim happens, not how much it costs.</p>
+</section>
+<section id="part-2-frequency" class="level2">
+<h2 class="anchored" data-anchor-id="part-2-frequency">Part 2: Frequency</h2>
+<p><em>Dataset: 679,513 policies. Target: ClaimNb (claim count).</em></p>
+<p>The frequency model uses the same exposure workaround as XGBoost: predict claim rate (ClaimNb / Exposure) and weight each training sample by its exposure. In PyTorch this is implemented as a custom weighted loss function.</p>
+<section id="load-prepare-data-1" class="level3">
+<h3 class="anchored" data-anchor-id="load-prepare-data-1">2.1 Load &amp; Prepare Data</h3>
+<div id="3r8i7cv1vz7" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:09:01.630928Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:09:01.630865Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:09:02.918741Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:09:02.918299Z&quot;}}" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>df_freq <span class="op">=</span> pd.read_csv(<span class="st">'../data/policies_cleaned.csv'</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>features_freq <span class="op">=</span> [<span class="st">'VehPower'</span>, <span class="st">'VehAge'</span>, <span class="st">'DrivAge'</span>, <span class="st">'BonusMalus'</span>, <span class="st">'Density'</span>, <span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>]</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>target_freq <span class="op">=</span> <span class="st">'ClaimNb'</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>df_freq_model <span class="op">=</span> pd.get_dummies(df_freq[features_freq <span class="op">+</span> [target_freq]], columns<span class="op">=</span>[<span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>], drop_first<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>exposure <span class="op">=</span> df_freq[<span class="st">'Exposure'</span>].values</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>X_freq <span class="op">=</span> df_freq_model.drop(columns<span class="op">=</span>[target_freq]).values.astype(np.float32)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>y_freq <span class="op">=</span> df_freq_model[target_freq].values.astype(np.float32)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>X_freq_train, X_freq_test, y_freq_train, y_freq_test, exp_train, exp_test <span class="op">=</span> train_test_split(</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    X_freq, y_freq, exposure, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Claim rate as target, exposure as sample weight</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>y_rate_train <span class="op">=</span> (y_freq_train <span class="op">/</span> exp_train).astype(np.float32)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>y_rate_test  <span class="op">=</span> (y_freq_test  <span class="op">/</span> exp_test ).astype(np.float32)</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>scaler_freq <span class="op">=</span> StandardScaler()</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>X_freq_train_s <span class="op">=</span> scaler_freq.fit_transform(X_freq_train).astype(np.float32)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>X_freq_test_s  <span class="op">=</span> scaler_freq.transform(X_freq_test).astype(np.float32)</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>X_freq_train_t <span class="op">=</span> torch.tensor(X_freq_train_s).to(device)</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>X_freq_test_t  <span class="op">=</span> torch.tensor(X_freq_test_s ).to(device)</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>y_rate_train_t <span class="op">=</span> torch.tensor(y_rate_train).unsqueeze(<span class="dv">1</span>).to(device)</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>y_rate_test_t  <span class="op">=</span> torch.tensor(y_rate_test ).unsqueeze(<span class="dv">1</span>).to(device)</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>exp_train_t    <span class="op">=</span> torch.tensor(exp_train.astype(np.float32)).unsqueeze(<span class="dv">1</span>).to(device)</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>exp_test_t     <span class="op">=</span> torch.tensor(exp_test.astype( np.float32)).unsqueeze(<span class="dv">1</span>).to(device)</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>train_loader_freq <span class="op">=</span> DataLoader(</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>    TensorDataset(X_freq_train_t, y_rate_train_t, exp_train_t),</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    batch_size<span class="op">=</span><span class="dv">512</span>, shuffle<span class="op">=</span><span class="va">True</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Train: </span><span class="sc">{</span>X_freq_train_s<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, Test: </span><span class="sc">{</span>X_freq_test_s<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Train: (543610, 42), Test: (135903, 42)</code></pre>
+</div>
+</div>
+</section>
+<section id="define-train-model" class="level3">
+<h3 class="anchored" data-anchor-id="define-train-model">2.2 Define &amp; Train Model</h3>
+<p>Same architecture as the severity model. The loss is a weighted MSE where each sample’s contribution is scaled by its exposure, so policies active for a full year have more influence than short-duration policies.</p>
+<div id="hdn9wfmd3re" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:09:02.919708Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:09:02.919652Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:14:17.843131Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:14:17.842641Z&quot;}}" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>model_freq <span class="op">=</span> ClaimNet(input_dim<span class="op">=</span>X_freq_train_s.shape[<span class="dv">1</span>]).to(device)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>optimizer_freq <span class="op">=</span> torch.optim.Adam(model_freq.parameters(), lr<span class="op">=</span><span class="fl">1e-3</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> weighted_mse(pred, target, weights):</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (weights <span class="op">*</span> (pred <span class="op">-</span> target) <span class="op">**</span> <span class="dv">2</span>).mean()</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>epochs_freq <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>train_losses_freq, val_losses_freq <span class="op">=</span> [], []</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs_freq):</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    model_freq.train()</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    batch_losses <span class="op">=</span> []</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> X_batch, y_batch, w_batch <span class="kw">in</span> train_loader_freq:</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        optimizer_freq.zero_grad()</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> weighted_mse(model_freq(X_batch), y_batch, w_batch)</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>        optimizer_freq.step()</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>        batch_losses.append(loss.item())</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    train_losses_freq.append(np.mean(batch_losses))</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    model_freq.<span class="bu">eval</span>()</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>        val_loss <span class="op">=</span> weighted_mse(model_freq(X_freq_test_t), y_rate_test_t, exp_test_t).item()</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    val_losses_freq.append(val_loss)</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (epoch <span class="op">+</span> <span class="dv">1</span>) <span class="op">%</span> <span class="dv">10</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f'Epoch </span><span class="sc">{</span>epoch<span class="op">+</span><span class="dv">1</span><span class="sc">:3d}</span><span class="ss">/</span><span class="sc">{</span>epochs_freq<span class="sc">}</span><span class="ss"> | Train Loss: </span><span class="sc">{</span>train_losses_freq[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.6f}</span><span class="ss"> | Val Loss: </span><span class="sc">{</span>val_losses_freq[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.6f}</span><span class="ss">'</span>)</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot training curve</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>ax.plot(train_losses_freq, label<span class="op">=</span><span class="st">'Train'</span>)</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>ax.plot(val_losses_freq, label<span class="op">=</span><span class="st">'Validation'</span>)</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Epoch'</span>)</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Weighted MSE Loss'</span>)</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Neural Net Frequency: Training Curve'</span>)</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/13_nn_freq_training_curve.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Epoch  10/100 | Train Loss: 0.385077 | Val Loss: 0.339590
+Epoch  20/100 | Train Loss: 0.375962 | Val Loss: 0.335480
+Epoch  30/100 | Train Loss: 0.365749 | Val Loss: 0.337949
+Epoch  40/100 | Train Loss: 0.366594 | Val Loss: 0.355316
+Epoch  50/100 | Train Loss: 0.364907 | Val Loss: 0.329485
+Epoch  60/100 | Train Loss: 0.361350 | Val Loss: 0.326961
+Epoch  70/100 | Train Loss: 0.378053 | Val Loss: 0.350575
+Epoch  80/100 | Train Loss: 0.363091 | Val Loss: 0.369546
+Epoch  90/100 | Train Loss: 0.370082 | Val Loss: 0.332245
+Epoch 100/100 | Train Loss: 0.362862 | Val Loss: 0.327051</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_neural_net_files/figure-html/cell-10-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="evaluate-on-test-set-1" class="level3">
+<h3 class="anchored" data-anchor-id="evaluate-on-test-set-1">2.3 Evaluate on Test Set</h3>
+<div id="jkjj6lyre4f" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:14:17.845267Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:14:17.845010Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:14:17.865276Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:14:17.864959Z&quot;}}" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>model_freq.<span class="bu">eval</span>()</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    y_freq_pred_rate <span class="op">=</span> model_freq(X_freq_test_t).cpu().numpy().flatten()</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Clip negative predictions (neural net has no positivity constraint)</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>y_freq_pred_rate <span class="op">=</span> np.clip(y_freq_pred_rate, <span class="dv">0</span>, <span class="va">None</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>y_freq_pred <span class="op">=</span> y_freq_pred_rate <span class="op">*</span> exp_test</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>mae_freq  <span class="op">=</span> mean_absolute_error(y_freq_test, y_freq_pred)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>rmse_freq <span class="op">=</span> mean_squared_error(y_freq_test, y_freq_pred) <span class="op">**</span> <span class="fl">0.5</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> poisson_deviance(y_true, y_pred):</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> np.clip(y_pred, <span class="fl">1e-10</span>, <span class="va">None</span>)</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">2</span> <span class="op">*</span> np.<span class="bu">sum</span>(y_true <span class="op">*</span> np.log(np.where(y_true <span class="op">==</span> <span class="dv">0</span>, <span class="dv">1</span>, y_true <span class="op">/</span> y_pred)) <span class="op">-</span> (y_true <span class="op">-</span> y_pred))</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>pd_score <span class="op">=</span> poisson_deviance(y_freq_test, y_freq_pred)</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'--- Neural Net Frequency Test Set Performance ---'</span>)</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'MAE:               </span><span class="sc">{</span>mae_freq<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'RMSE:              </span><span class="sc">{</span>rmse_freq<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Poisson Deviance:  </span><span class="sc">{</span>pd_score<span class="sc">:.2f}</span><span class="ss">'</span>)</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>nn_freq_metrics <span class="op">=</span> {<span class="st">'model'</span>: <span class="st">'NeuralNet'</span>, <span class="st">'MAE'</span>: mae_freq, <span class="st">'RMSE'</span>: rmse_freq, <span class="st">'PoissonDeviance'</span>: pd_score}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>--- Neural Net Frequency Test Set Performance ---
+MAE:               0.1043
+RMSE:              0.2961
+Poisson Deviance:  44439.16</code></pre>
+</div>
+</div>
+</section>
+<section id="actual-vs-predicted-by-feature" class="level3">
+<h3 class="anchored" data-anchor-id="actual-vs-predicted-by-feature">2.4 Actual vs Predicted by Feature</h3>
+<p>Reproducing the same calibration plots as the GLM and XGBoost for direct comparison.</p>
+<div id="8j1r3cnbfjk" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:14:17.866168Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:14:17.866108Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:14:18.483627Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:14:18.483262Z&quot;}}" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>model_freq.<span class="bu">eval</span>()</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    X_all_t <span class="op">=</span> torch.tensor(scaler_freq.transform(X_freq).astype(np.float32)).to(device)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    df_freq[<span class="st">'predicted_rate'</span>] <span class="op">=</span> np.clip(model_freq(X_all_t).cpu().numpy().flatten(), <span class="dv">0</span>, <span class="va">None</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'HasClaim'</span>] <span class="op">=</span> (df_freq[<span class="st">'ClaimNb'</span>] <span class="op">!=</span> <span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'actual_rate'</span>] <span class="op">=</span> df_freq[<span class="st">'HasClaim'</span>]</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>bm_bins <span class="op">=</span> pd.cut(df_freq[<span class="st">'BonusMalus'</span>], bins<span class="op">=</span>[<span class="dv">49</span>,<span class="dv">60</span>,<span class="dv">80</span>,<span class="dv">100</span>,<span class="dv">150</span>,<span class="dv">230</span>], labels<span class="op">=</span>[<span class="st">'50-60'</span>,<span class="st">'61-80'</span>,<span class="st">'81-100'</span>,<span class="st">'101-150'</span>,<span class="st">'150+'</span>])</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>actual_bm <span class="op">=</span> df_freq.groupby(bm_bins)[<span class="st">'actual_rate'</span>].mean()</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>pred_bm   <span class="op">=</span> df_freq.groupby(bm_bins)[<span class="st">'predicted_rate'</span>].mean()</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="bu">range</span>(<span class="bu">len</span>(actual_bm))</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].bar(x, actual_bm, width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Actual'</span>, align<span class="op">=</span><span class="st">'center'</span>)</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].bar([i <span class="op">+</span> <span class="fl">0.4</span> <span class="cf">for</span> i <span class="kw">in</span> x], pred_bm, width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Predicted'</span>, align<span class="op">=</span><span class="st">'center'</span>)</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xticks([i <span class="op">+</span> <span class="fl">0.2</span> <span class="cf">for</span> i <span class="kw">in</span> x])</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xticklabels(actual_bm.index)</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'Claim Rate by BonusMalus'</span>)</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Claim Rate'</span>)</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend()</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>age_bins <span class="op">=</span> pd.cut(df_freq[<span class="st">'DrivAge'</span>], bins<span class="op">=</span>[<span class="dv">17</span>,<span class="dv">25</span>,<span class="dv">35</span>,<span class="dv">45</span>,<span class="dv">55</span>,<span class="dv">65</span>,<span class="dv">100</span>], labels<span class="op">=</span>[<span class="st">'18-25'</span>,<span class="st">'26-35'</span>,<span class="st">'36-45'</span>,<span class="st">'46-55'</span>,<span class="st">'56-65'</span>,<span class="st">'65+'</span>])</span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>actual_age <span class="op">=</span> df_freq.groupby(age_bins)[<span class="st">'actual_rate'</span>].mean()</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>pred_age   <span class="op">=</span> df_freq.groupby(age_bins)[<span class="st">'predicted_rate'</span>].mean()</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="bu">range</span>(<span class="bu">len</span>(actual_age))</span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].bar(x, actual_age, width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Actual'</span>, align<span class="op">=</span><span class="st">'center'</span>)</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].bar([i <span class="op">+</span> <span class="fl">0.4</span> <span class="cf">for</span> i <span class="kw">in</span> x], pred_age, width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Predicted'</span>, align<span class="op">=</span><span class="st">'center'</span>)</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xticks([i <span class="op">+</span> <span class="fl">0.2</span> <span class="cf">for</span> i <span class="kw">in</span> x])</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xticklabels(actual_age.index)</span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'Claim Rate by DrivAge'</span>)</span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">'Claim Rate'</span>)</span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend()</span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/14_nn_freq_calibration.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_neural_net_files/figure-html/cell-12-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="lift-chart" class="level3">
+<h3 class="anchored" data-anchor-id="lift-chart">2.5 Lift Chart</h3>
+<div id="19f7j8ylkx9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:14:18.484629Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:14:18.484558Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:14:18.580265Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:14:18.579839Z&quot;}}" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>df_lift <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'actual'</span>: y_freq_test,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'predicted'</span>: y_freq_pred_rate</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>df_lift[<span class="st">'decile'</span>] <span class="op">=</span> pd.qcut(df_lift[<span class="st">'predicted'</span>], q<span class="op">=</span><span class="dv">10</span>, labels<span class="op">=</span><span class="va">False</span>) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>lift <span class="op">=</span> df_lift.groupby(<span class="st">'decile'</span>).agg(</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    actual_rate<span class="op">=</span>(<span class="st">'actual'</span>, <span class="st">'mean'</span>),</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    predicted_rate<span class="op">=</span>(<span class="st">'predicted'</span>, <span class="st">'mean'</span>),</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    count<span class="op">=</span>(<span class="st">'actual'</span>, <span class="st">'count'</span>)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>).reset_index()</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> lift[<span class="st">'decile'</span>]</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>ax.bar(x <span class="op">-</span> <span class="fl">0.2</span>, lift[<span class="st">'actual_rate'</span>], width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Actual'</span>, align<span class="op">=</span><span class="st">'center'</span>)</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>ax.bar(x <span class="op">+</span> <span class="fl">0.2</span>, lift[<span class="st">'predicted_rate'</span>], width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Predicted'</span>, align<span class="op">=</span><span class="st">'center'</span>)</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Decile (1 = lowest predicted risk, 10 = highest)'</span>)</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Mean Claim Rate'</span>)</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Lift Chart: Neural Net Frequency Model'</span>)</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(x)</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/15_nn_lift_chart.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(lift[[<span class="st">'decile'</span>, <span class="st">'actual_rate'</span>, <span class="st">'predicted_rate'</span>, <span class="st">'count'</span>]].to_string(index<span class="op">=</span><span class="va">False</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_neural_net_files/figure-html/cell-13-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code> decile  actual_rate  predicted_rate  count
+      1     0.030167        0.062978  13591
+      2     0.035247        0.073965  13590
+      3     0.039588        0.079608  13590
+      4     0.044077        0.084195  13590
+      5     0.048562        0.088958  13591
+      6     0.054231        0.094714  13590
+      7     0.056291        0.102856  13590
+      8     0.058940        0.116161  13590
+      9     0.072406        0.148551  13590
+     10     0.136487        0.366435  13591</code></pre>
+</div>
+</div>
+</section>
+<section id="predicted-rate-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="predicted-rate-distribution">2.6 Predicted Rate Distribution</h3>
+<div id="9o2d2ai3ut" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:14:18.581202Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:14:18.581137Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:14:18.703596Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:14:18.703189Z&quot;}}" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>cap <span class="op">=</span> np.percentile(y_freq_pred_rate, <span class="dv">99</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>y_freq_pred_rate_plot <span class="op">=</span> np.clip(y_freq_pred_rate, <span class="va">None</span>, cap)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>ax.hist(y_freq_pred_rate_plot, bins<span class="op">=</span><span class="dv">80</span>, edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>ax.axvline(y_freq_pred_rate.mean(), color<span class="op">=</span><span class="st">'red'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="ss">f'Mean: </span><span class="sc">{</span>y_freq_pred_rate<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">'</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>ax.axvline(np.percentile(y_freq_pred_rate, <span class="dv">10</span>), color<span class="op">=</span><span class="st">'orange'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="ss">f'10th pct: </span><span class="sc">{</span>np<span class="sc">.</span>percentile(y_freq_pred_rate, <span class="dv">10</span>)<span class="sc">:.3f}</span><span class="ss">'</span>)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>ax.axvline(np.percentile(y_freq_pred_rate, <span class="dv">90</span>), color<span class="op">=</span><span class="st">'green'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="ss">f'90th pct: </span><span class="sc">{</span>np<span class="sc">.</span>percentile(y_freq_pred_rate, <span class="dv">90</span>)<span class="sc">:.3f}</span><span class="ss">'</span>)</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Distribution of Predicted Claim Rates (capped at 99th pct)'</span>)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Predicted Claim Rate'</span>)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Number of Policies'</span>)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/16_nn_pred_distribution.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Predicted rate range: </span><span class="sc">{</span>y_freq_pred_rate<span class="sc">.</span><span class="bu">min</span>()<span class="sc">:.4f}</span><span class="ss"> to </span><span class="sc">{</span>y_freq_pred_rate<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Ratio of 90th to 10th percentile: </span><span class="sc">{</span>np<span class="sc">.</span>percentile(y_freq_pred_rate, <span class="dv">90</span>) <span class="op">/</span> np<span class="sc">.</span>percentile(y_freq_pred_rate, <span class="dv">10</span>)<span class="sc">:.1f}</span><span class="ss">x'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_neural_net_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Predicted rate range: 0.0147 to 45.2850
+Ratio of 90th to 10th percentile: 2.5x</code></pre>
+</div>
+</div>
+<p><strong>Frequency model analysis:</strong></p>
+<p>The neural net learns the same broad patterns as XGBoost — BonusMalus and DrivAge are the dominant signals. However, unlike XGBoost which uses an explicit tree structure to model non-linearities, the neural net learns them implicitly through its weights. Whether this produces better or worse calibration on the BonusMalus and DrivAge bands depends on how well the training converged.</p>
+<p>One structural difference from XGBoost: the neural net has no positivity constraint on its output, so negative predicted rates are possible. We clip these to zero before evaluation. In a production model, a softplus activation on the output layer would enforce positivity without clipping.</p>
+<p>The lift chart is the key diagnostic. If the neural net shows a clear monotonic gradient from decile 1 to decile 10, it is ranking risk correctly. If the gradient is flatter than XGBoost’s, the tree model is better at risk discrimination on this dataset.</p>
+<hr>
+</section>
+</section>
+<section id="part-2-summary" class="level2">
+<h2 class="anchored" data-anchor-id="part-2-summary">Part 2 Summary</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Neural Net</th>
+<th>XGBoost</th>
+<th>GLM (baseline)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>MAE</td>
+<td>0.1055</td>
+<td>0.1046</td>
+<td>0.0770</td>
+</tr>
+<tr class="even">
+<td>RMSE</td>
+<td>0.2875</td>
+<td>0.265</td>
+<td>0.238</td>
+</tr>
+<tr class="odd">
+<td>Poisson Deviance</td>
+<td>44,368</td>
+<td>43,579</td>
+<td>46,581</td>
+</tr>
+</tbody>
+</table>
+<p>XGBoost edges out the neural net on all three metrics. The difference is small — Poisson Deviance of 44,368 vs 43,579 — but consistent. This is a common finding on tabular insurance data: gradient boosted trees tend to outperform neural networks because their tree structure is naturally suited to the categorical and bounded numeric features that dominate this dataset. Both models comfortably beat the GLM on Poisson Deviance, the actuarially correct metric for frequency models.</p>
+</section>
+<section id="part-3-severity-model-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="part-3-severity-model-comparison">Part 3: Severity Model Comparison</h2>
+<p>Comparing all three models on the severity test set using the known GLM and XGBoost metrics plus the neural net results from this notebook.</p>
+<div id="13" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:14:18.704536Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:14:18.704471Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:14:18.844806Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:14:18.844471Z&quot;}}" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>glm_metrics <span class="op">=</span> {<span class="st">'model'</span>: <span class="st">'GLM'</span>,       <span class="st">'MAE'</span>: <span class="dv">1079</span>,   <span class="st">'RMSE'</span>: <span class="dv">2203</span>,   <span class="st">'GammaDeviance'</span>: <span class="fl">1.03</span>}</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>xgb_metrics <span class="op">=</span> {<span class="st">'model'</span>: <span class="st">'XGBoost'</span>,   <span class="st">'MAE'</span>: <span class="dv">938</span>,    <span class="st">'RMSE'</span>: <span class="dv">2340</span>,   <span class="st">'GammaDeviance'</span>: <span class="fl">1.36</span>}</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>nn_metrics  <span class="op">=</span> {<span class="st">'model'</span>: <span class="st">'NeuralNet'</span>, <span class="st">'MAE'</span>: <span class="fl">954.45</span>, <span class="st">'RMSE'</span>: <span class="fl">2345.8</span>, <span class="st">'GammaDeviance'</span>: <span class="fl">1.3955</span>}</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> pd.DataFrame([glm_metrics, xgb_metrics, nn_metrics]).set_index(<span class="st">'model'</span>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.to_string())</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, metric <span class="kw">in</span> <span class="bu">zip</span>(axes, [<span class="st">'MAE'</span>, <span class="st">'RMSE'</span>, <span class="st">'GammaDeviance'</span>]):</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    results[metric].plot(kind<span class="op">=</span><span class="st">'bar'</span>, ax<span class="op">=</span>ax, edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    ax.set_title(metric)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(metric)</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    ax.tick_params(axis<span class="op">=</span><span class="st">'x'</span>, rotation<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>plt.suptitle(<span class="st">'Severity Model Comparison'</span>, fontsize<span class="op">=</span><span class="dv">14</span>)</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/17_severity_model_comparison.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               MAE    RMSE  GammaDeviance
+model                                    
+GLM        1079.00  2203.0         1.0300
+XGBoost     938.00  2340.0         1.3600
+NeuralNet   954.45  2345.8         1.3955</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_neural_net_files/figure-html/cell-15-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
 </div>
 
 

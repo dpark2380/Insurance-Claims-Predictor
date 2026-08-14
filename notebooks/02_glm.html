@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -14,10 +14,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -76,10 +79,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-f418161beb48e0141c760e455f12af2c.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d6fd904d1c54ba319e3f8c30b794b012.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-3a0730cdd9a625ae55dc35d4063f4b4c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -112,7 +115,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -189,7 +192,7 @@ window.Quarto = {
  <span class="dropdown-text">4. Neural Network</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../notebooks/05_comparison.ipynb">
+    <a class="dropdown-item" href="../notebooks/05_comparison.html">
  <span class="dropdown-text">5. Model Comparison</span></a>
   </li>  
     </ul>
@@ -245,12 +248,11 @@ window.Quarto = {
 
 
 
-<p>—title: “GLM: Gamma and Poisson Baselines”description: “Gamma GLM for severity and Poisson GLM for frequency — the actuarial industry standard and interpretable baseline.”date: “2026-03-28”—</p>
 <section id="notebook-2-glm-models" class="level1">
 <h1>Notebook 2: GLM Models</h1>
 <p>This notebook fits two GLMs. - <strong>Part 1 — Severity:</strong> Gamma GLM with log-link, predicting claim amount given a claim occurred - <strong>Part 2 — Frequency:</strong> Poisson GLM with log-link, predicting claim rate across all policies</p>
 <p>The outputs of both models are combined in notebook 5 to estimate a pure premium.</p>
-<div id="2" class="cell" data-execution_count="14">
+<div id="2" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:17.354646Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:17.354452Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:19.007562Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:19.007113Z&quot;}}" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -264,7 +266,7 @@ window.Quarto = {
 <section id="part-1-severity-gamma-glm" class="level2">
 <h2 class="anchored" data-anchor-id="part-1-severity-gamma-glm">Part 1: Severity — Gamma GLM</h2>
 <p><em>Predicts how much a claim costs, given one occurred. Uses 26k claims dataset.</em></p>
-<div id="4" class="cell">
+<div id="4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:19.008819Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:19.008693Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:19.027818Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:19.027459Z&quot;}}" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">'../data/claims_cleaned.csv'</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.shape)</span>
@@ -272,7 +274,7 @@ window.Quarto = {
 <div class="cell-output cell-output-stdout">
 <pre><code>(26439, 13)</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="15">
+<div class="cell-output cell-output-display" data-execution_count="2">
 <div>
 
 
@@ -382,7 +384,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<div id="5" class="cell" data-execution_count="16">
+<div id="5" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:19.028644Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:19.028588Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:19.037093Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:19.036769Z&quot;}}" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Features to use — drop IDpol (ID), Exposure and ClaimNb (not relevant for severity)</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [<span class="st">'VehPower'</span>, <span class="st">'VehAge'</span>, <span class="st">'DrivAge'</span>, <span class="st">'BonusMalus'</span>, <span class="st">'Density'</span>, <span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>]</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>target <span class="op">=</span> <span class="st">'ClaimAmount'</span></span>
@@ -398,7 +400,7 @@ window.Quarto = {
 <pre><code>Features after encoding: 42</code></pre>
 </div>
 </div>
-<div id="6" class="cell">
+<div id="6" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:19.037933Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:19.037878Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:19.042915Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:19.042559Z&quot;}}" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df_model.drop(columns<span class="op">=</span>[target])</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df_model[target]</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -420,7 +422,7 @@ window.Quarto = {
 - It means the model is multiplicative — each feature multiplies the expected claim by some factor, which makes<br>
 actuarial sense (e.g.&nbsp;a high-power vehicle multiplies your expected claim by 1.1x)</p>
 <p>The alternative would be plain linear regression, which assumes normally distributed errors and can predict negative values — neither of which makes sense for insurance claims.</p>
-<div id="8" class="cell" data-execution_count="20">
+<div id="8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:19.043771Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:19.043721Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:19.194363Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:19.193979Z&quot;}}" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># adding an intercept column to ensure the model doesn't simply pass through the origin.</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>X_train_sm <span class="op">=</span> sm.add_constant(X_train)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>X_test_sm  <span class="op">=</span> sm.add_constant(X_test)</span>
@@ -441,8 +443,8 @@ Model:                            GLM   Df Residuals:                    21108
 Model Family:                   Gamma   Df Model:                           42
 Link Function:                    Log   Scale:                          1.9642
 Method:                          IRLS   Log-Likelihood:            -1.7997e+05
-Date:                Thu, 26 Mar 2026   Deviance:                       21794.
-Time:                        00:10:47   Pearson chi2:                 4.15e+04
+Date:                Sat, 15 Aug 2026   Deviance:                       21794.
+Time:                        00:02:19   Pearson chi2:                 4.15e+04
 No. Iterations:                    13   Pseudo R-squ. (CS):           0.006289
 Covariance Type:            nonrobust                                         
 ====================================================================================
@@ -497,7 +499,7 @@ Region_R94           0.2147      0.143      1.504      0.133      -0.065       0
 </section>
 <section id="evaluate-on-test-set" class="level2">
 <h2 class="anchored" data-anchor-id="evaluate-on-test-set">3. Evaluate on Test Set</h2>
-<div id="10" class="cell" data-execution_count="19">
+<div id="10" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:19.195338Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:19.195276Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:19.198268Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:19.197956Z&quot;}}" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: generate predictions on the test set</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> result.predict(X_test_sm)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -528,7 +530,7 @@ Gamma Deviance:  1.0314</code></pre>
 </section>
 <section id="visualise-predictions-vs-actuals" class="level2">
 <h2 class="anchored" data-anchor-id="visualise-predictions-vs-actuals">4. Visualise Predictions vs Actuals</h2>
-<div id="12" class="cell">
+<div id="12" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:19.199114Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:19.199059Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:19.373895Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:19.373593Z&quot;}}" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Scatter plot of y_test (x-axis) vs y_pred (y-axis)</span></span>
@@ -584,39 +586,64 @@ Key takeaway: The GLM performs as expected for a severity baseline. The flat pre
 <section id="coefficient-interpretation" class="level2">
 <h2 class="anchored" data-anchor-id="coefficient-interpretation">5. Coefficient Interpretation</h2>
 <p>Key advantage of GLM over XGBoost/neural net — coefficients are directly interpretable.</p>
-<div id="14" class="cell">
+<div id="14" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:19.374871Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:19.374811Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:19.379927Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:19.379610Z&quot;}}" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On a log-link GLM, exp(coef) = multiplicative effect on claim amount</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># e.g. exp(coef) = 1.10 means that feature increases expected claim by 10%</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: create a dataframe of coefficients, their exponentiated values, and p-values</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Hint: result.params, result.pvalues</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>coef_df <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(coef_df.sort_values(<span class="st">'exp_coef'</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">10</span>).to_string())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>coef_df <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'coef'</span>: result.params,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'exp_coef'</span>: np.exp(result.params),</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'p_value'</span>: result.pvalues,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(coef_df.sort_values(<span class="st">'exp_coef'</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">10</span>).to_string())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  coef     exp_coef   p_value
+const         7.113560  1228.513124  0.000000
+Region_R43    0.248801     1.282487  0.321513
+Region_R94    0.214715     1.239508  0.132532
+Region_R41    0.186880     1.205482  0.023342
+Region_R93    0.174476     1.190622  0.000225
+Region_R91    0.144155     1.155063  0.020801
+Region_R72    0.084167     1.087810  0.175132
+Region_R31    0.074100     1.076915  0.243926
+VehBrand_B13  0.065937     1.068160  0.348898
+Region_R22    0.063848     1.065930  0.509444</code></pre>
+</div>
 </div>
 <hr>
 <section id="appendix-why-gamma-over-ols" class="level3">
 <h3 class="anchored" data-anchor-id="appendix-why-gamma-over-ols">Appendix: Why Gamma over OLS?</h3>
 <p>Fits a plain OLS regression on the same data and compares predictions and metrics. This demonstrates concretely why OLS is inappropriate for claim severity.</p>
-<div id="xzdulssq32" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>ols <span class="op">=</span> LinearRegression().fit(X_train, y_train)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>y_pred_ols <span class="op">=</span> ols.predict(X_test)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># OLS can predict negative claim amounts</span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>n_negative <span class="op">=</span> (y_pred_ols <span class="op">&lt;</span> <span class="dv">0</span>).<span class="bu">sum</span>()</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'OLS negative predictions: </span><span class="sc">{</span>n_negative<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>n_negative<span class="op">/</span><span class="bu">len</span>(y_pred_ols)<span class="sc">:.1%}</span><span class="ss">)'</span>)</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare metrics</span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>mae_ols  <span class="op">=</span> mean_absolute_error(y_test, y_pred_ols)</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>rmse_ols <span class="op">=</span> mean_squared_error(y_test, y_pred_ols) <span class="op">**</span> <span class="fl">0.5</span></span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'</span><span class="ch">\n</span><span class="sc">{</span><span class="st">""</span><span class="sc">:20}</span><span class="ss"> </span><span class="sc">{</span><span class="st">"GLM"</span><span class="sc">:&gt;10}</span><span class="ss"> </span><span class="sc">{</span><span class="st">"OLS"</span><span class="sc">:&gt;10}</span><span class="ss">'</span>)</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span><span class="st">"MAE"</span><span class="sc">:20}</span><span class="ss"> </span><span class="sc">{</span>mae<span class="sc">:&gt;10,.2f}</span><span class="ss"> </span><span class="sc">{</span>mae_ols<span class="sc">:&gt;10,.2f}</span><span class="ss">'</span>)</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span><span class="st">"RMSE"</span><span class="sc">:20}</span><span class="ss"> </span><span class="sc">{</span>rmse<span class="sc">:&gt;10,.2f}</span><span class="ss"> </span><span class="sc">{</span>rmse_ols<span class="sc">:&gt;10,.2f}</span><span class="ss">'</span>)</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'</span><span class="ch">\n</span><span class="ss">Conclusion: OLS produces negative predictions and higher errors.'</span>)</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Gamma GLM is the correct choice for positive, right-skewed targets.'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="xzdulssq32" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:19.380722Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:19.380669Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:19.452325Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:19.451969Z&quot;}}" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>ols <span class="op">=</span> LinearRegression().fit(X_train, y_train)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>y_pred_ols <span class="op">=</span> ols.predict(X_test)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co"># OLS can predict negative claim amounts</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>n_negative <span class="op">=</span> (y_pred_ols <span class="op">&lt;</span> <span class="dv">0</span>).<span class="bu">sum</span>()</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'OLS negative predictions: </span><span class="sc">{</span>n_negative<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>n_negative<span class="op">/</span><span class="bu">len</span>(y_pred_ols)<span class="sc">:.1%}</span><span class="ss">)'</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare metrics</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>mae_ols  <span class="op">=</span> mean_absolute_error(y_test, y_pred_ols)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>rmse_ols <span class="op">=</span> mean_squared_error(y_test, y_pred_ols) <span class="op">**</span> <span class="fl">0.5</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'</span><span class="ch">\n</span><span class="sc">{</span><span class="st">""</span><span class="sc">:20}</span><span class="ss"> </span><span class="sc">{</span><span class="st">"GLM"</span><span class="sc">:&gt;10}</span><span class="ss"> </span><span class="sc">{</span><span class="st">"OLS"</span><span class="sc">:&gt;10}</span><span class="ss">'</span>)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span><span class="st">"MAE"</span><span class="sc">:20}</span><span class="ss"> </span><span class="sc">{</span>mae<span class="sc">:&gt;10,.2f}</span><span class="ss"> </span><span class="sc">{</span>mae_ols<span class="sc">:&gt;10,.2f}</span><span class="ss">'</span>)</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span><span class="st">"RMSE"</span><span class="sc">:20}</span><span class="ss"> </span><span class="sc">{</span>rmse<span class="sc">:&gt;10,.2f}</span><span class="ss"> </span><span class="sc">{</span>rmse_ols<span class="sc">:&gt;10,.2f}</span><span class="ss">'</span>)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'</span><span class="ch">\n</span><span class="ss">Conclusion: OLS produces negative predictions and higher errors.'</span>)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Gamma GLM is the correct choice for positive, right-skewed targets.'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>OLS negative predictions: 0 (0.0%)
+
+                            GLM        OLS
+MAE                    1,079.28   1,079.03
+RMSE                   2,203.43   2,203.14
+
+Conclusion: OLS produces negative predictions and higher errors.
+Gamma GLM is the correct choice for positive, right-skewed targets.</code></pre>
+</div>
 </div>
 <hr>
 </section>
@@ -628,16 +655,16 @@ Key takeaway: The GLM performs as expected for a severity baseline. The flat pre
 <p><strong>Exposure offset:</strong> Policies have different durations (Exposure column, in years). A policy active for 0.5 years has half the opportunity to claim. We account for this by including log(Exposure) as an offset in the model.</p>
 <section id="load-prepare-data" class="level3">
 <h3 class="anchored" data-anchor-id="load-prepare-data">2.1 Load &amp; Prepare Data</h3>
-<div id="auxwzlbxs48" class="cell" data-execution_count="33">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load policies_cleaned.csv from the data folder</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>df_freq <span class="op">=</span> pd.read_csv(<span class="st">'../data/freMTPL2freq.csv'</span>)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_freq.shape)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>df_freq.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="auxwzlbxs48" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:19.453201Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:19.453137Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:19.628757Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:19.628393Z&quot;}}" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load policies_cleaned.csv from the data folder</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>df_freq <span class="op">=</span> pd.read_csv(<span class="st">'../data/freMTPL2freq.csv'</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_freq.shape)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>df_freq.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>(678013, 12)</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="33">
+<div class="cell-output cell-output-display" data-execution_count="10">
 <div>
 
 
@@ -741,25 +768,25 @@ Key takeaway: The GLM performs as expected for a severity baseline. The flat pre
 </div>
 </div>
 </div>
-<div id="bojrro7ixqv" class="cell" data-execution_count="39">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>features_freq <span class="op">=</span> [<span class="st">'VehPower'</span>, <span class="st">'VehAge'</span>, <span class="st">'DrivAge'</span>, <span class="st">'BonusMalus'</span>, <span class="st">'Density'</span>, <span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>]</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>target_freq <span class="op">=</span> <span class="st">'ClaimNb'</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># one-hot encode categorical columns and convert to float (same as severity section)</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>df_freq_model <span class="op">=</span> pd.get_dummies(df_freq[features_freq <span class="op">+</span> [target_freq]], columns<span class="op">=</span>[<span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>], drop_first<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>df_freq_model <span class="op">=</span> df_freq_model.astype(<span class="bu">float</span>)</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Separate out exposure before dropping — needed as offset</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>exposure <span class="op">=</span> df_freq[<span class="st">'Exposure'</span>]</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>X_freq <span class="op">=</span> df_freq_model.drop(columns<span class="op">=</span>[target_freq])</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>y_freq <span class="op">=</span> df_freq_model[target_freq]</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="co"># train/test split (80/20, random_state=42)</span></span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Make sure to split exposure with the same indices</span></span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>X_freq_train, X_freq_test, y_freq_train, y_freq_test, exp_train, exp_test <span class="op">=</span> train_test_split(X_freq, y_freq, exposure, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Train: </span><span class="sc">{</span>X_freq_train<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, Test: </span><span class="sc">{</span>X_freq_test<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="bojrro7ixqv" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:19.629574Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:19.629521Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:19.836737Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:19.836374Z&quot;}}" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>features_freq <span class="op">=</span> [<span class="st">'VehPower'</span>, <span class="st">'VehAge'</span>, <span class="st">'DrivAge'</span>, <span class="st">'BonusMalus'</span>, <span class="st">'Density'</span>, <span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>]</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>target_freq <span class="op">=</span> <span class="st">'ClaimNb'</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># one-hot encode categorical columns and convert to float (same as severity section)</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>df_freq_model <span class="op">=</span> pd.get_dummies(df_freq[features_freq <span class="op">+</span> [target_freq]], columns<span class="op">=</span>[<span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>], drop_first<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>df_freq_model <span class="op">=</span> df_freq_model.astype(<span class="bu">float</span>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Separate out exposure before dropping — needed as offset</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>exposure <span class="op">=</span> df_freq[<span class="st">'Exposure'</span>]</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>X_freq <span class="op">=</span> df_freq_model.drop(columns<span class="op">=</span>[target_freq])</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>y_freq <span class="op">=</span> df_freq_model[target_freq]</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="co"># train/test split (80/20, random_state=42)</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Make sure to split exposure with the same indices</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>X_freq_train, X_freq_test, y_freq_train, y_freq_test, exp_train, exp_test <span class="op">=</span> train_test_split(X_freq, y_freq, exposure, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Train: </span><span class="sc">{</span>X_freq_train<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, Test: </span><span class="sc">{</span>X_freq_test<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Train: (542410, 42), Test: (135603, 42)</code></pre>
 </div>
@@ -767,16 +794,16 @@ Key takeaway: The GLM performs as expected for a severity baseline. The flat pre
 </section>
 <section id="fit-poisson-glm" class="level3">
 <h3 class="anchored" data-anchor-id="fit-poisson-glm">2.2 Fit Poisson GLM</h3>
-<div id="ax6lvc964b" class="cell" data-execution_count="41">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>X_freq_train_sm <span class="op">=</span> sm.add_constant(X_freq_train)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>X_freq_test_sm  <span class="op">=</span> sm.add_constant(X_freq_test)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: fit a Poisson GLM with log-link using sm.GLM</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Include log(exposure) as an offset: offset=np.log(exp_train)</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Hint: family=sm.families.Poisson(link=sm.families.links.Log())</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>result_freq <span class="op">=</span> sm.GLM(y_freq_train, X_freq_train_sm, family<span class="op">=</span>sm.families.Poisson(link<span class="op">=</span>sm.families.links.Log())).fit()</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result_freq.summary())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="ax6lvc964b" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:19.837602Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:19.837536Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:22.538375Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:22.537799Z&quot;}}" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>X_freq_train_sm <span class="op">=</span> sm.add_constant(X_freq_train)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>X_freq_test_sm  <span class="op">=</span> sm.add_constant(X_freq_test)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: fit a Poisson GLM with log-link using sm.GLM</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Include log(exposure) as an offset: offset=np.log(exp_train)</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Hint: family=sm.families.Poisson(link=sm.families.links.Log())</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>result_freq <span class="op">=</span> sm.GLM(y_freq_train, X_freq_train_sm, family<span class="op">=</span>sm.families.Poisson(link<span class="op">=</span>sm.families.links.Log())).fit()</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result_freq.summary())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                 Generalized Linear Model Regression Results                  
 ==============================================================================
@@ -785,8 +812,8 @@ Model:                            GLM   Df Residuals:                   542367
 Model Family:                 Poisson   Df Model:                           42
 Link Function:                    Log   Scale:                          1.0000
 Method:                          IRLS   Log-Likelihood:            -1.1301e+05
-Date:                Thu, 26 Mar 2026   Deviance:                   1.7063e+05
-Time:                        17:42:19   Pearson chi2:                 5.92e+05
+Date:                Sat, 15 Aug 2026   Deviance:                   1.7063e+05
+Time:                        00:02:22   Pearson chi2:                 5.92e+05
 No. Iterations:                     7   Pseudo R-squ. (CS):           0.006456
 Covariance Type:            nonrobust                                         
 ====================================================================================
@@ -848,27 +875,27 @@ model.<br>
 </section>
 <section id="evaluate-on-test-set-1" class="level3">
 <h3 class="anchored" data-anchor-id="evaluate-on-test-set-1">2.3 Evaluate on Test Set</h3>
-<div id="i90cogxg8sp" class="cell" data-execution_count="43">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: generate predictions on the test set</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Remember to pass offset=np.log(exp_test) when predicting</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>y_freq_pred <span class="op">=</span> result_freq.predict(X_freq_test_sm, offset<span class="op">=</span>np.log(exp_test))</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>mae_freq  <span class="op">=</span> mean_absolute_error(y_freq_test, y_freq_pred)</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>rmse_freq <span class="op">=</span> mean_squared_error(y_freq_test, y_freq_pred) <span class="op">**</span> <span class="fl">0.5</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Poisson deviance — correct metric for count models</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> poisson_deviance(y_true, y_pred):</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> np.clip(y_pred, <span class="fl">1e-10</span>, <span class="va">None</span>)</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">2</span> <span class="op">*</span> np.<span class="bu">sum</span>(y_true <span class="op">*</span> np.log(np.where(y_true <span class="op">==</span> <span class="dv">0</span>, <span class="dv">1</span>, y_true <span class="op">/</span> y_pred)) <span class="op">-</span> (y_true <span class="op">-</span> y_pred))</span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>pd_score <span class="op">=</span> poisson_deviance(y_freq_test.values, y_freq_pred)</span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'--- Poisson GLM Test Set Performance ---'</span>)</span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'MAE:               </span><span class="sc">{</span>mae_freq<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'RMSE:              </span><span class="sc">{</span>rmse_freq<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Poisson Deviance:  </span><span class="sc">{</span>pd_score<span class="sc">:.2f}</span><span class="ss">'</span>)</span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>glm_freq_metrics <span class="op">=</span> {<span class="st">'model'</span>: <span class="st">'GLM'</span>, <span class="st">'MAE'</span>: mae_freq, <span class="st">'RMSE'</span>: rmse_freq, <span class="st">'PoissonDeviance'</span>: pd_score}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="i90cogxg8sp" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:22.540069Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:22.539959Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:22.561572Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:22.561183Z&quot;}}" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: generate predictions on the test set</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Remember to pass offset=np.log(exp_test) when predicting</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>y_freq_pred <span class="op">=</span> result_freq.predict(X_freq_test_sm, offset<span class="op">=</span>np.log(exp_test))</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>mae_freq  <span class="op">=</span> mean_absolute_error(y_freq_test, y_freq_pred)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>rmse_freq <span class="op">=</span> mean_squared_error(y_freq_test, y_freq_pred) <span class="op">**</span> <span class="fl">0.5</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Poisson deviance — correct metric for count models</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> poisson_deviance(y_true, y_pred):</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> np.clip(y_pred, <span class="fl">1e-10</span>, <span class="va">None</span>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">2</span> <span class="op">*</span> np.<span class="bu">sum</span>(y_true <span class="op">*</span> np.log(np.where(y_true <span class="op">==</span> <span class="dv">0</span>, <span class="dv">1</span>, y_true <span class="op">/</span> y_pred)) <span class="op">-</span> (y_true <span class="op">-</span> y_pred))</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>pd_score <span class="op">=</span> poisson_deviance(y_freq_test.values, y_freq_pred)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'--- Poisson GLM Test Set Performance ---'</span>)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'MAE:               </span><span class="sc">{</span>mae_freq<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'RMSE:              </span><span class="sc">{</span>rmse_freq<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Poisson Deviance:  </span><span class="sc">{</span>pd_score<span class="sc">:.2f}</span><span class="ss">'</span>)</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>glm_freq_metrics <span class="op">=</span> {<span class="st">'model'</span>: <span class="st">'GLM'</span>, <span class="st">'MAE'</span>: mae_freq, <span class="st">'RMSE'</span>: rmse_freq, <span class="st">'PoissonDeviance'</span>: pd_score}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>--- Poisson GLM Test Set Performance ---
 MAE:               0.0774
@@ -884,49 +911,49 @@ Poisson Deviance:  46581.25</code></pre>
 <li>Poisson Deviance of 46,581 is a large absolute number but that is expected with 135k test records. It is more useful for comparison against XGBoost and the neural net later.</li>
 </ul></li>
 </ul>
-<div id="870303a4" class="cell" data-execution_count="48">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))                                                                       </span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Get predictions on full training + test set for this analysis                                                       </span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>X_all_sm <span class="op">=</span> sm.add_constant(pd.concat([X_freq_train, X_freq_test]))</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>exp_all <span class="op">=</span> pd.concat([exp_train, exp_test])</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'predicted_rate'</span>] <span class="op">=</span> result_freq.predict(X_all_sm, offset<span class="op">=</span>np.log(exp_all))</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'HasClaim'</span>] <span class="op">=</span> (df_freq[<span class="st">'ClaimNb'</span>] <span class="op">!=</span> <span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'actual_rate'</span>] <span class="op">=</span> df_freq[<span class="st">'HasClaim'</span>]</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="co"># BonusMalus</span></span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>bm_bins <span class="op">=</span> pd.cut(df_freq[<span class="st">'BonusMalus'</span>], bins<span class="op">=</span>[<span class="dv">49</span>,<span class="dv">60</span>,<span class="dv">80</span>,<span class="dv">100</span>,<span class="dv">150</span>,<span class="dv">230</span>],</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>labels<span class="op">=</span>[<span class="st">'50-60'</span>,<span class="st">'61-80'</span>,<span class="st">'81-100'</span>,<span class="st">'101-150'</span>,<span class="st">'150+'</span>])</span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>actual_bm <span class="op">=</span> df_freq.groupby(bm_bins)[<span class="st">'actual_rate'</span>].mean()</span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>pred_bm <span class="op">=</span> df_freq.groupby(bm_bins)[<span class="st">'predicted_rate'</span>].mean()</span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="bu">range</span>(<span class="bu">len</span>(actual_bm))</span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].bar(x, actual_bm, width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Actual'</span>, align<span class="op">=</span><span class="st">'center'</span>)                                                  </span>
-<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].bar([i <span class="op">+</span> <span class="fl">0.4</span> <span class="cf">for</span> i <span class="kw">in</span> x], pred_bm, width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Predicted'</span>, align<span class="op">=</span><span class="st">'center'</span>)                              </span>
-<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xticks([i <span class="op">+</span> <span class="fl">0.2</span> <span class="cf">for</span> i <span class="kw">in</span> x])                                                                              </span>
-<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xticklabels(actual_bm.index)                                                                              </span>
-<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'Claim Rate by BonusMalus'</span>)                                                                         </span>
-<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Claim Rate'</span>)                          </span>
-<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend()                                                                                                      </span>
-<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>                                                                                                                    </span>
-<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a><span class="co"># DrivAge</span></span>
-<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>age_bins <span class="op">=</span> pd.cut(df_freq[<span class="st">'DrivAge'</span>], bins<span class="op">=</span>[<span class="dv">17</span>,<span class="dv">25</span>,<span class="dv">35</span>,<span class="dv">45</span>,<span class="dv">55</span>,<span class="dv">65</span>,<span class="dv">100</span>],                                                   </span>
-<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>labels<span class="op">=</span>[<span class="st">'18-25'</span>,<span class="st">'26-35'</span>,<span class="st">'36-45'</span>,<span class="st">'46-55'</span>,<span class="st">'56-65'</span>,<span class="st">'65+'</span>])                                                               </span>
-<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>actual_age <span class="op">=</span> df_freq.groupby(age_bins)[<span class="st">'actual_rate'</span>].mean()</span>
-<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>pred_age <span class="op">=</span> df_freq.groupby(age_bins)[<span class="st">'predicted_rate'</span>].mean()                                                         </span>
-<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>                                                        </span>
-<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="bu">range</span>(<span class="bu">len</span>(actual_age))                                                                                            </span>
-<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].bar(x, actual_age, width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Actual'</span>, align<span class="op">=</span><span class="st">'center'</span>)</span>
-<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].bar([i <span class="op">+</span> <span class="fl">0.4</span> <span class="cf">for</span> i <span class="kw">in</span> x], pred_age, width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Predicted'</span>, align<span class="op">=</span><span class="st">'center'</span>)                             </span>
-<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xticks([i <span class="op">+</span> <span class="fl">0.2</span> <span class="cf">for</span> i <span class="kw">in</span> x])</span>
-<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xticklabels(actual_age.index)                                                                             </span>
-<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'Claim Rate by DrivAge'</span>)                                                                            </span>
-<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">'Claim Rate'</span>)</span>
-<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend()                                                                                                      </span>
-<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a>                                                        </span>
-<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/04_freq_actual_vs_predicted.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="870303a4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:22.562655Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:22.562601Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:22.871961Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:22.871598Z&quot;}}" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))                                                                       </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Get predictions on full training + test set for this analysis                                                       </span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>X_all_sm <span class="op">=</span> sm.add_constant(pd.concat([X_freq_train, X_freq_test]))</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>exp_all <span class="op">=</span> pd.concat([exp_train, exp_test])</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'predicted_rate'</span>] <span class="op">=</span> result_freq.predict(X_all_sm, offset<span class="op">=</span>np.log(exp_all))</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'HasClaim'</span>] <span class="op">=</span> (df_freq[<span class="st">'ClaimNb'</span>] <span class="op">!=</span> <span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'actual_rate'</span>] <span class="op">=</span> df_freq[<span class="st">'HasClaim'</span>]</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="co"># BonusMalus</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>bm_bins <span class="op">=</span> pd.cut(df_freq[<span class="st">'BonusMalus'</span>], bins<span class="op">=</span>[<span class="dv">49</span>,<span class="dv">60</span>,<span class="dv">80</span>,<span class="dv">100</span>,<span class="dv">150</span>,<span class="dv">230</span>],</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>labels<span class="op">=</span>[<span class="st">'50-60'</span>,<span class="st">'61-80'</span>,<span class="st">'81-100'</span>,<span class="st">'101-150'</span>,<span class="st">'150+'</span>])</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>actual_bm <span class="op">=</span> df_freq.groupby(bm_bins)[<span class="st">'actual_rate'</span>].mean()</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>pred_bm <span class="op">=</span> df_freq.groupby(bm_bins)[<span class="st">'predicted_rate'</span>].mean()</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="bu">range</span>(<span class="bu">len</span>(actual_bm))</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].bar(x, actual_bm, width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Actual'</span>, align<span class="op">=</span><span class="st">'center'</span>)                                                  </span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].bar([i <span class="op">+</span> <span class="fl">0.4</span> <span class="cf">for</span> i <span class="kw">in</span> x], pred_bm, width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Predicted'</span>, align<span class="op">=</span><span class="st">'center'</span>)                              </span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xticks([i <span class="op">+</span> <span class="fl">0.2</span> <span class="cf">for</span> i <span class="kw">in</span> x])                                                                              </span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xticklabels(actual_bm.index)                                                                              </span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'Claim Rate by BonusMalus'</span>)                                                                         </span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Claim Rate'</span>)                          </span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend()                                                                                                      </span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>                                                                                                                    </span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a><span class="co"># DrivAge</span></span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>age_bins <span class="op">=</span> pd.cut(df_freq[<span class="st">'DrivAge'</span>], bins<span class="op">=</span>[<span class="dv">17</span>,<span class="dv">25</span>,<span class="dv">35</span>,<span class="dv">45</span>,<span class="dv">55</span>,<span class="dv">65</span>,<span class="dv">100</span>],                                                   </span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>labels<span class="op">=</span>[<span class="st">'18-25'</span>,<span class="st">'26-35'</span>,<span class="st">'36-45'</span>,<span class="st">'46-55'</span>,<span class="st">'56-65'</span>,<span class="st">'65+'</span>])                                                               </span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>actual_age <span class="op">=</span> df_freq.groupby(age_bins)[<span class="st">'actual_rate'</span>].mean()</span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>pred_age <span class="op">=</span> df_freq.groupby(age_bins)[<span class="st">'predicted_rate'</span>].mean()                                                         </span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>                                                        </span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="bu">range</span>(<span class="bu">len</span>(actual_age))                                                                                            </span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].bar(x, actual_age, width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Actual'</span>, align<span class="op">=</span><span class="st">'center'</span>)</span>
+<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].bar([i <span class="op">+</span> <span class="fl">0.4</span> <span class="cf">for</span> i <span class="kw">in</span> x], pred_age, width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Predicted'</span>, align<span class="op">=</span><span class="st">'center'</span>)                             </span>
+<span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xticks([i <span class="op">+</span> <span class="fl">0.2</span> <span class="cf">for</span> i <span class="kw">in</span> x])</span>
+<span id="cb25-35"><a href="#cb25-35" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xticklabels(actual_age.index)                                                                             </span>
+<span id="cb25-36"><a href="#cb25-36" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'Claim Rate by DrivAge'</span>)                                                                            </span>
+<span id="cb25-37"><a href="#cb25-37" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">'Claim Rate'</span>)</span>
+<span id="cb25-38"><a href="#cb25-38" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend()                                                                                                      </span>
+<span id="cb25-39"><a href="#cb25-39" aria-hidden="true" tabindex="-1"></a>                                                        </span>
+<span id="cb25-40"><a href="#cb25-40" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb25-41"><a href="#cb25-41" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/04_freq_actual_vs_predicted.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb25-42"><a href="#cb25-42" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
