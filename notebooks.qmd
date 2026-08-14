@@ -1,0 +1,15 @@
+---
+title: "Notebooks"
+page-layout: full
+title-block-banner: true
+---
+
+The analysis is split across five notebooks, run in order.
+
+| Notebook | Description |
+|---|---|
+| [1. Exploratory Data Analysis](notebooks/01_eda.ipynb) | Distribution of claim amounts, feature relationships, frequency vs severity patterns |
+| [2. GLM (Baseline)](notebooks/02_glm.ipynb) | Gamma GLM for severity, Poisson GLM for frequency — the actuarial industry standard |
+| [3. XGBoost](notebooks/03_xgboost.ipynb) | Gradient boosted trees capturing non-linear feature interactions |
+| [4. Neural Network](notebooks/04_neural_net.ipynb) | Feedforward PyTorch network for both frequency and severity |
+| [5. Model Comparison](notebooks/05_comparison.ipynb) | Side-by-side comparison and pure premium estimator |
