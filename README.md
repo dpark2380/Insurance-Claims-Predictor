@@ -136,14 +136,14 @@ insurance_claims_severity/
 ```bash
 # Clone the repo
 git clone <repo-url>
-cd insurance_claims_severity
+cd insurance_claims_predictor
 
 # Create virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
 # Install dependencies
-pip install pandas numpy matplotlib seaborn scikit-learn xgboost torch torchvision jupyter statsmodels
+pip install -r requirements.txt
 ```
 
 Run notebooks in order from 01 to 05. The first notebook downloads the dataset automatically from OpenML — no manual download required.
