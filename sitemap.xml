@@ -1,35 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://dpark2380.github.io/Insurance-Claims-Predictor/PROJECT_BRIEF.html</loc>
-    <lastmod>2026-08-14T14:31:33.720Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dpark2380.github.io/Insurance-Claims-Predictor/notebooks/02_glm.html</loc>
-    <lastmod>2026-08-14T14:31:33.995Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dpark2380.github.io/Insurance-Claims-Predictor/notebooks/01_eda.html</loc>
-    <lastmod>2026-08-14T14:31:33.994Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dpark2380.github.io/Insurance-Claims-Predictor/notebooks.html</loc>
-    <lastmod>2026-08-14T14:31:33.989Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dpark2380.github.io/Insurance-Claims-Predictor/index.html</loc>
-    <lastmod>2026-08-14T14:31:33.985Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dpark2380.github.io/Insurance-Claims-Predictor/notebooks/04_neural_net.html</loc>
-    <lastmod>2026-08-14T14:31:34.001Z</lastmod>
+    <loc>https://dpark2380.github.io/Insurance-Claims-Predictor/notebooks/05_comparison.html</loc>
+    <lastmod>2026-08-27T15:39:22.491Z</lastmod>
   </url>
   <url>
     <loc>https://dpark2380.github.io/Insurance-Claims-Predictor/notebooks/03_xgboost.html</loc>
-    <lastmod>2026-08-14T14:31:33.998Z</lastmod>
+    <lastmod>2026-08-27T15:39:22.487Z</lastmod>
   </url>
   <url>
-    <loc>https://dpark2380.github.io/Insurance-Claims-Predictor/notebooks/05_comparison.html</loc>
-    <lastmod>2026-08-14T14:31:34.003Z</lastmod>
+    <loc>https://dpark2380.github.io/Insurance-Claims-Predictor/notebooks/01_eda.html</loc>
+    <lastmod>2026-08-27T15:39:22.482Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpark2380.github.io/Insurance-Claims-Predictor/index.html</loc>
+    <lastmod>2026-08-27T15:39:22.472Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpark2380.github.io/Insurance-Claims-Predictor/notebooks.html</loc>
+    <lastmod>2026-08-27T15:39:22.477Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpark2380.github.io/Insurance-Claims-Predictor/notebooks/02_glm.html</loc>
+    <lastmod>2026-08-27T15:39:22.483Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpark2380.github.io/Insurance-Claims-Predictor/notebooks/04_neural_net.html</loc>
+    <lastmod>2026-08-27T15:39:22.488Z</lastmod>
   </url>
 </urlset>

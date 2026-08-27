@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2026-03-28">
+<meta name="dcterms.date" content="2026-08-27">
 <meta name="description" content="Gradient boosted trees for frequency and severity, capturing non-linear feature interactions the GLM misses.">
 
 <title>XGBoost Models – Insurance Claims Predictor</title>
@@ -139,37 +139,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notebooks.html"> 
+<span class="menu-text">Notebooks</span></a>
+  </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-notebooks" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Notebooks</span>
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-notebooks">    
-        <li>
-    <a class="dropdown-item" href="../notebooks/01_eda.html">
- <span class="dropdown-text">1. Exploratory Data Analysis</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/02_glm.html">
- <span class="dropdown-text">2. GLM (Baseline)</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/03_xgboost.html">
- <span class="dropdown-text">3. XGBoost</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/04_neural_net.html">
- <span class="dropdown-text">4. Neural Network</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/05_comparison.html">
- <span class="dropdown-text">5. Model Comparison</span></a>
-  </li>  
-    </ul>
-  </li>
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/dpark2380/insurance_claims_predictor"> <i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/dpark2380/Insurance-Claims-Predictor"> <i class="bi bi-github" role="img">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -200,7 +177,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">March 28, 2026</p>
+        <p class="date">August 27, 2026</p>
       </div>
     </div>
     
@@ -222,7 +199,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="notebook-3-xgboost-models" class="level1">
 <h1>Notebook 3: XGBoost Models</h1>
 <p>This notebook fits XGBoost models for both frequency and severity and compares against the GLM baselines. - <strong>Part 1: Severity</strong> - XGBoost trained on log(ClaimAmount), predicting claim amount given a claim occurred - <strong>Part 2: Frequency</strong> - XGBoost trained on claim counts across all 679k policies</p>
-<div id="2" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:54.145017Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:54.144883Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:54.975559Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:54.975005Z&quot;}}" data-execution_count="1">
+<div id="2" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -236,7 +213,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="part-1-severity" class="level2">
 <h2 class="anchored" data-anchor-id="part-1-severity">Part 1: Severity</h2>
 <p><em>Dataset: 26,439 claims. Target: ClaimAmount in EUR.</em></p>
-<div id="4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:54.976698Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:54.976573Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:54.996207Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:54.995926Z&quot;}}" data-execution_count="2">
+<div id="4" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">'../data/claims_cleaned.csv'</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [<span class="st">'VehPower'</span>, <span class="st">'VehAge'</span>, <span class="st">'DrivAge'</span>, <span class="st">'BonusMalus'</span>, <span class="st">'Density'</span>, <span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>]</span>
@@ -256,7 +233,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="fit-xgboost" class="level3">
 <h3 class="anchored" data-anchor-id="fit-xgboost">1.2 Fit XGBoost</h3>
 <p>We train on log(ClaimAmount) rather than the raw target. This helps XGBoost handle the right-skewed distribution and produces more spread in predictions. We exponentiate back to EUR for evaluation.</p>
-<div id="6" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:54.997234Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:54.997176Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:55.143619Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:55.143241Z&quot;}}" data-execution_count="3">
+<div id="6" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>y_train_log <span class="op">=</span> np.log(y_train)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>y_test_log <span class="op">=</span> np.log(y_test)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1382,7 +1359,7 @@ forceTheme('sk-container-id-1');</script>
 </section>
 <section id="evaluate-on-test-set" class="level3">
 <h3 class="anchored" data-anchor-id="evaluate-on-test-set">1.3 Evaluate on Test Set</h3>
-<div id="8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:55.144490Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:55.144424Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:55.149251Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:55.148946Z&quot;}}" data-execution_count="4">
+<div id="8" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exponentiate back to EUR</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> np.exp(model.predict(X_test))</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1410,7 +1387,7 @@ Gamma Deviance:  1.3611</code></pre>
 </section>
 <section id="feature-importance" class="level3">
 <h3 class="anchored" data-anchor-id="feature-importance">1.4 Feature Importance</h3>
-<div id="10" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:55.150091Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:55.150041Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:55.268970Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:55.268577Z&quot;}}" data-execution_count="5">
+<div id="10" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>importance <span class="op">=</span> pd.Series(model.feature_importances_, index<span class="op">=</span>X_train.columns).sort_values(ascending<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="bu">max</span>(<span class="dv">6</span>, <span class="bu">len</span>(importance) <span class="op">*</span> <span class="fl">0.25</span>)))</span>
@@ -1436,7 +1413,7 @@ Gamma Deviance:  1.3611</code></pre>
 <section id="b-permutation-importance" class="level3">
 <h3 class="anchored" data-anchor-id="b-permutation-importance">1.4b Permutation Importance</h3>
 <p>Permutation importance shuffles each feature’s values and measures how much model performance degrades. Unlike gain-based importance, it is not biased toward high-frequency categories.</p>
-<div id="nnv9kk7lbei" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:55.270031Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:55.269963Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:56.413487Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:56.413137Z&quot;}}" data-execution_count="6">
+<div id="nnv9kk7lbei" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.inspection <span class="im">import</span> permutation_importance</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> permutation_importance(</span>
@@ -1466,7 +1443,7 @@ Gamma Deviance:  1.3611</code></pre>
 </section>
 <section id="predictions-vs-actuals" class="level3">
 <h3 class="anchored" data-anchor-id="predictions-vs-actuals">1.5 Predictions vs Actuals</h3>
-<div id="12" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:56.414399Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:56.414340Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:56.554064Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:56.553677Z&quot;}}" data-execution_count="7">
+<div id="12" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].scatter(y_test, y_pred, alpha<span class="op">=</span><span class="fl">0.3</span>, s<span class="op">=</span><span class="dv">10</span>)</span>
@@ -1535,7 +1512,7 @@ Gamma Deviance:  1.3611</code></pre>
 <p>XGBoost should outperform the GLM here by capturing the non-linear DrivAge pattern the GLM missed.</p>
 <section id="load-prepare-data" class="level3">
 <h3 class="anchored" data-anchor-id="load-prepare-data">2.1 Load &amp; Prepare Data</h3>
-<div id="2ckvsue3s58" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:56.555015Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:56.554945Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:02:56.892303Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:02:56.891915Z&quot;}}" data-execution_count="8">
+<div id="2ckvsue3s58" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df_freq <span class="op">=</span> pd.read_csv(<span class="st">'../data/policies_cleaned.csv'</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>features_freq <span class="op">=</span> [<span class="st">'VehPower'</span>, <span class="st">'VehAge'</span>, <span class="st">'DrivAge'</span>, <span class="st">'BonusMalus'</span>, <span class="st">'Density'</span>, <span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>]</span>
@@ -1552,13 +1529,13 @@ Gamma Deviance:  1.3611</code></pre>
 <span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Train: </span><span class="sc">{</span>X_freq_train<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, Test: </span><span class="sc">{</span>X_freq_test<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Train: (543610, 42), Test: (135903, 42)</code></pre>
+<pre><code>Train: (542410, 42), Test: (135603, 42)</code></pre>
 </div>
 </div>
 </section>
 <section id="fit-xgboost-frequency-model" class="level3">
 <h3 class="anchored" data-anchor-id="fit-xgboost-frequency-model">2.2 Fit XGBoost Frequency Model</h3>
-<div id="caqe8agj2pb" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:02:56.893380Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:02:56.893307Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:03:00.648661Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:03:00.648354Z&quot;}}" data-execution_count="9">
+<div id="caqe8agj2pb" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># XGBoost does not support exposure offsets natively.</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># We account for exposure by using claim rate (ClaimNb / Exposure) as the target</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># and weighting each row by Exposure, so longer-duration policies have more influence.</span></span>
@@ -1584,17 +1561,17 @@ Gamma Deviance:  1.3611</code></pre>
 <span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    verbose<span class="op">=</span><span class="dv">50</span></span>
 <span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[0] validation_0-poisson-nloglik:1.25364
-[50]    validation_0-poisson-nloglik:1.16438
-[100]   validation_0-poisson-nloglik:1.13690
-[150]   validation_0-poisson-nloglik:1.12382
-[200]   validation_0-poisson-nloglik:1.11630
-[250]   validation_0-poisson-nloglik:1.11062
-[300]   validation_0-poisson-nloglik:1.10666
-[350]   validation_0-poisson-nloglik:1.10475
-[400]   validation_0-poisson-nloglik:1.10375
-[450]   validation_0-poisson-nloglik:1.10202
-[499]   validation_0-poisson-nloglik:1.10109</code></pre>
+<pre><code>[0] validation_0-poisson-nloglik:1.41191
+[50]    validation_0-poisson-nloglik:1.29694
+[100]   validation_0-poisson-nloglik:1.26647
+[150]   validation_0-poisson-nloglik:1.26005
+[200]   validation_0-poisson-nloglik:1.25764
+[250]   validation_0-poisson-nloglik:1.25608
+[300]   validation_0-poisson-nloglik:1.25517
+[350]   validation_0-poisson-nloglik:1.25429
+[400]   validation_0-poisson-nloglik:1.25356
+[450]   validation_0-poisson-nloglik:1.25296
+[499]   validation_0-poisson-nloglik:1.25262</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <style>#sk-container-id-2 {
@@ -2697,7 +2674,7 @@ forceTheme('sk-container-id-2');</script>
 </section>
 <section id="evaluate-on-test-set-1" class="level3">
 <h3 class="anchored" data-anchor-id="evaluate-on-test-set-1">2.3 Evaluate on Test Set</h3>
-<div id="ehj9m9ob8xv" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:03:00.649773Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:03:00.649713Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:03:00.699775Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:03:00.699428Z&quot;}}" data-execution_count="10">
+<div id="ehj9m9ob8xv" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Model predicts claim rate — multiply by exposure to get expected claim count</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>y_freq_pred_rate <span class="op">=</span> model_freq.predict(X_freq_test)</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>y_freq_pred <span class="op">=</span> y_freq_pred_rate <span class="op">*</span> exp_test</span>
@@ -2719,16 +2696,16 @@ forceTheme('sk-container-id-2');</script>
 <span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>xgb_freq_metrics <span class="op">=</span> {<span class="st">'model'</span>: <span class="st">'XGBoost'</span>, <span class="st">'MAE'</span>: mae_freq, <span class="st">'RMSE'</span>: rmse_freq, <span class="st">'PoissonDeviance'</span>: pd_score}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>--- XGBoost Frequency Test Set Performance ---
-MAE:               0.1046
-RMSE:              0.2650
-Poisson Deviance:  43579.40</code></pre>
+MAE:               0.0966
+RMSE:              0.2352
+Poisson Deviance:  41478.64</code></pre>
 </div>
 </div>
 </section>
 <section id="actual-vs-predicted-by-feature" class="level3">
 <h3 class="anchored" data-anchor-id="actual-vs-predicted-by-feature">2.4 Actual vs Predicted by Feature</h3>
 <p>Reproducing the same calibration plots as the GLM to compare how well XGBoost captures the BonusMalus and DrivAge patterns.</p>
-<div id="zjwp971nht" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:03:00.700823Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:03:00.700759Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:03:01.083954Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:03:01.083464Z&quot;}}" data-execution_count="11">
+<div id="zjwp971nht" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'predicted_rate'</span>] <span class="op">=</span> model_freq.predict(X_freq)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'HasClaim'</span>] <span class="op">=</span> (df_freq[<span class="st">'ClaimNb'</span>] <span class="op">!=</span> <span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'actual_rate'</span>] <span class="op">=</span> df_freq[<span class="st">'HasClaim'</span>]</span>
@@ -2778,7 +2755,7 @@ Poisson Deviance:  43579.40</code></pre>
 </section>
 <section id="feature-importance-1" class="level3">
 <h3 class="anchored" data-anchor-id="feature-importance-1">2.5 Feature Importance</h3>
-<div id="zxvjd7bwk5e" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:03:01.084824Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:03:01.084759Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:03:01.191666Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:03:01.191245Z&quot;}}" data-execution_count="12">
+<div id="zxvjd7bwk5e" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>importance_freq <span class="op">=</span> pd.Series(model_freq.feature_importances_, index<span class="op">=</span>X_freq_train.columns).sort_values(ascending<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="bu">max</span>(<span class="dv">6</span>, <span class="bu">len</span>(importance_freq) <span class="op">*</span> <span class="fl">0.25</span>)))</span>
@@ -2804,7 +2781,7 @@ Poisson Deviance:  43579.40</code></pre>
 <section id="partial-dependence-plots" class="level3">
 <h3 class="anchored" data-anchor-id="partial-dependence-plots">2.6 Partial Dependence Plots</h3>
 <p>Shows the model’s learned relationship with BonusMalus and DrivAge across their full range. Unlike the binned calibration plots, this shows the raw non-linear curve XGBoost has learned.</p>
-<div id="tpwmvfut37" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:03:01.192743Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:03:01.192679Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:03:34.784116Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:03:34.782989Z&quot;}}" data-execution_count="13">
+<div id="tpwmvfut37" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.inspection <span class="im">import</span> PartialDependenceDisplay</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
@@ -2848,7 +2825,7 @@ Poisson Deviance:  43579.40</code></pre>
 <section id="lift-chart" class="level3">
 <h3 class="anchored" data-anchor-id="lift-chart">2.7 Lift Chart</h3>
 <p>Policies ranked by predicted claim rate, grouped into deciles. A good model should show a clear gradient: the highest decile should have a materially higher actual claim rate than the lowest.</p>
-<div id="yvlv9z5rns" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:03:34.785780Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:03:34.785693Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:03:34.898291Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:03:34.897763Z&quot;}}" data-execution_count="14">
+<div id="yvlv9z5rns" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>df_lift <span class="op">=</span> pd.DataFrame({</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'actual'</span>: y_freq_test.values,</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'predicted'</span>: y_freq_pred_rate</span>
@@ -2884,16 +2861,16 @@ Poisson Deviance:  43579.40</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code> decile  actual_rate  predicted_rate  count
-      1     0.025973        0.046367  13591
-      2     0.032303        0.062094  13590
-      3     0.038043        0.072155  13590
-      4     0.045033        0.079608  13590
-      5     0.051946        0.086087  13591
-      6     0.053054        0.093664  13590
-      7     0.049816        0.105730  13590
-      8     0.057910        0.129005  13590
-      9     0.068580        0.173724  13590
-     10     0.153337        0.433990  13591</code></pre>
+      1     0.026399        0.042693  13561
+      2     0.031711        0.056951  13560
+      3     0.037906        0.065994  13560
+      4     0.037537        0.073153  13560
+      5     0.049111        0.079310  13561
+      6     0.046755        0.085817  13560
+      7     0.053761        0.095160  13560
+      8     0.051622        0.114993  13560
+      9     0.070280        0.152493  13560
+     10     0.128752        0.378091  13561</code></pre>
 </div>
 </div>
 <p><strong>Lift chart analysis:</strong></p>
@@ -2904,7 +2881,7 @@ Poisson Deviance:  43579.40</code></pre>
 <section id="predicted-rate-distribution" class="level3">
 <h3 class="anchored" data-anchor-id="predicted-rate-distribution">2.8 Predicted Rate Distribution</h3>
 <p>Shows how much the model differentiates between high and low risk policies. A wider spread means the model is making more confident risk distinctions.</p>
-<div id="xivmbrey2s" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:03:34.899392Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:03:34.899326Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:03:35.045252Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:03:35.044860Z&quot;}}" data-execution_count="15">
+<div id="xivmbrey2s" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>cap <span class="op">=</span> np.percentile(y_freq_pred_rate, <span class="dv">99</span>)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>y_freq_pred_rate_plot <span class="op">=</span> np.clip(y_freq_pred_rate, <span class="va">None</span>, cap)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -2931,8 +2908,8 @@ Poisson Deviance:  43579.40</code></pre>
 </div>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Predicted rate range: 0.0166 to 24.5092
-Ratio of 90th to 10th percentile: 3.8x</code></pre>
+<pre><code>Predicted rate range: 0.0170 to 1.3876
+Ratio of 90th to 10th percentile: 3.6x</code></pre>
 </div>
 </div>
 <p><strong>Predicted rate distribution analysis:</strong></p>
@@ -2971,6 +2948,49 @@ Ratio of 90th to 10th percentile: 3.8x</code></pre>
 </table>
 <p>XGBoost achieves lower Poisson Deviance than the GLM (43,579 vs 46,581), indicating a better fit to the underlying count distribution. The MAE and RMSE are slightly higher because XGBoost produces wider predictions that occasionally overshoot on individual policies, whereas the GLM compresses predictions toward the mean and thus makes smaller absolute errors per policy.</p>
 <p>The primary advantage of XGBoost is not better average accuracy but better risk discrimination — it correctly identifies non-linear relationships that the GLM cannot represent, particularly the young driver spike in DrivAge. For pricing purposes, this discrimination is more valuable than minimising MAE.</p>
+<hr>
+</section>
+<section id="part-3-save-models-predictions-and-metrics" class="level2">
+<h2 class="anchored" data-anchor-id="part-3-save-models-predictions-and-metrics">Part 3: Save Models, Predictions and Metrics</h2>
+<p>Written for notebook 5 to consume, so it never refits these models. Same contract as notebook 2: the two boosters, the test-set predictions, and the metrics.</p>
+<p><code>sev_on_freq_test</code> is the severity model scored on the <strong>frequency</strong> test rows — the severity half of the pure premium calculation, computed here so it stays row-aligned with <code>freq_test_rate</code>. The shared test-set definition (<code>results/test_split.npz</code>) is written by notebook 2; this notebook reproduces the identical split from the same seed.</p>
+<div id="8470b263" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">list</span>(X_test.columns) <span class="op">==</span> <span class="bu">list</span>(X_freq_test.columns), <span class="st">'design matrices misaligned'</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Severity booster applied to the frequency test policies (trained on log target)</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>sev_on_freq_test <span class="op">=</span> np.exp(model.predict(X_freq_test))</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Models ───────────────────────────────────────────────────────────────────</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>model.save_model(<span class="st">'../models/xgb_sev.json'</span>)</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>model_freq.save_model(<span class="st">'../models/xgb_freq.json'</span>)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Predictions ──────────────────────────────────────────────────────────────</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>np.savez_compressed(</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">'../results/predictions_xgb.npz'</span>,</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>    sev_test_pred    <span class="op">=</span> np.asarray(y_pred, dtype<span class="op">=</span>np.float32),</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    freq_test_rate   <span class="op">=</span> np.asarray(y_freq_pred_rate, dtype<span class="op">=</span>np.float32),</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    sev_on_freq_test <span class="op">=</span> np.asarray(sev_on_freq_test, dtype<span class="op">=</span>np.float32),</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Metrics ──────────────────────────────────────────────────────────────────</span></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'../results/metrics_xgb.json'</span>, <span class="st">'w'</span>) <span class="im">as</span> f:</span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>    json.dump({</span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">'model'</span>: <span class="st">'XGBoost'</span>,</span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">'severity'</span>:  {<span class="st">'MAE'</span>: <span class="bu">float</span>(mae),      <span class="st">'RMSE'</span>: <span class="bu">float</span>(rmse),      <span class="st">'GammaDeviance'</span>:   <span class="bu">float</span>(gd)},</span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">'frequency'</span>: {<span class="st">'MAE'</span>: <span class="bu">float</span>(mae_freq), <span class="st">'RMSE'</span>: <span class="bu">float</span>(rmse_freq), <span class="st">'PoissonDeviance'</span>: <span class="bu">float</span>(pd_score)},</span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>    }, f, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Saved XGBoost models, predictions and metrics.'</span>)</span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'  predictions_xgb.npz  — sev </span><span class="sc">{</span>y_pred<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, freq </span><span class="sc">{</span>y_freq_pred_rate<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, sev_on_freq </span><span class="sc">{</span>sev_on_freq_test<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'  metrics_xgb.json     — sev MAE </span><span class="sc">{</span>mae<span class="sc">:,.2f}</span><span class="ss"> | freq Poisson Deviance </span><span class="sc">{</span>pd_score<span class="sc">:,.2f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Saved XGBoost models, predictions and metrics.
+  predictions_xgb.npz  — sev (5288,), freq (135603,), sev_on_freq (135603,)
+  metrics_xgb.json     — sev MAE 938.56 | freq Poisson Deviance 41,478.64</code></pre>
+</div>
+</div>
 
 
 </section>

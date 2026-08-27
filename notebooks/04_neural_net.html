@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2026-03-28">
+<meta name="dcterms.date" content="2026-08-27">
 <meta name="description" content="Feedforward neural network for frequency and severity, the most flexible but least interpretable approach.">
 
 <title>Neural Network (PyTorch) – Insurance Claims Predictor</title>
@@ -136,37 +136,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notebooks.html"> 
+<span class="menu-text">Notebooks</span></a>
+  </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-notebooks" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Notebooks</span>
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-notebooks">    
-        <li>
-    <a class="dropdown-item" href="../notebooks/01_eda.html">
- <span class="dropdown-text">1. Exploratory Data Analysis</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/02_glm.html">
- <span class="dropdown-text">2. GLM (Baseline)</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/03_xgboost.html">
- <span class="dropdown-text">3. XGBoost</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/04_neural_net.html">
- <span class="dropdown-text">4. Neural Network</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/05_comparison.html">
- <span class="dropdown-text">5. Model Comparison</span></a>
-  </li>  
-    </ul>
-  </li>
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/dpark2380/insurance_claims_predictor"> <i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/dpark2380/Insurance-Claims-Predictor"> <i class="bi bi-github" role="img">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -197,7 +174,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">March 28, 2026</p>
+        <p class="date">August 27, 2026</p>
       </div>
     </div>
     
@@ -219,7 +196,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="notebook-4-neural-network-pytorch" class="level1">
 <h1>Notebook 4: Neural Network (PyTorch)</h1>
 <p>This notebook fits feedforward neural networks for both frequency and severity and compares against the GLM and XGBoost baselines. - <strong>Part 1: Severity</strong> - Network trained on log(ClaimAmount), predicting claim amount given a claim occurred - <strong>Part 2: Frequency</strong> - Network trained on claim counts across all 679k policies</p>
-<div id="2" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:08:45.594413Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:08:45.594211Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:08:47.251301Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:08:47.250880Z&quot;}}" data-execution_count="1">
+<div id="2" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -245,7 +222,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="load-prepare-data" class="level3">
 <h3 class="anchored" data-anchor-id="load-prepare-data">1.1 Load &amp; Prepare Data</h3>
 <p>Features are standardised with StandardScaler — neural networks require this because gradient descent is sensitive to feature scale. The target is log-transformed for the same reason as XGBoost: the right-skewed distribution of claim amounts causes training instability on the raw scale.</p>
-<div id="4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:08:47.252289Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:08:47.252185Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:08:47.313639Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:08:47.313287Z&quot;}}" data-execution_count="2">
+<div id="4" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">'../data/claims_cleaned.csv'</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [<span class="st">'VehPower'</span>, <span class="st">'VehAge'</span>, <span class="st">'DrivAge'</span>, <span class="st">'BonusMalus'</span>, <span class="st">'Density'</span>, <span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>]</span>
@@ -280,7 +257,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="define-model" class="level3">
 <h3 class="anchored" data-anchor-id="define-model">1.2 Define Model</h3>
 <p>Two hidden layers (64 and 32 units) with ReLU activations and dropout for regularisation. This is deliberately simple — a more complex network would not help given the weak signal in severity features.</p>
-<div id="6" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:08:47.314600Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:08:47.314538Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:08:47.323061Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:08:47.322763Z&quot;}}" data-execution_count="3">
+<div id="6" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ClaimNet(nn.Module):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, input_dim):</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
@@ -316,7 +293,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="train" class="level3">
 <h3 class="anchored" data-anchor-id="train">1.3 Train</h3>
-<div id="8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:08:47.324717Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:08:47.324664Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:09:01.382250Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:09:01.381830Z&quot;}}" data-execution_count="4">
+<div id="8" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span><span class="fl">1e-3</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>criterion <span class="op">=</span> nn.MSELoss()  <span class="co"># MSE on log scale ≈ minimising proportional errors</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -356,7 +333,7 @@ Epoch  90/100 | Train Loss: 1.3793 | Val Loss: 1.2082
 Epoch 100/100 | Train Loss: 1.3490 | Val Loss: 1.2059</code></pre>
 </div>
 </div>
-<div id="9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:09:01.383300Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:09:01.383198Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:09:01.480726Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:09:01.480376Z&quot;}}" data-execution_count="5">
+<div id="9" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot training curve</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>plt.plot(train_losses, label<span class="op">=</span><span class="st">'Train'</span>)</span>
@@ -382,7 +359,7 @@ Epoch 100/100 | Train Loss: 1.3490 | Val Loss: 1.2059</code></pre>
 </section>
 <section id="evaluate-on-test-set" class="level3">
 <h3 class="anchored" data-anchor-id="evaluate-on-test-set">1.5 Evaluate on Test Set</h3>
-<div id="11" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:09:01.481637Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:09:01.481581Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:09:01.485354Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:09:01.484976Z&quot;}}" data-execution_count="6">
+<div id="11" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    y_pred_log <span class="op">=</span> model(X_test_t).cpu().numpy().flatten()</span>
@@ -416,7 +393,7 @@ Gamma Deviance:  1.4114</code></pre>
 </section>
 <section id="predictions-vs-actuals" class="level3">
 <h3 class="anchored" data-anchor-id="predictions-vs-actuals">1.6 Predictions vs Actuals</h3>
-<div id="wnbev1tescf" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:09:01.486157Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:09:01.486108Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:09:01.630001Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:09:01.629632Z&quot;}}" data-execution_count="7">
+<div id="wnbev1tescf" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>y_test_eur <span class="op">=</span> np.expm1(y_test)</span>
@@ -490,7 +467,7 @@ Gamma Deviance:  1.4114</code></pre>
 <p>The frequency model uses the same exposure workaround as XGBoost: predict claim rate (ClaimNb / Exposure) and weight each training sample by its exposure. In PyTorch this is implemented as a custom weighted loss function.</p>
 <section id="load-prepare-data-1" class="level3">
 <h3 class="anchored" data-anchor-id="load-prepare-data-1">2.1 Load &amp; Prepare Data</h3>
-<div id="3r8i7cv1vz7" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:09:01.630928Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:09:01.630865Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:09:02.918741Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:09:02.918299Z&quot;}}" data-execution_count="8">
+<div id="3r8i7cv1vz7" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>df_freq <span class="op">=</span> pd.read_csv(<span class="st">'../data/policies_cleaned.csv'</span>)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>features_freq <span class="op">=</span> [<span class="st">'VehPower'</span>, <span class="st">'VehAge'</span>, <span class="st">'DrivAge'</span>, <span class="st">'BonusMalus'</span>, <span class="st">'Density'</span>, <span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>]</span>
@@ -529,14 +506,14 @@ Gamma Deviance:  1.4114</code></pre>
 <span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Train: </span><span class="sc">{</span>X_freq_train_s<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, Test: </span><span class="sc">{</span>X_freq_test_s<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Train: (543610, 42), Test: (135903, 42)</code></pre>
+<pre><code>Train: (542410, 42), Test: (135603, 42)</code></pre>
 </div>
 </div>
 </section>
 <section id="define-train-model" class="level3">
 <h3 class="anchored" data-anchor-id="define-train-model">2.2 Define &amp; Train Model</h3>
 <p>Same architecture as the severity model. The loss is a weighted MSE where each sample’s contribution is scaled by its exposure, so policies active for a full year have more influence than short-duration policies.</p>
-<div id="hdn9wfmd3re" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:09:02.919708Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:09:02.919652Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:14:17.843131Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:14:17.842641Z&quot;}}" data-execution_count="9">
+<div id="hdn9wfmd3re" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>model_freq <span class="op">=</span> ClaimNet(input_dim<span class="op">=</span>X_freq_train_s.shape[<span class="dv">1</span>]).to(device)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>optimizer_freq <span class="op">=</span> torch.optim.Adam(model_freq.parameters(), lr<span class="op">=</span><span class="fl">1e-3</span>)</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -577,16 +554,16 @@ Gamma Deviance:  1.4114</code></pre>
 <span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/13_nn_freq_training_curve.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
 <span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Epoch  10/100 | Train Loss: 0.385077 | Val Loss: 0.339590
-Epoch  20/100 | Train Loss: 0.375962 | Val Loss: 0.335480
-Epoch  30/100 | Train Loss: 0.365749 | Val Loss: 0.337949
-Epoch  40/100 | Train Loss: 0.366594 | Val Loss: 0.355316
-Epoch  50/100 | Train Loss: 0.364907 | Val Loss: 0.329485
-Epoch  60/100 | Train Loss: 0.361350 | Val Loss: 0.326961
-Epoch  70/100 | Train Loss: 0.378053 | Val Loss: 0.350575
-Epoch  80/100 | Train Loss: 0.363091 | Val Loss: 0.369546
-Epoch  90/100 | Train Loss: 0.370082 | Val Loss: 0.332245
-Epoch 100/100 | Train Loss: 0.362862 | Val Loss: 0.327051</code></pre>
+<pre><code>Epoch  10/100 | Train Loss: 0.278803 | Val Loss: 0.302490
+Epoch  20/100 | Train Loss: 0.278350 | Val Loss: 0.302088
+Epoch  30/100 | Train Loss: 0.278007 | Val Loss: 0.302157
+Epoch  40/100 | Train Loss: 0.277733 | Val Loss: 0.302010
+Epoch  50/100 | Train Loss: 0.277730 | Val Loss: 0.302074
+Epoch  60/100 | Train Loss: 0.277471 | Val Loss: 0.302121
+Epoch  70/100 | Train Loss: 0.277437 | Val Loss: 0.302131
+Epoch  80/100 | Train Loss: 0.277354 | Val Loss: 0.301961
+Epoch  90/100 | Train Loss: 0.277061 | Val Loss: 0.302404
+Epoch 100/100 | Train Loss: 0.277221 | Val Loss: 0.301902</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <div>
@@ -599,7 +576,7 @@ Epoch 100/100 | Train Loss: 0.362862 | Val Loss: 0.327051</code></pre>
 </section>
 <section id="evaluate-on-test-set-1" class="level3">
 <h3 class="anchored" data-anchor-id="evaluate-on-test-set-1">2.3 Evaluate on Test Set</h3>
-<div id="jkjj6lyre4f" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:14:17.845267Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:14:17.845010Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:14:17.865276Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:14:17.864959Z&quot;}}" data-execution_count="10">
+<div id="jkjj6lyre4f" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>model_freq.<span class="bu">eval</span>()</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    y_freq_pred_rate <span class="op">=</span> model_freq(X_freq_test_t).cpu().numpy().flatten()</span>
@@ -625,16 +602,16 @@ Epoch 100/100 | Train Loss: 0.362862 | Val Loss: 0.327051</code></pre>
 <span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>nn_freq_metrics <span class="op">=</span> {<span class="st">'model'</span>: <span class="st">'NeuralNet'</span>, <span class="st">'MAE'</span>: mae_freq, <span class="st">'RMSE'</span>: rmse_freq, <span class="st">'PoissonDeviance'</span>: pd_score}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>--- Neural Net Frequency Test Set Performance ---
-MAE:               0.1043
-RMSE:              0.2961
-Poisson Deviance:  44439.16</code></pre>
+MAE:               0.0972
+RMSE:              0.2371
+Poisson Deviance:  42250.46</code></pre>
 </div>
 </div>
 </section>
 <section id="actual-vs-predicted-by-feature" class="level3">
 <h3 class="anchored" data-anchor-id="actual-vs-predicted-by-feature">2.4 Actual vs Predicted by Feature</h3>
 <p>Reproducing the same calibration plots as the GLM and XGBoost for direct comparison.</p>
-<div id="8j1r3cnbfjk" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:14:17.866168Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:14:17.866108Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:14:18.483627Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:14:18.483262Z&quot;}}" data-execution_count="11">
+<div id="8j1r3cnbfjk" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>model_freq.<span class="bu">eval</span>()</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    X_all_t <span class="op">=</span> torch.tensor(scaler_freq.transform(X_freq).astype(np.float32)).to(device)</span>
@@ -685,33 +662,40 @@ Poisson Deviance:  44439.16</code></pre>
 </section>
 <section id="lift-chart" class="level3">
 <h3 class="anchored" data-anchor-id="lift-chart">2.5 Lift Chart</h3>
-<div id="19f7j8ylkx9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:14:18.484629Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:14:18.484558Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:14:18.580265Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:14:18.579839Z&quot;}}" data-execution_count="12">
+<div id="19f7j8ylkx9" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>df_lift <span class="op">=</span> pd.DataFrame({</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'actual'</span>: y_freq_test,</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'predicted'</span>: y_freq_pred_rate</span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>})</span>
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>df_lift[<span class="st">'decile'</span>] <span class="op">=</span> pd.qcut(df_lift[<span class="st">'predicted'</span>], q<span class="op">=</span><span class="dv">10</span>, labels<span class="op">=</span><span class="va">False</span>) <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>lift <span class="op">=</span> df_lift.groupby(<span class="st">'decile'</span>).agg(</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    actual_rate<span class="op">=</span>(<span class="st">'actual'</span>, <span class="st">'mean'</span>),</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    predicted_rate<span class="op">=</span>(<span class="st">'predicted'</span>, <span class="st">'mean'</span>),</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    count<span class="op">=</span>(<span class="st">'actual'</span>, <span class="st">'count'</span>)</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>).reset_index()</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> lift[<span class="st">'decile'</span>]</span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>ax.bar(x <span class="op">-</span> <span class="fl">0.2</span>, lift[<span class="st">'actual_rate'</span>], width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Actual'</span>, align<span class="op">=</span><span class="st">'center'</span>)</span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>ax.bar(x <span class="op">+</span> <span class="fl">0.2</span>, lift[<span class="st">'predicted_rate'</span>], width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Predicted'</span>, align<span class="op">=</span><span class="st">'center'</span>)</span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Decile (1 = lowest predicted risk, 10 = highest)'</span>)</span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Mean Claim Rate'</span>)</span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Lift Chart: Neural Net Frequency Model'</span>)</span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(x)</span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/15_nn_lift_chart.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(lift[[<span class="st">'decile'</span>, <span class="st">'actual_rate'</span>, <span class="st">'predicted_rate'</span>, <span class="st">'count'</span>]].to_string(index<span class="op">=</span><span class="va">False</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co"># duplicates='drop' is required here: clipping negative rates to zero leaves many</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co"># tied predictions, so several decile boundaries fall on the same value. Without</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="co"># it, qcut silently produces wildly unequal deciles (one ~21k rows, another ~6k</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co"># instead of ~13.5k each), which distorts the lift gradient. Dropping the</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="co"># duplicate edges yields fewer than 10 groups but each is honestly constructed.</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>df_lift[<span class="st">'decile'</span>] <span class="op">=</span> pd.qcut(df_lift[<span class="st">'predicted'</span>], q<span class="op">=</span><span class="dv">10</span>, labels<span class="op">=</span><span class="va">False</span>, duplicates<span class="op">=</span><span class="st">'drop'</span>) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>lift <span class="op">=</span> df_lift.groupby(<span class="st">'decile'</span>).agg(</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    actual_rate<span class="op">=</span>(<span class="st">'actual'</span>, <span class="st">'mean'</span>),</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    predicted_rate<span class="op">=</span>(<span class="st">'predicted'</span>, <span class="st">'mean'</span>),</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    count<span class="op">=</span>(<span class="st">'actual'</span>, <span class="st">'count'</span>)</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>).reset_index()</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> lift[<span class="st">'decile'</span>]</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>ax.bar(x <span class="op">-</span> <span class="fl">0.2</span>, lift[<span class="st">'actual_rate'</span>], width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Actual'</span>, align<span class="op">=</span><span class="st">'center'</span>)</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>ax.bar(x <span class="op">+</span> <span class="fl">0.2</span>, lift[<span class="st">'predicted_rate'</span>], width<span class="op">=</span><span class="fl">0.4</span>, label<span class="op">=</span><span class="st">'Predicted'</span>, align<span class="op">=</span><span class="st">'center'</span>)</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Decile (1 = lowest predicted risk, highest = riskiest)'</span>)</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Mean Claim Rate'</span>)</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Lift Chart: Neural Net Frequency Model'</span>)</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(x)</span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/15_nn_lift_chart.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(lift[[<span class="st">'decile'</span>, <span class="st">'actual_rate'</span>, <span class="st">'predicted_rate'</span>, <span class="st">'count'</span>]].to_string(index<span class="op">=</span><span class="va">False</span>))</span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> lift.shape[<span class="dv">0</span>] <span class="op">&lt;</span> <span class="dv">10</span>:</span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'</span><span class="ch">\n</span><span class="ss">Note: </span><span class="sc">{</span>lift<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">}</span><span class="ss"> groups instead of 10 — tied predictions collapsed some decile boundaries.'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -721,22 +705,22 @@ Poisson Deviance:  44439.16</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code> decile  actual_rate  predicted_rate  count
-      1     0.030167        0.062978  13591
-      2     0.035247        0.073965  13590
-      3     0.039588        0.079608  13590
-      4     0.044077        0.084195  13590
-      5     0.048562        0.088958  13591
-      6     0.054231        0.094714  13590
-      7     0.056291        0.102856  13590
-      8     0.058940        0.116161  13590
-      9     0.072406        0.148551  13590
-     10     0.136487        0.366435  13591</code></pre>
+      1     0.029423        0.055673  13561
+      2     0.037242        0.069078  13560
+      3     0.040192        0.076316  13560
+      4     0.039528        0.081508  13560
+      5     0.045719        0.085689  13561
+      6     0.050387        0.089482  20938
+      7     0.053543        0.092276   6182
+      8     0.056785        0.102434  13560
+      9     0.064897        0.129049  13560
+     10     0.117838        0.335080  13561</code></pre>
 </div>
 </div>
 </section>
 <section id="predicted-rate-distribution" class="level3">
 <h3 class="anchored" data-anchor-id="predicted-rate-distribution">2.6 Predicted Rate Distribution</h3>
-<div id="9o2d2ai3ut" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:14:18.581202Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:14:18.581137Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:14:18.703596Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:14:18.703189Z&quot;}}" data-execution_count="13">
+<div id="9o2d2ai3ut" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>cap <span class="op">=</span> np.percentile(y_freq_pred_rate, <span class="dv">99</span>)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>y_freq_pred_rate_plot <span class="op">=</span> np.clip(y_freq_pred_rate, <span class="va">None</span>, cap)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -763,8 +747,8 @@ Poisson Deviance:  44439.16</code></pre>
 </div>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Predicted rate range: 0.0147 to 45.2850
-Ratio of 90th to 10th percentile: 2.5x</code></pre>
+<pre><code>Predicted rate range: 0.0000 to 4.5948
+Ratio of 90th to 10th percentile: 2.4x</code></pre>
 </div>
 </div>
 <p><strong>Frequency model analysis:</strong></p>
@@ -807,42 +791,56 @@ Ratio of 90th to 10th percentile: 2.5x</code></pre>
 </tbody>
 </table>
 <p>XGBoost edges out the neural net on all three metrics. The difference is small — Poisson Deviance of 44,368 vs 43,579 — but consistent. This is a common finding on tabular insurance data: gradient boosted trees tend to outperform neural networks because their tree structure is naturally suited to the categorical and bounded numeric features that dominate this dataset. Both models comfortably beat the GLM on Poisson Deviance, the actuarially correct metric for frequency models.</p>
+<hr>
 </section>
-<section id="part-3-severity-model-comparison" class="level2">
-<h2 class="anchored" data-anchor-id="part-3-severity-model-comparison">Part 3: Severity Model Comparison</h2>
-<p>Comparing all three models on the severity test set using the known GLM and XGBoost metrics plus the neural net results from this notebook.</p>
-<div id="13" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:14:18.704536Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:14:18.704471Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:14:18.844806Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:14:18.844471Z&quot;}}" data-execution_count="14">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>glm_metrics <span class="op">=</span> {<span class="st">'model'</span>: <span class="st">'GLM'</span>,       <span class="st">'MAE'</span>: <span class="dv">1079</span>,   <span class="st">'RMSE'</span>: <span class="dv">2203</span>,   <span class="st">'GammaDeviance'</span>: <span class="fl">1.03</span>}</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>xgb_metrics <span class="op">=</span> {<span class="st">'model'</span>: <span class="st">'XGBoost'</span>,   <span class="st">'MAE'</span>: <span class="dv">938</span>,    <span class="st">'RMSE'</span>: <span class="dv">2340</span>,   <span class="st">'GammaDeviance'</span>: <span class="fl">1.36</span>}</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>nn_metrics  <span class="op">=</span> {<span class="st">'model'</span>: <span class="st">'NeuralNet'</span>, <span class="st">'MAE'</span>: <span class="fl">954.45</span>, <span class="st">'RMSE'</span>: <span class="fl">2345.8</span>, <span class="st">'GammaDeviance'</span>: <span class="fl">1.3955</span>}</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> pd.DataFrame([glm_metrics, xgb_metrics, nn_metrics]).set_index(<span class="st">'model'</span>)</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(results.to_string())</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, metric <span class="kw">in</span> <span class="bu">zip</span>(axes, [<span class="st">'MAE'</span>, <span class="st">'RMSE'</span>, <span class="st">'GammaDeviance'</span>]):</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    results[metric].plot(kind<span class="op">=</span><span class="st">'bar'</span>, ax<span class="op">=</span>ax, edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    ax.set_title(metric)</span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(metric)</span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    ax.tick_params(axis<span class="op">=</span><span class="st">'x'</span>, rotation<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>plt.suptitle(<span class="st">'Severity Model Comparison'</span>, fontsize<span class="op">=</span><span class="dv">14</span>)</span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/17_severity_model_comparison.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="part-3-save-models-predictions-and-metrics" class="level2">
+<h2 class="anchored" data-anchor-id="part-3-save-models-predictions-and-metrics">Part 3: Save Models, Predictions and Metrics</h2>
+<p>Same contract as notebooks 2 and 3, so notebook 5 never has to load PyTorch or retrain a network. Both networks are saved as <code>state_dict</code>s alongside their fitted <code>StandardScaler</code>s — a scaler is useless without its fitted mean and variance, so scoring a saved network on new data is impossible without it.</p>
+<p><code>sev_on_freq_test</code> scores the severity network over the <strong>frequency</strong> test rows. Those rows are unscaled, so they must go through the <em>severity</em> scaler (<code>scaler</code>), not the frequency one — each network was standardised against its own training distribution.</p>
+<div id="4d54635c" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json, pickle</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Severity network scored on the frequency test policies.</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co"># X_freq_test is unscaled, so it goes through the severity scaler.</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    X_freq_test_sev_scaled <span class="op">=</span> torch.tensor(</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>        scaler.transform(X_freq_test).astype(np.float32)</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    ).to(device)</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    sev_on_freq_test <span class="op">=</span> np.expm1(model(X_freq_test_sev_scaled).cpu().numpy().flatten())</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Models ───────────────────────────────────────────────────────────────────</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>torch.save(model.state_dict(),      <span class="st">'../models/nn_sev.pt'</span>)</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>torch.save(model_freq.state_dict(), <span class="st">'../models/nn_freq.pt'</span>)</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'../models/nn_sev_scaler.pkl'</span>, <span class="st">'wb'</span>) <span class="im">as</span> f:</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    pickle.dump(scaler, f)</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'../models/nn_freq_scaler.pkl'</span>, <span class="st">'wb'</span>) <span class="im">as</span> f:</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>    pickle.dump(scaler_freq, f)</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Predictions ──────────────────────────────────────────────────────────────</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>np.savez_compressed(</span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">'../results/predictions_nn.npz'</span>,</span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>    sev_test_pred    <span class="op">=</span> np.asarray(y_pred, dtype<span class="op">=</span>np.float32),</span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>    freq_test_rate   <span class="op">=</span> np.asarray(y_freq_pred_rate, dtype<span class="op">=</span>np.float32),</span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>    sev_on_freq_test <span class="op">=</span> np.asarray(sev_on_freq_test, dtype<span class="op">=</span>np.float32),</span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Metrics ──────────────────────────────────────────────────────────────────</span></span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'../results/metrics_nn.json'</span>, <span class="st">'w'</span>) <span class="im">as</span> f:</span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>    json.dump({</span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a>        <span class="st">'model'</span>: <span class="st">'Neural Net'</span>,</span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a>        <span class="st">'severity'</span>:  {<span class="st">'MAE'</span>: <span class="bu">float</span>(mae),      <span class="st">'RMSE'</span>: <span class="bu">float</span>(rmse),      <span class="st">'GammaDeviance'</span>:   <span class="bu">float</span>(gd)},</span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a>        <span class="st">'frequency'</span>: {<span class="st">'MAE'</span>: <span class="bu">float</span>(mae_freq), <span class="st">'RMSE'</span>: <span class="bu">float</span>(rmse_freq), <span class="st">'PoissonDeviance'</span>: <span class="bu">float</span>(pd_score)},</span>
+<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a>    }, f, indent<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Saved neural net models, scalers, predictions and metrics.'</span>)</span>
+<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'  predictions_nn.npz   — sev </span><span class="sc">{</span>y_pred<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, freq </span><span class="sc">{</span>y_freq_pred_rate<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, sev_on_freq </span><span class="sc">{</span>sev_on_freq_test<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'  metrics_nn.json      — sev MAE </span><span class="sc">{</span>mae<span class="sc">:,.2f}</span><span class="ss"> | freq Poisson Deviance </span><span class="sc">{</span>pd_score<span class="sc">:,.2f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>               MAE    RMSE  GammaDeviance
-model                                    
-GLM        1079.00  2203.0         1.0300
-XGBoost     938.00  2340.0         1.3600
-NeuralNet   954.45  2345.8         1.3955</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="04_neural_net_files/figure-html/cell-15-output-2.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
+<pre><code>Saved neural net models, scalers, predictions and metrics.
+  predictions_nn.npz   — sev (5288,), freq (135603,), sev_on_freq (135603,)
+  metrics_nn.json      — sev MAE 957.42 | freq Poisson Deviance 42,250.46</code></pre>
 </div>
 </div>
 

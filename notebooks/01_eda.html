@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2026-03-28">
+<meta name="dcterms.date" content="2026-08-27">
 <meta name="description" content="Distribution of claim amounts, feature relationships, and frequency vs severity patterns in the French MTPL dataset.">
 
 <title>Exploratory Data Analysis – Insurance Claims Predictor</title>
@@ -139,37 +139,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notebooks.html"> 
+<span class="menu-text">Notebooks</span></a>
+  </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-notebooks" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Notebooks</span>
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-notebooks">    
-        <li>
-    <a class="dropdown-item" href="../notebooks/01_eda.html">
- <span class="dropdown-text">1. Exploratory Data Analysis</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/02_glm.html">
- <span class="dropdown-text">2. GLM (Baseline)</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/03_xgboost.html">
- <span class="dropdown-text">3. XGBoost</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/04_neural_net.html">
- <span class="dropdown-text">4. Neural Network</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/05_comparison.html">
- <span class="dropdown-text">5. Model Comparison</span></a>
-  </li>  
-    </ul>
-  </li>
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/dpark2380/insurance_claims_predictor"> <i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/dpark2380/Insurance-Claims-Predictor"> <i class="bi bi-github" role="img">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -200,7 +177,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">March 28, 2026</p>
+        <p class="date">August 27, 2026</p>
       </div>
     </div>
     
@@ -219,7 +196,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<div id="cf61559a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:11.780509Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:11.780380Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:13.572831Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:13.572283Z&quot;}}" data-execution_count="1">
+<div id="cf61559a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-26T11:08:42.297404Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-26T11:08:42.297185Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-26T11:08:43.402798Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-26T11:08:43.402370Z&quot;}}" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -233,62 +210,82 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>This notebook explores the French MTPL dataset to understand the data before modelling. The analysis is split into two parts.</p>
 <ul>
 <li><strong>Part 1 — Severity:</strong> Distribution and features of claim amounts (26k claims)</li>
-<li><strong>Part 2 — Frequency:</strong> Which policies result in a claim (679k policies)</li>
+<li><strong>Part 2 — Frequency:</strong> Which policies result in a claim (678k policies)</li>
 </ul>
 <p>Both parts feed into separate models that are later combined to estimate a pure premium.</p>
-<div id="96ae96d8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:13.573913Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:13.573811Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:13.845734Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:13.845312Z&quot;}}" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fetching the severity dataset</span></span>
+<div id="96ae96d8" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-26T11:08:43.404033Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-26T11:08:43.403938Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-26T11:08:43.644346Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-26T11:08:43.644018Z&quot;}}" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Downloading severity dataset</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Fetching freMTPL2sev from OpenML...'</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> fetch_openml(name<span class="op">=</span><span class="st">'freMTPL2sev'</span>, version<span class="op">=</span><span class="dv">1</span>, as_frame<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> data.frame</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># df.to_csv('../data/freMTPL2sev.csv', index=False)</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># print(f'Saved. Shape: {df.shape}')</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># df.head()</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Downloading the frequency dataset.</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>data_freq <span class="op">=</span> fetch_openml(name<span class="op">=</span><span class="st">'freMTPL2freq'</span>, version<span class="op">=</span><span class="dv">1</span>, as_frame<span class="op">=</span><span class="va">True</span>)                                               </span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>df_freq <span class="op">=</span> data_freq.frame</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>                                                                                                                    </span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co"># df_freq.to_csv('../data/freMTPL2freq.csv', index=False)</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co"># print(f'Frequency dataset shape: {df_freq.shape}')                                                                    </span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co"># df_freq.head()  </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Downloading frequency dataset.</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>data_freq <span class="op">=</span> fetch_openml(name<span class="op">=</span><span class="st">'freMTPL2freq'</span>, version<span class="op">=</span><span class="dv">1</span>, as_frame<span class="op">=</span><span class="va">True</span>)                                               </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>df_freq <span class="op">=</span> data_freq.frame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Fetching freMTPL2sev from OpenML...</code></pre>
 </div>
 </div>
-<div id="22cc2dd0" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:13.846755Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:13.846700Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:13.907688Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:13.907408Z&quot;}}" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename severity column for clarity                                                              </span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>df_sev <span class="op">=</span> df  <span class="co"># the 26k claims dataset you already loaded                                       </span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Join on IDpol — left join keeps all freq policies, NaN ClaimAmount = no claim </span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>df_merged <span class="op">=</span> df_freq.merge(df_sev, on<span class="op">=</span><span class="st">'IDpol'</span>, how<span class="op">=</span><span class="st">'left'</span>)</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Policies with at least one claim</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>df_claims <span class="op">=</span> df_merged[df_merged[<span class="st">'ClaimAmount'</span>].notna()].copy()</span>
+</section>
+<section id="frequency-data-quality-implausible-values-a-join-pitfall" class="level2">
+<h2 class="anchored" data-anchor-id="frequency-data-quality-implausible-values-a-join-pitfall">Frequency Data Quality: Implausible Values &amp; a Join Pitfall</h2>
+<p>Two corrections are worth making to <code>freMTPL2freq</code> before it’s used for modelling (see e.g.&nbsp;Noll, Salzmann &amp; Wüthrich (2020), and scikit-learn’s own tutorial on this exact dataset):</p>
+<ol type="1">
+<li><strong>Implausible <code>ClaimNb</code>/<code>Exposure</code> values.</strong> A handful of policies report more than 4 claims or more than 1 year of exposure in a single annual policy. Standard practice for this dataset is to cap rather than drop, since the rest of the record (features) is still usable. (We also assert there are no duplicate <code>IDpol</code> rows in the raw fetch — there aren’t, in this OpenML version — as a defensive check.)</li>
+<li><strong>A join pitfall to avoid, not a raw-data defect.</strong> Left-joining <code>freMTPL2freq</code> with <code>freMTPL2sev</code> on <code>IDpol</code> fans out one row per <em>claim</em> for any policy with 2+ claims — correct for building the severity dataset (<code>claims_cleaned.csv</code>, one row per claim), but wrong if that same joined table is then saved as the <em>frequency</em> dataset. Doing so silently duplicates ~1,500 policies’ feature rows (once per claim they had), giving them outsized weight in frequency models trained on it. The frequency table (<code>policies_cleaned.csv</code>) should stay one row per policy — so we keep <code>df_freq</code> (deduplicated/capped, pre-join) as the source of truth for frequency modelling and EDA, and only use the joined/fanned-out table for severity.</li>
+</ol>
+<div id="a4017b94" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-26T11:08:43.645588Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-26T11:08:43.645535Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-26T11:08:43.661225Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-26T11:08:43.660891Z&quot;}}" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> df_freq[<span class="st">'IDpol'</span>].is_unique, <span class="st">'Unexpected duplicate IDpol rows in raw freMTPL2freq'</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>n_capped_claimnb <span class="op">=</span> (df_freq[<span class="st">'ClaimNb'</span>] <span class="op">&gt;</span> <span class="dv">4</span>).<span class="bu">sum</span>()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>n_capped_exposure <span class="op">=</span> (df_freq[<span class="st">'Exposure'</span>] <span class="op">&gt;</span> <span class="dv">1</span>).<span class="bu">sum</span>()</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Cap implausible values (standard treatment for this dataset)</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'ClaimNb'</span>] <span class="op">=</span> df_freq[<span class="st">'ClaimNb'</span>].clip(upper<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'Exposure'</span>] <span class="op">=</span> df_freq[<span class="st">'Exposure'</span>].clip(upper<span class="op">=</span><span class="dv">1</span>)</span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Computing the 99th percentile.</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>p99 <span class="op">=</span> df_claims[<span class="st">'ClaimAmount'</span>].quantile(<span class="fl">0.99</span>)</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"99th percentile: </span><span class="sc">{</span>p99<span class="sc">:,.2f}</span><span class="ss">"</span>)</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Claims above it: </span><span class="sc">{</span>(df_claims[<span class="st">'ClaimAmount'</span>] <span class="op">&gt;</span> p99)<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>(df_claims[<span class="st">'ClaimAmount'</span>] <span class="op">&gt;</span> p99)<span class="sc">.</span>mean()<span class="sc">:.1%}</span><span class="ss">)"</span>)</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Capping claims above the 99th percentile to the 99th percentile value</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>df_claims[<span class="st">'ClaimAmount'</span>] <span class="op">=</span> df_claims[<span class="st">'ClaimAmount'</span>].clip(upper<span class="op">=</span>p99)                                                   </span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Max after capping: </span><span class="sc">{</span>df_claims[<span class="st">'ClaimAmount'</span>]<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:,.2f}</span><span class="ss">"</span>)</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'All policies:         </span><span class="sc">{</span><span class="bu">len</span>(df_merged)<span class="sc">:,}</span><span class="ss">'</span>)</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Policies with claims: </span><span class="sc">{</span><span class="bu">len</span>(df_claims)<span class="sc">:,}</span><span class="ss">'</span>)</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Claim rate:           </span><span class="sc">{</span><span class="bu">len</span>(df_claims)<span class="op">/</span><span class="bu">len</span>(df_merged)<span class="sc">:.1%}</span><span class="ss">'</span>)</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>df_claims.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'--- Frequency Data Corrections ---'</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'ClaimNb capped at 4:       </span><span class="sc">{</span>n_capped_claimnb<span class="sc">:,}</span><span class="ss"> policies'</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Exposure capped at 1:      </span><span class="sc">{</span>n_capped_exposure<span class="sc">:,}</span><span class="ss"> policies'</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Total policies:            </span><span class="sc">{</span><span class="bu">len</span>(df_freq)<span class="sc">:,}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>--- Frequency Data Corrections ---
+ClaimNb capped at 4:       9 policies
+Exposure capped at 1:      1,224 policies
+Total policies:            678,013</code></pre>
+</div>
+</div>
+<div id="22cc2dd0" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-26T11:08:43.662175Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-26T11:08:43.662126Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-26T11:08:43.714496Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-26T11:08:43.714137Z&quot;}}" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename severity column for clarity                                                              </span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>df_sev <span class="op">=</span> df  <span class="co"># the 26k claims dataset you already loaded                                       </span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Join on IDpol — left join fans out one row per claim, which is what we want for the</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># severity dataset (one row per claim). NOT used as the frequency dataset — see note above.</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>df_merged <span class="op">=</span> df_freq.merge(df_sev, on<span class="op">=</span><span class="st">'IDpol'</span>, how<span class="op">=</span><span class="st">'left'</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Policies with at least one claim</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>df_claims <span class="op">=</span> df_merged[df_merged[<span class="st">'ClaimAmount'</span>].notna()].copy()</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Computing the 99th percentile.</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>p99 <span class="op">=</span> df_claims[<span class="st">'ClaimAmount'</span>].quantile(<span class="fl">0.99</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"99th percentile: </span><span class="sc">{</span>p99<span class="sc">:,.2f}</span><span class="ss">"</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Claims above it: </span><span class="sc">{</span>(df_claims[<span class="st">'ClaimAmount'</span>] <span class="op">&gt;</span> p99)<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>(df_claims[<span class="st">'ClaimAmount'</span>] <span class="op">&gt;</span> p99)<span class="sc">.</span>mean()<span class="sc">:.1%}</span><span class="ss">)"</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Capping claims above the 99th percentile to the 99th percentile value</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>df_claims[<span class="st">'ClaimAmount'</span>] <span class="op">=</span> df_claims[<span class="st">'ClaimAmount'</span>].clip(upper<span class="op">=</span>p99)                                                   </span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Max after capping: </span><span class="sc">{</span>df_claims[<span class="st">'ClaimAmount'</span>]<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:,.2f}</span><span class="ss">"</span>)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Total policies:  </span><span class="sc">{</span><span class="bu">len</span>(df_freq)<span class="sc">:,}</span><span class="ss">'</span>)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Claim records:   </span><span class="sc">{</span><span class="bu">len</span>(df_claims)<span class="sc">:,}</span><span class="ss"> (across </span><span class="sc">{</span>df_claims[<span class="st">"IDpol"</span>]<span class="sc">.</span>nunique()<span class="sc">:,}</span><span class="ss"> distinct policies)'</span>)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>df_claims.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>99th percentile: 16,451.22
 Claims above it: 265 (1.0%)
 Max after capping: 16,451.22
-All policies:         679,513
-Policies with claims: 26,444
-Claim rate:           3.9%</code></pre>
+Total policies:  678,013
+Claim records:   26,444 (across 24,944 distinct policies)</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="4">
 <div>
 
 
@@ -403,32 +400,32 @@ Claim rate:           3.9%</code></pre>
 <section id="part-1.-severity-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="part-1.-severity-analysis">Part 1. Severity Analysis</h2>
 <p>Dataset. 26,439 claims (policies where at least one claim was made)</p>
-<div id="4de8cc91" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:13.908771Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:13.908708Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:14.126660Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:14.126341Z&quot;}}" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Raw distribution capped at 99th percentile</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>cap <span class="op">=</span> df_claims[<span class="st">'ClaimAmount'</span>].quantile(<span class="fl">0.99</span>)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].hist(df_claims[<span class="st">'ClaimAmount'</span>].clip(upper<span class="op">=</span>cap), bins<span class="op">=</span><span class="dv">60</span>, edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'ClaimAmount (capped at 99th pct)'</span>)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Claim Amount (EUR)'</span>)</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Frequency'</span>)</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].axvline(df_claims[<span class="st">'ClaimAmount'</span>].mean(), color<span class="op">=</span><span class="st">'red'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="ss">f"Mean: </span><span class="sc">{</span>df_claims[<span class="st">'ClaimAmount'</span>]<span class="sc">.</span>mean()<span class="sc">:,.0f}</span><span class="ss">"</span>)</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].axvline(df_claims[<span class="st">'ClaimAmount'</span>].median(), color<span class="op">=</span><span class="st">'orange'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="ss">f"Median: </span><span class="sc">{</span>df_claims[<span class="st">'ClaimAmount'</span>]<span class="sc">.</span>median()<span class="sc">:,.0f}</span><span class="ss">"</span>)</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend()</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Log-transformed</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].hist(np.log1p(df_claims[<span class="st">'ClaimAmount'</span>]), bins<span class="op">=</span><span class="dv">60</span>, edgecolor<span class="op">=</span><span class="st">'white'</span>, color<span class="op">=</span><span class="st">'steelblue'</span>)</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'log(1 + ClaimAmount)'</span>)</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">'log(1 + Claim Amount)'</span>)</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">'Frequency'</span>)</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/01_claim_distribution.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="4de8cc91" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-26T11:08:43.715384Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-26T11:08:43.715331Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-26T11:08:43.885414Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-26T11:08:43.885065Z&quot;}}" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Raw distribution capped at 99th percentile</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>cap <span class="op">=</span> df_claims[<span class="st">'ClaimAmount'</span>].quantile(<span class="fl">0.99</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].hist(df_claims[<span class="st">'ClaimAmount'</span>].clip(upper<span class="op">=</span>cap), bins<span class="op">=</span><span class="dv">60</span>, edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'ClaimAmount (capped at 99th pct)'</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Claim Amount (EUR)'</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Frequency'</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].axvline(df_claims[<span class="st">'ClaimAmount'</span>].mean(), color<span class="op">=</span><span class="st">'red'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="ss">f"Mean: </span><span class="sc">{</span>df_claims[<span class="st">'ClaimAmount'</span>]<span class="sc">.</span>mean()<span class="sc">:,.0f}</span><span class="ss">"</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].axvline(df_claims[<span class="st">'ClaimAmount'</span>].median(), color<span class="op">=</span><span class="st">'orange'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="ss">f"Median: </span><span class="sc">{</span>df_claims[<span class="st">'ClaimAmount'</span>]<span class="sc">.</span>median()<span class="sc">:,.0f}</span><span class="ss">"</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend()</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Log-transformed</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].hist(np.log1p(df_claims[<span class="st">'ClaimAmount'</span>]), bins<span class="op">=</span><span class="dv">60</span>, edgecolor<span class="op">=</span><span class="st">'white'</span>, color<span class="op">=</span><span class="st">'steelblue'</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'log(1 + ClaimAmount)'</span>)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">'log(1 + Claim Amount)'</span>)</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">'Frequency'</span>)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/01_claim_distribution.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="01_eda_files/figure-html/cell-5-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="01_eda_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -443,10 +440,10 @@ Claim rate:           3.9%</code></pre>
 <li>Log-transforming the target when training the neural network</li>
 </ol>
 <p>Many claims cluster at round amounts (1,204 EUR, 1,128 EUR, 1,172 EUR), likely standardised repair tariffs rather than individually assessed claims. This is a known characteristic of this dataset.</p>
-<div id="814dd3de" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:14.127632Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:14.127564Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:14.130821Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:14.130539Z&quot;}}" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_claims[<span class="st">'ClaimAmount'</span>].describe())                                                                            </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Top 5 largest claims:"</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_claims[<span class="st">'ClaimAmount'</span>].nlargest(<span class="dv">5</span>).values)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="814dd3de" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-26T11:08:43.886346Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-26T11:08:43.886286Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-26T11:08:43.889402Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-26T11:08:43.889068Z&quot;}}" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_claims[<span class="st">'ClaimAmount'</span>].describe())                                                                            </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Top 5 largest claims:"</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_claims[<span class="st">'ClaimAmount'</span>].nlargest(<span class="dv">5</span>).values)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>count    26444.000000
 mean      1569.161516
@@ -462,9 +459,9 @@ Top 5 largest claims:
 [16451.224 16451.224 16451.224 16451.224 16451.224]</code></pre>
 </div>
 </div>
-<div id="2d613449" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:14.131682Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:14.131632Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:14.144815Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:14.144417Z&quot;}}" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df_claims.describe(include<span class="op">=</span><span class="st">'all'</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
+<div id="2d613449" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-26T11:08:43.890247Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-26T11:08:43.890201Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-26T11:08:43.902040Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-26T11:08:43.901670Z&quot;}}" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df_claims.describe(include<span class="op">=</span><span class="st">'all'</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
 <div>
 
 
@@ -555,8 +552,8 @@ Top 5 largest claims:
 <tr class="odd">
 <th data-quarto-table-cell-role="th">mean</th>
 <td>2.280004e+06</td>
-<td>1.139427</td>
-<td>0.691791</td>
+<td>1.122599</td>
+<td>0.691497</td>
 <td>NaN</td>
 <td>6.464415</td>
 <td>7.355090</td>
@@ -571,8 +568,8 @@ Top 5 largest claims:
 <tr class="even">
 <th data-quarto-table-cell-role="th">std</th>
 <td>1.583004e+06</td>
-<td>0.617563</td>
-<td>0.313213</td>
+<td>0.377211</td>
+<td>0.312728</td>
 <td>NaN</td>
 <td>2.017260</td>
 <td>5.165475</td>
@@ -651,8 +648,8 @@ Top 5 largest claims:
 <tr class="odd">
 <th data-quarto-table-cell-role="th">max</th>
 <td>6.113971e+06</td>
-<td>16.000000</td>
-<td>2.000000</td>
+<td>4.000000</td>
+<td>1.000000</td>
 <td>NaN</td>
 <td>15.000000</td>
 <td>99.000000</td>
@@ -670,13 +667,13 @@ Top 5 largest claims:
 </div>
 </div>
 </div>
-<div id="7a4ee7af" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:14.148260Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:14.148181Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:14.151891Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:14.151548Z&quot;}}" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"VehAge == 99:  </span><span class="sc">{</span>(df_claims[<span class="st">'VehAge'</span>] <span class="op">==</span> <span class="dv">99</span>)<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"DrivAge == 99: </span><span class="sc">{</span>(df_claims[<span class="st">'DrivAge'</span>] <span class="op">==</span> <span class="dv">99</span>)<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Dropping claims where vehicle age is 99 and driver's age is 99.</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>df_claims <span class="op">=</span> df_claims[(df_claims[<span class="st">'VehAge'</span>] <span class="op">!=</span> <span class="dv">99</span>) <span class="op">&amp;</span> (df_claims[<span class="st">'DrivAge'</span>] <span class="op">!=</span> <span class="dv">99</span>)]                                     </span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Remaining records: </span><span class="sc">{</span><span class="bu">len</span>(df_claims)<span class="sc">:,}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="7a4ee7af" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-26T11:08:43.902968Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-26T11:08:43.902915Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-26T11:08:43.905530Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-26T11:08:43.905213Z&quot;}}" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"VehAge == 99:  </span><span class="sc">{</span>(df_claims[<span class="st">'VehAge'</span>] <span class="op">==</span> <span class="dv">99</span>)<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"DrivAge == 99: </span><span class="sc">{</span>(df_claims[<span class="st">'DrivAge'</span>] <span class="op">==</span> <span class="dv">99</span>)<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Dropping claims where vehicle age is 99 and driver's age is 99.</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>df_claims <span class="op">=</span> df_claims[(df_claims[<span class="st">'VehAge'</span>] <span class="op">!=</span> <span class="dv">99</span>) <span class="op">&amp;</span> (df_claims[<span class="st">'DrivAge'</span>] <span class="op">!=</span> <span class="dv">99</span>)]                                     </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Remaining records: </span><span class="sc">{</span><span class="bu">len</span>(df_claims)<span class="sc">:,}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>VehAge == 99:  1
 DrivAge == 99: 4
@@ -687,54 +684,54 @@ Remaining records: 26,439</code></pre>
 <section id="data-quality" class="level2">
 <h2 class="anchored" data-anchor-id="data-quality">Data Quality</h2>
 <p>5 records with placeholder values (VehAge or DrivAge = 99) were removed, leaving <strong>26,439 clean records</strong>. No missing values were found elsewhere in the dataset.</p>
-<div id="10eef66f" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:14.152694Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:14.152647Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:14.544863Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:14.544504Z&quot;}}" data-execution_count="8">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">10</span>))                                                                      </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>axes <span class="op">=</span> axes.flatten()                                                                                                 </span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                                                                                                                    </span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>num_features <span class="op">=</span> [<span class="st">'BonusMalus'</span>, <span class="st">'DrivAge'</span>, <span class="st">'VehAge'</span>, <span class="st">'VehPower'</span>, <span class="st">'Density'</span>]                                             </span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                </span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, col <span class="kw">in</span> <span class="bu">enumerate</span>(num_features):                                                                                </span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    axes[i].scatter(df_claims[col], df_claims[<span class="st">'ClaimAmount'</span>], alpha<span class="op">=</span><span class="fl">0.2</span>, s<span class="op">=</span><span class="dv">5</span>)</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    axes[i].set_xlabel(col)                                                                                           </span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    axes[i].set_ylabel(<span class="st">'ClaimAmount'</span>)                                                                                 </span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    axes[i].set_title(<span class="ss">f'ClaimAmount vs </span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>                                                                                                                    </span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">5</span>].set_visible(<span class="va">False</span>)                                                                                            </span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/02_feature_vs_claim.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)                                       </span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="10eef66f" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-26T11:08:43.906407Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-26T11:08:43.906358Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-26T11:08:44.241528Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-26T11:08:44.241104Z&quot;}}" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">10</span>))                                                                      </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>axes <span class="op">=</span> axes.flatten()                                                                                                 </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                                                                                                                    </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>num_features <span class="op">=</span> [<span class="st">'BonusMalus'</span>, <span class="st">'DrivAge'</span>, <span class="st">'VehAge'</span>, <span class="st">'VehPower'</span>, <span class="st">'Density'</span>]                                             </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, col <span class="kw">in</span> <span class="bu">enumerate</span>(num_features):                                                                                </span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    axes[i].scatter(df_claims[col], df_claims[<span class="st">'ClaimAmount'</span>], alpha<span class="op">=</span><span class="fl">0.2</span>, s<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    axes[i].set_xlabel(col)                                                                                           </span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    axes[i].set_ylabel(<span class="st">'ClaimAmount'</span>)                                                                                 </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    axes[i].set_title(<span class="ss">f'ClaimAmount vs </span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>                                                                                                                    </span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">5</span>].set_visible(<span class="va">False</span>)                                                                                            </span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/02_feature_vs_claim.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)                                       </span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="01_eda_files/figure-html/cell-9-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="01_eda_files/figure-html/cell-10-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="d3b80cb2" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:14.546130Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:14.546047Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:14.919298Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:14.919003Z&quot;}}" data-execution_count="9">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>num_features <span class="op">=</span> [<span class="st">'BonusMalus'</span>, <span class="st">'DrivAge'</span>, <span class="st">'VehAge'</span>, <span class="st">'VehPower'</span>, <span class="st">'Density'</span>]</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">10</span>))</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>axes <span class="op">=</span> axes.flatten()</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, col <span class="kw">in</span> <span class="bu">enumerate</span>(num_features):</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> df_claims[[col]]</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> df_claims[<span class="st">'ClaimAmount'</span>]</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> LinearRegression().fit(x, y)</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    x_line <span class="op">=</span> np.linspace(x[col].<span class="bu">min</span>(), x[col].<span class="bu">max</span>(), <span class="dv">100</span>).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    y_line <span class="op">=</span> model.predict(x_line)</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    axes[i].scatter(df_claims[col], y, alpha<span class="op">=</span><span class="fl">0.2</span>, s<span class="op">=</span><span class="dv">5</span>)</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    axes[i].plot(x_line, y_line, color<span class="op">=</span><span class="st">'red'</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    axes[i].set_xlabel(col)</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    axes[i].set_ylabel(<span class="st">'ClaimAmount'</span>)</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    axes[i].set_title(<span class="ss">f'ClaimAmount vs </span><span class="sc">{</span>col<span class="sc">}</span><span class="ss"> (R²=</span><span class="sc">{</span>model<span class="sc">.</span>score(x, y)<span class="sc">:.3f}</span><span class="ss">)'</span>)</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">5</span>].set_visible(<span class="va">False</span>)</span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/02_feature_vs_claim.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="d3b80cb2" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-26T11:08:44.242571Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-26T11:08:44.242512Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-26T11:08:44.584236Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-26T11:08:44.583906Z&quot;}}" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>num_features <span class="op">=</span> [<span class="st">'BonusMalus'</span>, <span class="st">'DrivAge'</span>, <span class="st">'VehAge'</span>, <span class="st">'VehPower'</span>, <span class="st">'Density'</span>]</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">10</span>))</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>axes <span class="op">=</span> axes.flatten()</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, col <span class="kw">in</span> <span class="bu">enumerate</span>(num_features):</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> df_claims[[col]]</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> df_claims[<span class="st">'ClaimAmount'</span>]</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> LinearRegression().fit(x, y)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    x_line <span class="op">=</span> np.linspace(x[col].<span class="bu">min</span>(), x[col].<span class="bu">max</span>(), <span class="dv">100</span>).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    y_line <span class="op">=</span> model.predict(x_line)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    axes[i].scatter(df_claims[col], y, alpha<span class="op">=</span><span class="fl">0.2</span>, s<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    axes[i].plot(x_line, y_line, color<span class="op">=</span><span class="st">'red'</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    axes[i].set_xlabel(col)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    axes[i].set_ylabel(<span class="st">'ClaimAmount'</span>)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    axes[i].set_title(<span class="ss">f'ClaimAmount vs </span><span class="sc">{</span>col<span class="sc">}</span><span class="ss"> (R²=</span><span class="sc">{</span>model<span class="sc">.</span>score(x, y)<span class="sc">:.3f}</span><span class="ss">)'</span>)</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">5</span>].set_visible(<span class="va">False</span>)</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/02_feature_vs_claim.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>/Users/danielpark/Documents/insurance_claims_predictor/venv/lib/python3.14/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names
   warnings.warn(
@@ -750,7 +747,7 @@ Remaining records: 26,439</code></pre>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="01_eda_files/figure-html/cell-10-output-2.png" class="img-fluid figure-img"></p>
+<p><img src="01_eda_files/figure-html/cell-11-output-2.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -761,61 +758,119 @@ Remaining records: 26,439</code></pre>
 <p>All individual features show near-zero R² against ClaimAmount. This is expected and is a fundamental property of insurance severity modelling — these features predict <strong>whether</strong> a claim happens (frequency), not <strong>how much</strong> it costs (severity).</p>
 <p>For example, BonusMalus (claims history score) predicts that a risky driver will crash more often, but when they do crash, the repair bill isn’t systematically larger than a careful driver’s.</p>
 <p>The signal in severity modelling comes from <strong>combining features together</strong>, which is what the GLM, XGBoost, and neural network will do in the following notebooks.</p>
-<div id="ecbc899d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:14.920472Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:14.920397Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:14.926241Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:14.925827Z&quot;}}" data-execution_count="10">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df_merged[<span class="st">'HasClaim'</span>] <span class="op">=</span> (df_merged[<span class="st">'ClaimAmount'</span>].notna()).astype(<span class="bu">int</span>)                                                </span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                                                                                                                    </span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'--- Claim Frequency Summary ---'</span>)                                                                              </span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total policies:       </span><span class="sc">{</span><span class="bu">len</span>(df_merged)<span class="sc">:,}</span><span class="ss">"</span>)                                                                    </span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Policies with claims: </span><span class="sc">{</span>df_merged[<span class="st">'HasClaim'</span>]<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">:,}</span><span class="ss">"</span>)                                                       </span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Overall claim rate:   </span><span class="sc">{</span>df_merged[<span class="st">'HasClaim'</span>]<span class="sc">.</span>mean()<span class="sc">:.3%}</span><span class="ss">"</span>)</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()                                                                                                               </span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'ClaimNb distribution (among policies with claims):'</span>)</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_merged[df_merged[<span class="st">'HasClaim'</span>]<span class="op">==</span><span class="dv">1</span>][<span class="st">'ClaimNb'</span>].value_counts().sort_index())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="ecbc899d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-26T11:08:44.585311Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-26T11:08:44.585237Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-26T11:08:44.590105Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-26T11:08:44.589746Z&quot;}}" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ground truth for whether a claim occurred is ClaimNb on the one-row-per-policy frequency</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># table (df_freq), not the fanned-out severity join (df_merged) — see note above. ~9,100</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co"># policies also have ClaimNb &gt; 0 with no matching severity record (a documented characteristic</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># of this dataset), which ClaimNb-based HasClaim correctly counts as a claim regardless.</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'HasClaim'</span>] <span class="op">=</span> (df_freq[<span class="st">'ClaimNb'</span>] <span class="op">&gt;</span> <span class="dv">0</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'--- Claim Frequency Summary ---'</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total policies:       </span><span class="sc">{</span><span class="bu">len</span>(df_freq)<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Policies with claims: </span><span class="sc">{</span>df_freq[<span class="st">'HasClaim'</span>]<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Overall claim rate:   </span><span class="sc">{</span>df_freq[<span class="st">'HasClaim'</span>]<span class="sc">.</span>mean()<span class="sc">:.3%}</span><span class="ss">"</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'ClaimNb distribution (among policies with claims):'</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_freq[df_freq[<span class="st">'HasClaim'</span>]<span class="op">==</span><span class="dv">1</span>][<span class="st">'ClaimNb'</span>].value_counts().sort_index())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>--- Claim Frequency Summary ---
-Total policies:       679,513
-Policies with claims: 26,444
-Overall claim rate:   3.892%
+Total policies:       678,013
+Policies with claims: 34,060
+Overall claim rate:   5.024%
 
 ClaimNb distribution (among policies with claims):
 ClaimNb
-1     23570
-2      2597
-3       186
-4        20
-5        10
-6         6
-8         8
-9         9
-11       22
-16       16
+1    32178
+2     1784
+3       82
+4       16
 Name: count, dtype: int64</code></pre>
 </div>
 </div>
-<div id="30cmkric10y" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:14.927108Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:14.927056Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:15.341915Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:15.341433Z&quot;}}" data-execution_count="11">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">10</span>))</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>axes <span class="op">=</span> axes.flatten()</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>df_merged[<span class="st">'DrivAge_bin'</span>] <span class="op">=</span> pd.cut(df_merged[<span class="st">'DrivAge'</span>], bins<span class="op">=</span>[<span class="dv">17</span>,<span class="dv">25</span>,<span class="dv">35</span>,<span class="dv">45</span>,<span class="dv">55</span>,<span class="dv">65</span>,<span class="dv">100</span>], labels<span class="op">=</span>[<span class="st">'18-25'</span>,<span class="st">'26-35'</span>,<span class="st">'36-45'</span>,<span class="st">'46-55'</span>,<span class="st">'56-65'</span>,<span class="st">'65+'</span>])</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>df_merged[<span class="st">'BonusMalus_bin'</span>] <span class="op">=</span> pd.cut(df_merged[<span class="st">'BonusMalus'</span>], bins<span class="op">=</span>[<span class="dv">49</span>,<span class="dv">60</span>,<span class="dv">80</span>,<span class="dv">100</span>,<span class="dv">150</span>,<span class="dv">230</span>], labels<span class="op">=</span>[<span class="st">'50-60'</span>,<span class="st">'61-80'</span>,<span class="st">'81-100'</span>,<span class="st">'101-150'</span>,<span class="st">'150+'</span>])</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>cat_features <span class="op">=</span> [<span class="st">'DrivAge_bin'</span>, <span class="st">'BonusMalus_bin'</span>, <span class="st">'VehGas'</span>, <span class="st">'Area'</span>, <span class="st">'VehPower'</span>, <span class="st">'Region'</span>]</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, col <span class="kw">in</span> <span class="bu">enumerate</span>(cat_features):</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    rates <span class="op">=</span> df_merged.groupby(col)[<span class="st">'HasClaim'</span>].mean().sort_values(ascending<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    rates.plot(kind<span class="op">=</span><span class="st">'bar'</span>, ax<span class="op">=</span>axes[i], edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    axes[i].set_title(<span class="ss">f'Claim Rate by </span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    axes[i].set_ylabel(<span class="st">'Claim Rate'</span>)</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    axes[i].tick_params(axis<span class="op">=</span><span class="st">'x'</span>, rotation<span class="op">=</span><span class="dv">45</span>)</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>plt.suptitle(<span class="st">'Claim Frequency by Feature'</span>, fontsize<span class="op">=</span><span class="dv">14</span>)</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/03_claim_frequency_by_feature.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="overdispersion-check" class="level2">
+<h2 class="anchored" data-anchor-id="overdispersion-check">Overdispersion Check</h2>
+<p>The Poisson GLM used in notebook 02 assumes <code>Var(ClaimNb) = Mean(ClaimNb)</code>. That assumption is worth checking before relying on it — if the actual variance is substantially larger than the mean, the model is overdispersed, standard errors on the coefficients will be understated, and a Negative Binomial GLM would be the more defensible choice.</p>
+<div id="d3055170" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-26T11:08:44.590975Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-26T11:08:44.590926Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-26T11:08:44.817235Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-26T11:08:44.816890Z&quot;}}" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> poisson</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>mean_claimnb <span class="op">=</span> df_freq[<span class="st">'ClaimNb'</span>].mean()</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>var_claimnb <span class="op">=</span> df_freq[<span class="st">'ClaimNb'</span>].var()</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>dispersion_ratio <span class="op">=</span> var_claimnb <span class="op">/</span> mean_claimnb</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'--- Overdispersion Check (ClaimNb, all </span><span class="sc">{</span><span class="bu">len</span>(df_freq)<span class="sc">:,}</span><span class="ss"> policies) ---'</span>)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Mean:             </span><span class="sc">{</span>mean_claimnb<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Variance:         </span><span class="sc">{</span>var_claimnb<span class="sc">:.4f}</span><span class="ss">'</span>)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Dispersion ratio (Var/Mean): </span><span class="sc">{</span>dispersion_ratio<span class="sc">:.3f}</span><span class="ss">'</span>)</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'(Poisson assumes this ratio is 1.0)'</span>)</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Visual check: actual ClaimNb counts vs a Poisson(mean) fit</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>max_k <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> df_freq[<span class="st">'ClaimNb'</span>].value_counts().sort_index()</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> counts[counts.index <span class="op">&lt;=</span> max_k]</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>observed_prop <span class="op">=</span> counts <span class="op">/</span> <span class="bu">len</span>(df_freq)</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>k_vals <span class="op">=</span> np.arange(<span class="dv">0</span>, max_k <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>poisson_prop <span class="op">=</span> poisson.pmf(k_vals, mean_claimnb)</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>width <span class="op">=</span> <span class="fl">0.4</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>ax.bar(observed_prop.index <span class="op">-</span> width<span class="op">/</span><span class="dv">2</span>, observed_prop.values, width<span class="op">=</span>width, label<span class="op">=</span><span class="st">'Observed'</span>, edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>ax.bar(k_vals <span class="op">+</span> width<span class="op">/</span><span class="dv">2</span>, poisson_prop, width<span class="op">=</span>width, label<span class="op">=</span><span class="ss">f'Poisson(λ=</span><span class="sc">{</span>mean_claimnb<span class="sc">:.3f}</span><span class="ss">) fit'</span>, edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>ax.set_yscale(<span class="st">'log'</span>)</span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'ClaimNb'</span>)</span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Proportion of policies (log scale)'</span>)</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Observed ClaimNb vs Poisson Fit'</span>)</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/04_claimnb_overdispersion.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>--- Overdispersion Check (ClaimNb, all 678,013 policies) ---
+Mean:             0.0532
+Variance:         0.0566
+Dispersion ratio (Var/Mean): 1.065
+(Poisson assumes this ratio is 1.0)</code></pre>
+</div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="01_eda_files/figure-html/cell-12-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="01_eda_files/figure-html/cell-13-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="overdispersion-findings" class="level2">
+<h2 class="anchored" data-anchor-id="overdispersion-findings">Overdispersion: Findings</h2>
+<p>Dispersion ratio (Var/Mean) is <strong>1.065</strong>, close to the 1.0 that Poisson assumes. This is a large improvement on the 1.33 ratio we saw before fixing the frequency data (removing capped/implausible <code>ClaimNb</code>/<code>Exposure</code> values) — most of the apparent overdispersion was coming from a small number of implausible records (e.g.&nbsp;<code>ClaimNb=16</code> for a 0.33-year exposure), not from genuine variability in the underlying claim process.</p>
+<p><strong>Implication for modelling.</strong> With the ratio this close to 1.0, the Poisson GLM’s assumption is now well supported — coefficient standard errors and p-values in notebook 02 can be trusted without needing to reach for a Negative Binomial correction. This is a good example of a “model limitation” that turned out to be a data issue instead.</p>
+<div id="30cmkric10y" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-26T11:08:44.818303Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-26T11:08:44.818248Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-26T11:08:45.214344Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-26T11:08:45.213930Z&quot;}}" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">10</span>))</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>axes <span class="op">=</span> axes.flatten()</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'DrivAge_bin'</span>] <span class="op">=</span> pd.cut(df_freq[<span class="st">'DrivAge'</span>], bins<span class="op">=</span>[<span class="dv">17</span>,<span class="dv">25</span>,<span class="dv">35</span>,<span class="dv">45</span>,<span class="dv">55</span>,<span class="dv">65</span>,<span class="dv">100</span>], labels<span class="op">=</span>[<span class="st">'18-25'</span>,<span class="st">'26-35'</span>,<span class="st">'36-45'</span>,<span class="st">'46-55'</span>,<span class="st">'56-65'</span>,<span class="st">'65+'</span>])</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>df_freq[<span class="st">'BonusMalus_bin'</span>] <span class="op">=</span> pd.cut(df_freq[<span class="st">'BonusMalus'</span>], bins<span class="op">=</span>[<span class="dv">49</span>,<span class="dv">60</span>,<span class="dv">80</span>,<span class="dv">100</span>,<span class="dv">150</span>,<span class="dv">230</span>], labels<span class="op">=</span>[<span class="st">'50-60'</span>,<span class="st">'61-80'</span>,<span class="st">'81-100'</span>,<span class="st">'101-150'</span>,<span class="st">'150+'</span>])</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>cat_features <span class="op">=</span> [<span class="st">'DrivAge_bin'</span>, <span class="st">'BonusMalus_bin'</span>, <span class="st">'VehGas'</span>, <span class="st">'Area'</span>, <span class="st">'VehPower'</span>, <span class="st">'Region'</span>]</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, col <span class="kw">in</span> <span class="bu">enumerate</span>(cat_features):</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    rates <span class="op">=</span> df_freq.groupby(col)[<span class="st">'HasClaim'</span>].mean().sort_values(ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    rates.plot(kind<span class="op">=</span><span class="st">'bar'</span>, ax<span class="op">=</span>axes[i], edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    axes[i].set_title(<span class="ss">f'Claim Rate by </span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    axes[i].set_ylabel(<span class="st">'Claim Rate'</span>)</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    axes[i].tick_params(axis<span class="op">=</span><span class="st">'x'</span>, rotation<span class="op">=</span><span class="dv">45</span>)</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>plt.suptitle(<span class="st">'Claim Frequency by Feature'</span>, fontsize<span class="op">=</span><span class="dv">14</span>)</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/03_claim_frequency_by_feature.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_eda_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -824,16 +879,18 @@ Name: count, dtype: int64</code></pre>
 </section>
 <section id="part-2.-frequency-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="part-2.-frequency-analysis">Part 2. Frequency Analysis</h2>
-<p>Dataset. 679,513 policies (the full dataset including policies with no claims)</p>
-<div id="k8he5a2jyj" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-14T14:01:15.342877Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-14T14:01:15.342809Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-14T14:01:16.453652Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-14T14:01:16.453205Z&quot;}}" data-execution_count="12">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Save cleaned datasets for modelling notebooks</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>df_claims.to_csv(<span class="st">'../data/claims_cleaned.csv'</span>, index<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>df_merged.to_csv(<span class="st">'../data/policies_cleaned.csv'</span>, index<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Severity dataset saved: </span><span class="sc">{</span>df_claims<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Frequency dataset saved: </span><span class="sc">{</span>df_merged<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Dataset. 678,013 policies (the full dataset including policies with no claims)</p>
+<div id="k8he5a2jyj" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-26T11:08:45.215437Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-26T11:08:45.215380Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-26T11:08:46.142012Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-26T11:08:46.141665Z&quot;}}" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Save cleaned datasets for modelling notebooks</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co"># claims_cleaned.csv: one row per claim (severity modelling)</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># policies_cleaned.csv: one row per policy (frequency modelling) — NOT the fanned-out join</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>df_claims.to_csv(<span class="st">'../data/claims_cleaned.csv'</span>, index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>df_freq.to_csv(<span class="st">'../data/policies_cleaned.csv'</span>, index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Severity dataset saved: </span><span class="sc">{</span>df_claims<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Frequency dataset saved: </span><span class="sc">{</span>df_freq<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Severity dataset saved: (26439, 13)
-Frequency dataset saved: (679513, 16)</code></pre>
+Frequency dataset saved: (678013, 15)</code></pre>
 </div>
 </div>
 </section>
@@ -841,12 +898,12 @@ Frequency dataset saved: (679513, 16)</code></pre>
 <h2 class="anchored" data-anchor-id="claim-frequency-findings">Claim Frequency Findings</h2>
 <p>Unlike severity, frequency shows clear and intuitive relationships with individual features.</p>
 <ul>
-<li><strong>BonusMalus</strong> — strongest predictor by far. Drivers with a score of 150+ claim at 24% vs 3% for clean-record drivers (50–60). This is exactly what the score is designed to measure.</li>
-<li><strong>DrivAge</strong> — young drivers (18–25) claim at 6%, dropping steadily with age. Classic insurance pattern reflecting inexperience.</li>
-<li><strong>Area</strong> — areas E, F, D have higher claim rates (~4.5%) than A and B (~3.2%), consistent with higher-density/traffic environments.</li>
-<li><strong>VehPower</strong> — higher power vehicles tend to claim more frequently.</li>
-<li><strong>Region</strong> — meaningful geographic variation (R82 ~5%, R73 ~2%), reflecting differences in road conditions and traffic density.</li>
-<li><strong>VehGas</strong> — Diesel slightly higher than Regular (4.0% vs 3.8%).</li>
+<li><strong>BonusMalus</strong> - strongest predictor by far. Drivers with a score of 150+ claim at 19.1% vs 4.5% for clean-record drivers (50–60). This is exactly what the score is designed to measure.</li>
+<li><strong>DrivAge</strong> - young drivers (18–25) claim most often (6.7%), middle-aged drivers (26–35) least (4.2%), with a smaller uptick for 65+ (5.9%). Classic insurance U-shape.</li>
+<li><strong>Area</strong> - a modest gradient from A (4.6%) up to F (5.9%), consistent with denser/higher-traffic areas.</li>
+<li><strong>VehPower</strong> - no clean monotonic trend once the data is corrected; mid-power vehicles (5–10) cluster around 5.3–5.5%, both very low- and very high-power vehicles are slightly lower (~4.1–4.6%).</li>
+<li><strong>Region</strong> - meaningful geographic variation (R53 ~6.1%, R23 ~3.2%), reflecting differences in driving conditions or traffic.</li>
+<li><strong>VehGas</strong> - Regular slightly higher than Diesel (5.3% vs 4.7%).</li>
 </ul>
 <p>These features predict <strong>whether</strong> a claim happens. In the modelling notebooks we build a Poisson GLM to quantify these effects formally, then combine with the severity model to estimate a pure premium.</p>
 

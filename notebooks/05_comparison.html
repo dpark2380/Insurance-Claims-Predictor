@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2026-04-10">
+<meta name="dcterms.date" content="2026-08-27">
 <meta name="description" content="Head-to-head comparison of GLM, XGBoost, and neural network across frequency and severity. Combines both stages into a pure premium estimate.">
 
 <title>Model Comparison &amp; Pure Premium – Insurance Claims Predictor</title>
@@ -165,37 +165,14 @@ window.Quarto = {
     <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../notebooks.html"> 
+<span class="menu-text">Notebooks</span></a>
+  </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-notebooks" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Notebooks</span>
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-notebooks">    
-        <li>
-    <a class="dropdown-item" href="../notebooks/01_eda.html">
- <span class="dropdown-text">1. Exploratory Data Analysis</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/02_glm.html">
- <span class="dropdown-text">2. GLM (Baseline)</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/03_xgboost.html">
- <span class="dropdown-text">3. XGBoost</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/04_neural_net.html">
- <span class="dropdown-text">4. Neural Network</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../notebooks/05_comparison.html">
- <span class="dropdown-text">5. Model Comparison</span></a>
-  </li>  
-    </ul>
-  </li>
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/dpark2380/insurance_claims_predictor"> <i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/dpark2380/Insurance-Claims-Predictor"> <i class="bi bi-github" role="img">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -226,7 +203,7 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">April 10, 2026</p>
+        <p class="date">August 27, 2026</p>
       </div>
     </div>
     
@@ -248,71 +225,87 @@ window.Quarto = {
 <section id="notebook-5-model-comparison-pure-premium" class="level1">
 <h1>Notebook 5: Model Comparison &amp; Pure Premium</h1>
 <p>This notebook synthesises results from the three modelling notebooks into a single comparison and constructs a two-stage pure premium estimate.</p>
+<p><strong>This notebook fits nothing.</strong> Every model was already fitted in notebooks 2–4, which save their fitted objects to <code>models/</code> and their test-set predictions and metrics to <code>results/</code>. Refitting them here would duplicate that work and — because each refit would be a <em>separate</em> fit — risk reporting numbers that differ from the notebooks they are supposed to be summarising. Everything below is loaded, not computed.</p>
 <p><strong>Structure:</strong> - <strong>Part 1: Metric comparison</strong> — frequency and severity metrics side-by-side for GLM, XGBoost, and Neural Net - <strong>Part 2: Pure premium</strong> — frequency × severity per policy, compared across models - <strong>Part 3: Risk discrimination</strong> — lift charts and Gini coefficients across models - <strong>Part 4: Interpretability vs accuracy</strong> — regulatory considerations and model selection</p>
-<div id="imports" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:46:43.072756Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:46:43.072526Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:46:44.521499Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:46:44.521194Z&quot;}}" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.ticker <span class="im">as</span> mticker</span>
+<p><strong>Prerequisite:</strong> notebooks 2, 3 and 4 must have been run, in that order. Notebook 2 writes the shared test-set definition that this notebook indexes everything against.</p>
+<div id="imports" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">'ignore'</span>)</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Reproduce results from prior notebooks</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> xgboost <span class="im">as</span> xgb</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader, TensorDataset</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_absolute_error, mean_squared_error</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">42</span>)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> torch.device(<span class="st">'mps'</span> <span class="cf">if</span> torch.backends.mps.is_available() <span class="cf">else</span> <span class="st">'cuda'</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">'cpu'</span>)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Using device: </span><span class="sc">{</span>device<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># No torch, no xgboost, no statsmodels, no sklearn — this notebook loads results,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># it does not produce them.</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>MODELS <span class="op">=</span> [<span class="st">'GLM'</span>, <span class="st">'XGBoost'</span>, <span class="st">'Neural Net'</span>]</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>KEYS   <span class="op">=</span> {<span class="st">'GLM'</span>: <span class="st">'glm'</span>, <span class="st">'XGBoost'</span>: <span class="st">'xgb'</span>, <span class="st">'Neural Net'</span>: <span class="st">'nn'</span>}</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>colors_map <span class="op">=</span> {<span class="st">'GLM'</span>: <span class="st">'#4C72B0'</span>, <span class="st">'XGBoost'</span>: <span class="st">'#DD8452'</span>, <span class="st">'Neural Net'</span>: <span class="st">'#55A868'</span>}</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [colors_map[m] <span class="cf">for</span> m <span class="kw">in</span> MODELS]</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Shared test-set definition (written by notebook 2) ───────────────────────</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>split <span class="op">=</span> np.load(<span class="st">'../results/test_split.npz'</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>y_fr_te    <span class="op">=</span> split[<span class="st">'freq_y_test'</span>]           <span class="co"># actual ClaimNb</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>exp_te     <span class="op">=</span> split[<span class="st">'freq_exposure_test'</span>]    <span class="co"># actual Exposure</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>bm_te      <span class="op">=</span> split[<span class="st">'freq_bonusmalus_test'</span>]  <span class="co"># for the BonusMalus band charts</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>age_te     <span class="op">=</span> split[<span class="st">'freq_drivage_test'</span>]     <span class="co"># for the DrivAge band charts</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>y_sev_te   <span class="op">=</span> split[<span class="st">'sev_y_test'</span>]            <span class="co"># actual ClaimAmount</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Per-model predictions and metrics ────────────────────────────────────────</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>preds   <span class="op">=</span> {m: np.load(<span class="ss">f'../results/predictions_</span><span class="sc">{</span>KEYS[m]<span class="sc">}</span><span class="ss">.npz'</span>) <span class="cf">for</span> m <span class="kw">in</span> MODELS}</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>metrics <span class="op">=</span> {m: json.load(<span class="bu">open</span>(<span class="ss">f'../results/metrics_</span><span class="sc">{</span>KEYS[m]<span class="sc">}</span><span class="ss">.json'</span>)) <span class="cf">for</span> m <span class="kw">in</span> MODELS}</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Every model must predict on exactly the same rows, or the comparison is meaningless</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> m <span class="kw">in</span> MODELS:</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> preds[m][<span class="st">'sev_test_pred'</span>].shape    <span class="op">==</span> y_sev_te.shape, <span class="ss">f'</span><span class="sc">{</span>m<span class="sc">}</span><span class="ss">: severity rows mismatch'</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> preds[m][<span class="st">'freq_test_rate'</span>].shape   <span class="op">==</span> y_fr_te.shape,  <span class="ss">f'</span><span class="sc">{</span>m<span class="sc">}</span><span class="ss">: frequency rows mismatch'</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> preds[m][<span class="st">'sev_on_freq_test'</span>].shape <span class="op">==</span> y_fr_te.shape,  <span class="ss">f'</span><span class="sc">{</span>m<span class="sc">}</span><span class="ss">: pure premium rows mismatch'</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Loaded </span><span class="sc">{</span><span class="bu">len</span>(MODELS)<span class="sc">}</span><span class="ss"> models'</span>)</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'  Frequency test set: </span><span class="sc">{</span>y_fr_te<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss"> policies'</span>)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'  Severity  test set: </span><span class="sc">{</span>y_sev_te<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss"> claims'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Using device: mps</code></pre>
+<pre><code>Loaded 3 models
+  Frequency test set: 135,603 policies
+  Severity  test set: 5,288 claims</code></pre>
 </div>
 </div>
 <section id="part-1-metric-comparison" class="level2">
 <h2 class="anchored" data-anchor-id="part-1-metric-comparison">Part 1: Metric Comparison</h2>
 <p>Metrics recorded from each modelling notebook. These are test-set results; all models used the same 80/20 train-test split with <code>random_state=42</code>.</p>
-<div id="metric-tables" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:46:44.522853Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:46:44.522741Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:46:44.527328Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:46:44.527006Z&quot;}}" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Severity metrics (26,439 claims; target: ClaimAmount in EUR) ──────────────</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>sev_results <span class="op">=</span> pd.DataFrame([</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'Model'</span>: <span class="st">'GLM'</span>,        <span class="st">'MAE'</span>: <span class="dv">1079</span>,   <span class="st">'RMSE'</span>: <span class="dv">2203</span>,   <span class="st">'Gamma Deviance'</span>: <span class="fl">1.03</span>},</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'Model'</span>: <span class="st">'XGBoost'</span>,    <span class="st">'MAE'</span>: <span class="dv">938</span>,    <span class="st">'RMSE'</span>: <span class="dv">2340</span>,   <span class="st">'Gamma Deviance'</span>: <span class="fl">1.36</span>},</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'Model'</span>: <span class="st">'Neural Net'</span>, <span class="st">'MAE'</span>: <span class="dv">954</span>,    <span class="st">'RMSE'</span>: <span class="dv">2346</span>,   <span class="st">'Gamma Deviance'</span>: <span class="fl">1.40</span>},</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>]).set_index(<span class="st">'Model'</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Frequency metrics (679,513 policies; target: ClaimNb) ────────────────────</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>freq_results <span class="op">=</span> pd.DataFrame([</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'Model'</span>: <span class="st">'GLM'</span>,        <span class="st">'MAE'</span>: <span class="fl">0.0774</span>, <span class="st">'RMSE'</span>: <span class="fl">0.238</span>,  <span class="st">'Poisson Deviance'</span>: <span class="dv">46581</span>},</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'Model'</span>: <span class="st">'XGBoost'</span>,    <span class="st">'MAE'</span>: <span class="fl">0.1046</span>, <span class="st">'RMSE'</span>: <span class="fl">0.265</span>,  <span class="st">'Poisson Deviance'</span>: <span class="dv">43579</span>},</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'Model'</span>: <span class="st">'Neural Net'</span>, <span class="st">'MAE'</span>: <span class="fl">0.1055</span>, <span class="st">'RMSE'</span>: <span class="fl">0.2875</span>, <span class="st">'Poisson Deviance'</span>: <span class="dv">44368</span>},</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>]).set_index(<span class="st">'Model'</span>)</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'=== Severity Metrics ==='</span>)</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(sev_results.to_string())</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'=== Frequency Metrics ==='</span>)</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(freq_results.to_string())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="metric-tables" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Metrics as recorded by each modelling notebook — loaded, not retyped.</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>sev_results <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    [{<span class="st">'Model'</span>: m, <span class="op">**</span>metrics[m][<span class="st">'severity'</span>]} <span class="cf">for</span> m <span class="kw">in</span> MODELS]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>).set_index(<span class="st">'Model'</span>).rename(columns<span class="op">=</span>{<span class="st">'GammaDeviance'</span>: <span class="st">'Gamma Deviance'</span>})</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>freq_results <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    [{<span class="st">'Model'</span>: m, <span class="op">**</span>metrics[m][<span class="st">'frequency'</span>]} <span class="cf">for</span> m <span class="kw">in</span> MODELS]</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>).set_index(<span class="st">'Model'</span>).rename(columns<span class="op">=</span>{<span class="st">'PoissonDeviance'</span>: <span class="st">'Poisson Deviance'</span>})</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'=== Severity Metrics (</span><span class="sc">{</span>y_sev_te<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss"> claims; target: ClaimAmount in EUR) ==='</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(sev_results.<span class="bu">round</span>({<span class="st">'MAE'</span>: <span class="dv">2</span>, <span class="st">'RMSE'</span>: <span class="dv">2</span>, <span class="st">'Gamma Deviance'</span>: <span class="dv">4</span>}).to_string())</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'=== Frequency Metrics (</span><span class="sc">{</span>y_fr_te<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss"> test policies; target: ClaimNb) ==='</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(freq_results.<span class="bu">round</span>({<span class="st">'MAE'</span>: <span class="dv">4</span>, <span class="st">'RMSE'</span>: <span class="dv">4</span>, <span class="st">'Poisson Deviance'</span>: <span class="dv">2</span>}).to_string())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>=== Severity Metrics ===
-             MAE  RMSE  Gamma Deviance
-Model                                 
-GLM         1079  2203            1.03
-XGBoost      938  2340            1.36
-Neural Net   954  2346            1.40
+<pre><code>=== Severity Metrics (5,288 claims; target: ClaimAmount in EUR) ===
+                MAE     RMSE  Gamma Deviance
+Model                                       
+GLM         1102.26  2261.57          1.0595
+XGBoost      938.56  2340.31          1.3611
+Neural Net   957.42  2349.08          1.4114
 
-=== Frequency Metrics ===
+=== Frequency Metrics (135,603 test policies; target: ClaimNb) ===
                MAE    RMSE  Poisson Deviance
 Model                                       
-GLM         0.0774  0.2380             46581
-XGBoost     0.1046  0.2650             43579
-Neural Net  0.1055  0.2875             44368</code></pre>
+GLM         0.0988  0.2370          43585.73
+XGBoost     0.0966  0.2352          41478.64
+Neural Net  0.0972  0.2371          42250.46</code></pre>
 </div>
 </div>
-<div id="metric-charts" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:46:44.528221Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:46:44.528158Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:46:44.824260Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:46:44.823875Z&quot;}}" data-execution_count="3">
+<div id="metric-charts" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">9</span>))</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">'#4C72B0'</span>, <span class="st">'#DD8452'</span>, <span class="st">'#55A868'</span>]</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -356,664 +349,401 @@ Neural Net  0.1055  0.2875             44368</code></pre>
 </div>
 </div>
 </div>
-<p><strong>Metric comparison summary:</strong></p>
-<p><strong>Severity:</strong> All three models converge to essentially the same performance — the 2% MAE difference between XGBoost (938 EUR) and the Neural Net (954 EUR) is negligible. The GLM achieves the lowest Gamma Deviance (1.03 vs 1.36/1.40), meaning it is better calibrated to the gamma distribution of claim costs, despite having higher MAE. This is a known trade-off: log-transform training used by XGBoost and the neural net optimises MSE on the log scale rather than Gamma Deviance.</p>
-<p><strong>Frequency:</strong> XGBoost achieves the lowest Poisson Deviance (43,579), the actuarially appropriate metric for count models. The GLM has lower MAE and RMSE because it compresses predictions toward the mean and makes smaller per-policy errors, but it is a worse distributional fit overall. The neural net slightly trails XGBoost on all three metrics.</p>
-<p><strong>Bottom line:</strong> For frequency, XGBoost &gt; Neural Net &gt; GLM on distributional fit. For severity, no model meaningfully outperforms another — the data ceiling is the binding constraint, not model complexity.</p>
+<section id="reading-the-metric-table" class="level3">
+<h3 class="anchored" data-anchor-id="reading-the-metric-table">Reading the metric table</h3>
+<p><strong>Frequency:</strong> XGBoost has the lowest Poisson deviance (41,479 vs the GLM’s 43,586, a 4.8% reduction) and the lowest MAE and RMSE too — a clean, consistent win across every metric. The Neural Net sits between the two on all three. This is a genuine improvement, not an artifact of the earlier un-offset GLM fit — these numbers come from the offset-corrected model.</p>
+<p><strong>Severity looks contradictory at first glance, and isn’t.</strong> XGBoost (938 EUR) and the Neural Net (957 EUR) beat the GLM (1,102 EUR) on MAE, yet both are <em>worse</em> than the GLM on Gamma Deviance — and worse than an intercept-only baseline (deviance ≈ 1.064; see notebook 02, Appendix B). MAE and Gamma Deviance are answering different questions. MAE rewards being close on the common, small claims; Gamma Deviance weights errors relative to the predicted mean, so a systematic miss on a handful of very large claims costs far more under deviance than under MAE. That is exactly what’s happening here: XGBoost’s test predictions span roughly 310–1,500 EUR against actual claims running up to 16,451 EUR, while the GLM’s span 873–2,506 EUR. XGBoost looks more accurate on ordinary claims because it collapses harder toward the centre of the distribution — and that same collapse is what makes it worse at the one job severity models actually need to do, which is not underprice the claims that drive total portfolio cost.</p>
+<p>This isn’t specific to this run’s hyperparameters in a way that rescues XGBoost elsewhere: notebook 02’s Appendix B found a <em>carefully tuned</em> gradient booster only matched the GLM under cross-validation (p = 0.14, not significant), and the untuned model used here does worse than doing nothing. The severity ceiling is a data property, not a model-choice problem — see Appendix B for the full argument.</p>
+<p>This divergence — better MAE, worse deviance — is what drives the pure premium gap in Part 2.</p>
+</section>
 </section>
 <section id="part-2-pure-premium" class="level2">
 <h2 class="anchored" data-anchor-id="part-2-pure-premium">Part 2: Pure Premium</h2>
-<p>Pure premium = expected frequency × expected severity per policy.</p>
-<p>This requires re-fitting all three model pairs on the full policy dataset. Each frequency model predicts claim rate; each severity model predicts expected claim cost given a claim occurs. Their product is the expected annual cost per policy.</p>
+<p>Pure premium is the expected annual claim cost of a policy — what the policy costs the insurer before expenses, profit margin or capital loading. It is the product of the two stages:</p>
 <p><span class="math display">\[\text{Pure Premium} = \hat{p}_{\text{freq}} \times \hat{\mu}_{\text{sev}}\]</span></p>
-<div id="load-data" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:46:44.825409Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:46:44.825333Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:46:45.739144Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:46:45.738698Z&quot;}}" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ── Load cleaned datasets ────────────────────────────────────────────────────</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>df_policies <span class="op">=</span> pd.read_csv(<span class="st">'../data/policies_cleaned.csv'</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>df_claims   <span class="op">=</span> pd.read_csv(<span class="st">'../data/claims_cleaned.csv'</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [<span class="st">'VehPower'</span>, <span class="st">'VehAge'</span>, <span class="st">'DrivAge'</span>, <span class="st">'BonusMalus'</span>, <span class="st">'Density'</span>, <span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>]</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>cat_cols  <span class="op">=</span> [<span class="st">'Area'</span>, <span class="st">'VehBrand'</span>, <span class="st">'VehGas'</span>, <span class="st">'Region'</span>]</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Severity dataset</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>df_sev <span class="op">=</span> pd.get_dummies(df_claims[features <span class="op">+</span> [<span class="st">'ClaimAmount'</span>]], columns<span class="op">=</span>cat_cols, drop_first<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>X_sev <span class="op">=</span> df_sev.drop(columns<span class="op">=</span>[<span class="st">'ClaimAmount'</span>]).values.astype(np.float32)</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>y_sev <span class="op">=</span> df_sev[<span class="st">'ClaimAmount'</span>].values.astype(np.float32)</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Frequency dataset</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>df_freq_enc <span class="op">=</span> pd.get_dummies(df_policies[features <span class="op">+</span> [<span class="st">'ClaimNb'</span>]], columns<span class="op">=</span>cat_cols, drop_first<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>exposure <span class="op">=</span> df_policies[<span class="st">'Exposure'</span>].values</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>X_freq <span class="op">=</span> df_freq_enc.drop(columns<span class="op">=</span>[<span class="st">'ClaimNb'</span>]).values.astype(np.float32)</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>y_freq <span class="op">=</span> df_freq_enc[<span class="st">'ClaimNb'</span>].values.astype(np.float32)</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>feat_cols <span class="op">=</span> df_freq_enc.drop(columns<span class="op">=</span>[<span class="st">'ClaimNb'</span>]).columns.tolist()</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Train/test split — same seed as prior notebooks</span></span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>X_sev_tr, X_sev_te, y_sev_tr, y_sev_te <span class="op">=</span> train_test_split(X_sev, y_sev, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>X_fr_tr, X_fr_te, y_fr_tr, y_fr_te, exp_tr, exp_te <span class="op">=</span> train_test_split(</span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    X_freq, y_freq, exposure, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">42</span></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Severity  — train: </span><span class="sc">{</span>X_sev_tr<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, test: </span><span class="sc">{</span>X_sev_te<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Frequency — train: </span><span class="sc">{</span>X_fr_tr<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, test: </span><span class="sc">{</span>X_fr_te<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>where <span class="math inline">\(\hat{p}_{\text{freq}}\)</span> is the expected number of claims per year and <span class="math inline">\(\hat{\mu}_{\text{sev}}\)</span> is the expected cost of a claim given one occurs.</p>
+<p><strong>Why the two stages are modelled separately.</strong> Frequency and severity are driven by different things. Whether you crash is about driving behaviour and exposure to traffic — BonusMalus, driver age, population density. What the crash costs is about the vehicle and the repair market — vehicle value, power, regional labour rates. Modelling the product directly (a Tweedie GLM) is possible, but fitting the two halves separately lets each use the distribution that actually fits it (Poisson for counts, Gamma for costs) and makes the resulting rating factors far easier to explain to a regulator.</p>
+<p><strong>Row alignment is the thing to get right here.</strong> Multiplying frequency by severity is only meaningful when both refer to <em>the same policy</em>. The frequency test set is a shuffled 20% sample, so the severity model has to be scored on those same shuffled rows — which is exactly what <code>sev_on_freq_test</code> is, computed inside each modelling notebook where the rows are unambiguous. Taking a positional slice of the full dataset instead would pair each policy’s frequency with a different policy’s severity, and every downstream number would be quietly wrong.</p>
+<div id="f2c92bad" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pure premium per policy, per model — both halves scored on the same test rows.</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>pp_models <span class="op">=</span> {</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    m: preds[m][<span class="st">'freq_test_rate'</span>] <span class="op">*</span> preds[m][<span class="st">'sev_on_freq_test'</span>]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> m <span class="kw">in</span> MODELS</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Empirical benchmark: what the test portfolio actually cost per policy-year.</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Total claim cost is not observable per policy here, so approximate it as</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># (observed claim rate) x (mean claim size) across the severity test set.</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>emp_rate <span class="op">=</span> y_fr_te.<span class="bu">sum</span>() <span class="op">/</span> exp_te.<span class="bu">sum</span>()</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>emp_sev  <span class="op">=</span> y_sev_te.mean()</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>emp_pp   <span class="op">=</span> emp_rate <span class="op">*</span> emp_sev</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Empirical benchmark: </span><span class="sc">{</span>emp_rate<span class="sc">:.4f}</span><span class="ss"> claims/year x </span><span class="sc">{</span>emp_sev<span class="sc">:,.0f}</span><span class="ss"> EUR = </span><span class="sc">{</span>emp_pp<span class="sc">:,.2f}</span><span class="ss"> EUR</span><span class="ch">\n</span><span class="ss">'</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> m <span class="kw">in</span> MODELS:</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'</span><span class="sc">{</span>m<span class="sc">:12}</span><span class="ss"> mean pure premium: </span><span class="sc">{</span>pp_models[m]<span class="sc">.</span>mean()<span class="sc">:8,.2f}</span><span class="ss"> EUR '</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f'(median </span><span class="sc">{</span>np<span class="sc">.</span>median(pp_models[m])<span class="sc">:7,.2f}</span><span class="ss">)'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Severity  — train: (21151, 42), test: (5288, 42)
-Frequency — train: (543610, 42), test: (135903, 42)</code></pre>
+<pre><code>Empirical benchmark: 0.1011 claims/year x 1,558 EUR = 157.52 EUR
+
+GLM          mean pure premium:   173.75 EUR (median  147.83)
+XGBoost      mean pure premium:   112.46 EUR (median   75.34)
+Neural Net   mean pure premium:   107.18 EUR (median   77.58)</code></pre>
 </div>
 </div>
-<section id="glm-pure-premium" class="level3">
-<h3 class="anchored" data-anchor-id="glm-pure-premium">2.1 GLM Pure Premium</h3>
-<div id="glm-fit" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:46:45.740089Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:46:45.740029Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:46:49.414545Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:46:49.413854Z&quot;}}" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Severity — Gamma GLM with log link, trained on log(ClaimAmount)</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>glm_sev <span class="op">=</span> sm.GLM(</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    y_sev_tr,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    sm.add_constant(X_sev_tr),</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    family<span class="op">=</span>sm.families.Gamma(link<span class="op">=</span>sm.families.links.Log())</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>).fit()</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>glm_sev_pred <span class="op">=</span> glm_sev.predict(sm.add_constant(X_sev_te))</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Frequency — Poisson GLM with log(Exposure) offset</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>glm_freq <span class="op">=</span> sm.GLM(</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    y_fr_tr,</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    sm.add_constant(X_fr_tr),</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    family<span class="op">=</span>sm.families.Poisson(),</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    offset<span class="op">=</span>np.log(exp_tr)</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>).fit()</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>glm_freq_pred_count <span class="op">=</span> glm_freq.predict(sm.add_constant(X_fr_te), offset<span class="op">=</span>np.log(exp_te))</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>glm_freq_pred_rate  <span class="op">=</span> glm_freq_pred_count <span class="op">/</span> exp_te</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Pure premium on test policies that have both frequency and severity predictions</span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Use same test policies for all models; severity is needed per-policy via expected value</span></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>glm_sev_all   <span class="op">=</span> glm_sev.predict(sm.add_constant(X_freq[<span class="bu">len</span>(X_fr_tr):]))</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>glm_pp <span class="op">=</span> glm_freq_pred_rate <span class="op">*</span> glm_sev_all</span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'GLM mean pure premium: </span><span class="sc">{</span>glm_pp<span class="sc">.</span>mean()<span class="sc">:.2f}</span><span class="ss"> EUR'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>GLM mean pure premium: 192.43 EUR</code></pre>
-</div>
-</div>
-</section>
-<section id="xgboost-pure-premium" class="level3">
-<h3 class="anchored" data-anchor-id="xgboost-pure-premium">2.2 XGBoost Pure Premium</h3>
-<div id="xgb-fit" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:46:49.420740Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:46:49.419960Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:47:03.323607Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:47:03.320739Z&quot;}}" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Severity</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>xgb_sev <span class="op">=</span> xgb.XGBRegressor(</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    objective<span class="op">=</span><span class="st">'reg:squarederror'</span>, n_estimators<span class="op">=</span><span class="dv">500</span>, learning_rate<span class="op">=</span><span class="fl">0.05</span>,</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    max_depth<span class="op">=</span><span class="dv">4</span>, subsample<span class="op">=</span><span class="fl">0.8</span>, colsample_bytree<span class="op">=</span><span class="fl">0.8</span>, random_state<span class="op">=</span><span class="dv">42</span>,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    early_stopping_rounds<span class="op">=</span><span class="dv">20</span>, eval_metric<span class="op">=</span><span class="st">'rmse'</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>xgb_sev.fit(</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    X_sev_tr, np.log(y_sev_tr),</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    eval_set<span class="op">=</span>[(X_sev_te, np.log(y_sev_te))], verbose<span class="op">=</span><span class="va">False</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>xgb_sev_pred <span class="op">=</span> np.exp(xgb_sev.predict(X_sev_te))</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Frequency</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>y_rate_tr <span class="op">=</span> y_fr_tr <span class="op">/</span> exp_tr</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>y_rate_te <span class="op">=</span> y_fr_te <span class="op">/</span> exp_te</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>xgb_freq <span class="op">=</span> xgb.XGBRegressor(</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    objective<span class="op">=</span><span class="st">'count:poisson'</span>, n_estimators<span class="op">=</span><span class="dv">500</span>, learning_rate<span class="op">=</span><span class="fl">0.05</span>,</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    max_depth<span class="op">=</span><span class="dv">4</span>, subsample<span class="op">=</span><span class="fl">0.8</span>, colsample_bytree<span class="op">=</span><span class="fl">0.8</span>, random_state<span class="op">=</span><span class="dv">42</span>,</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    early_stopping_rounds<span class="op">=</span><span class="dv">20</span>, eval_metric<span class="op">=</span><span class="st">'poisson-nloglik'</span></span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>xgb_freq.fit(</span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    X_fr_tr, y_rate_tr, sample_weight<span class="op">=</span>exp_tr,</span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    eval_set<span class="op">=</span>[(X_fr_te, y_rate_te)], verbose<span class="op">=</span><span class="va">False</span></span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>xgb_freq_pred_rate <span class="op">=</span> xgb_freq.predict(X_fr_te)</span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Pure premium</span></span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>xgb_sev_all <span class="op">=</span> np.exp(xgb_sev.predict(X_freq[<span class="bu">len</span>(X_fr_tr):]))</span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>xgb_pp <span class="op">=</span> xgb_freq_pred_rate <span class="op">*</span> xgb_sev_all</span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'XGBoost mean pure premium: </span><span class="sc">{</span>xgb_pp<span class="sc">.</span>mean()<span class="sc">:.2f}</span><span class="ss"> EUR'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>XGBoost mean pure premium: 127.53 EUR</code></pre>
-</div>
-</div>
-</section>
-<section id="neural-net-pure-premium" class="level3">
-<h3 class="anchored" data-anchor-id="neural-net-pure-premium">2.3 Neural Net Pure Premium</h3>
-<div id="nn-fit" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:47:03.328214Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:47:03.328023Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:47:03.334381Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:47:03.333979Z&quot;}}" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ClaimNet(nn.Module):</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, input_dim):</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.net <span class="op">=</span> nn.Sequential(</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>            nn.Linear(input_dim, <span class="dv">64</span>), nn.ReLU(), nn.Dropout(<span class="fl">0.2</span>),</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">64</span>, <span class="dv">32</span>),        nn.ReLU(), nn.Dropout(<span class="fl">0.2</span>),</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">32</span>, <span class="dv">1</span>)</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.net(x)</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_nn(X_tr, y_tr, X_te, y_te, epochs<span class="op">=</span><span class="dv">30</span>, batch_size<span class="op">=</span><span class="dv">256</span>,</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>             weights_tr<span class="op">=</span><span class="va">None</span>, weighted<span class="op">=</span><span class="va">False</span>, label<span class="op">=</span><span class="st">''</span>):</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Minimal training loop — CPU, zero-copy tensors, manual mini-batches."""</span></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> time</span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    t0 <span class="op">=</span> time.time()</span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'[</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">] start (</span><span class="sc">{</span>X_tr<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss"> rows)'</span>, flush<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    scaler <span class="op">=</span> StandardScaler()</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    X_tr_np <span class="op">=</span> scaler.fit_transform(X_tr).astype(np.float32)</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    X_te_np <span class="op">=</span> scaler.transform(X_te).astype(np.float32)</span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    X_tr_t <span class="op">=</span> torch.from_numpy(X_tr_np)</span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    X_te_t <span class="op">=</span> torch.from_numpy(X_te_np)</span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    y_tr_t <span class="op">=</span> torch.from_numpy(np.asarray(y_tr, dtype<span class="op">=</span>np.float32)).unsqueeze(<span class="dv">1</span>)</span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    y_te_t <span class="op">=</span> torch.from_numpy(np.asarray(y_te, dtype<span class="op">=</span>np.float32)).unsqueeze(<span class="dv">1</span>)</span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    w_tr_t <span class="op">=</span> torch.from_numpy(np.asarray(weights_tr, dtype<span class="op">=</span>np.float32)).unsqueeze(<span class="dv">1</span>) <span class="cf">if</span> weighted <span class="cf">else</span> <span class="va">None</span></span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    net <span class="op">=</span> ClaimNet(X_tr_np.shape[<span class="dv">1</span>])</span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>    opt <span class="op">=</span> torch.optim.Adam(net.parameters(), lr<span class="op">=</span><span class="fl">1e-3</span>)</span>
-<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'[</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">] tensors ready (</span><span class="sc">{</span>time<span class="sc">.</span>time()<span class="op">-</span>t0<span class="sc">:.1f}</span><span class="ss">s) — training </span><span class="sc">{</span>epochs<span class="sc">}</span><span class="ss"> epochs'</span>, flush<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> X_tr_t.shape[<span class="dv">0</span>]</span>
-<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
-<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>        net.train()</span>
-<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>        idx <span class="op">=</span> torch.randperm(n)</span>
-<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>        total_loss, total_n <span class="op">=</span> <span class="fl">0.0</span>, <span class="dv">0</span></span>
-<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> start <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, n, batch_size):</span>
-<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>            b <span class="op">=</span> idx[start:start <span class="op">+</span> batch_size]</span>
-<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>            Xb, yb <span class="op">=</span> X_tr_t[b], y_tr_t[b]</span>
-<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>            opt.zero_grad()</span>
-<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>            pred <span class="op">=</span> net(Xb)</span>
-<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> weighted:</span>
-<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>                wb <span class="op">=</span> w_tr_t[b]</span>
-<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>                loss <span class="op">=</span> (wb <span class="op">*</span> (pred <span class="op">-</span> yb) <span class="op">**</span> <span class="dv">2</span>).mean()</span>
-<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
-<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>                loss <span class="op">=</span> ((pred <span class="op">-</span> yb) <span class="op">**</span> <span class="dv">2</span>).mean()</span>
-<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>            loss.backward()</span>
-<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>            opt.step()</span>
-<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>            total_loss <span class="op">+=</span> loss.item() <span class="op">*</span> Xb.shape[<span class="dv">0</span>]</span>
-<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>            total_n <span class="op">+=</span> Xb.shape[<span class="dv">0</span>]</span>
-<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (epoch <span class="op">+</span> <span class="dv">1</span>) <span class="op">%</span> <span class="dv">5</span> <span class="op">==</span> <span class="dv">0</span> <span class="kw">or</span> epoch <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>            net.<span class="bu">eval</span>()</span>
-<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>            <span class="cf">with</span> torch.no_grad():</span>
-<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>                val_loss <span class="op">=</span> ((net(X_te_t) <span class="op">-</span> y_te_t) <span class="op">**</span> <span class="dv">2</span>).mean().item()</span>
-<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f'  epoch </span><span class="sc">{</span>epoch<span class="op">+</span><span class="dv">1</span><span class="sc">:3d}</span><span class="ss">/</span><span class="sc">{</span>epochs<span class="sc">}</span><span class="ss"> | train: </span><span class="sc">{</span>total_loss<span class="op">/</span>total_n<span class="sc">:.5f}</span><span class="ss"> | val: </span><span class="sc">{</span>val_loss<span class="sc">:.5f}</span><span class="ss"> | </span><span class="sc">{</span>time<span class="sc">.</span>time()<span class="op">-</span>t0<span class="sc">:.0f}</span><span class="ss">s'</span>, flush<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'[</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">] done in </span><span class="sc">{</span>time<span class="sc">.</span>time()<span class="op">-</span>t0<span class="sc">:.0f}</span><span class="ss">s'</span>, flush<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> net, scaler</span>
-<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'ClaimNet and train_nn defined.'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>ClaimNet and train_nn defined.</code></pre>
-</div>
-</div>
-<div id="c560907d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:47:03.335410Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:47:03.335338Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:47:04.633796Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:47:04.633403Z&quot;}}" data-execution_count="8">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Severity net — should finish in &lt;30 seconds</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>nn_sev, sev_scaler <span class="op">=</span> train_nn(</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    X_sev_tr, np.log1p(y_sev_tr),</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    X_sev_te, np.log1p(y_sev_te),</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">'Severity'</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>nn_sev.<span class="bu">eval</span>()</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    nn_sev_pred <span class="op">=</span> np.expm1(nn_sev(torch.from_numpy(sev_scaler.transform(X_sev_te).astype(np.float32))).numpy().flatten())</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Severity predictions: </span><span class="sc">{</span>nn_sev_pred<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, mean </span><span class="sc">{</span>nn_sev_pred<span class="sc">.</span>mean()<span class="sc">:.0f}</span><span class="ss"> EUR'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[Severity] start (21,151 rows)
-[Severity] tensors ready (0.6s) — training 30 epochs
-  epoch   1/30 | train: 21.28919 | val: 1.95343 | 1s
-  epoch   5/30 | train: 2.26693 | val: 1.33132 | 1s
-  epoch  10/30 | train: 2.04189 | val: 1.26229 | 1s
-  epoch  15/30 | train: 1.97702 | val: 1.27220 | 1s
-  epoch  20/30 | train: 1.87841 | val: 1.24133 | 1s
-  epoch  25/30 | train: 1.84140 | val: 1.24545 | 1s
-  epoch  30/30 | train: 1.78784 | val: 1.23136 | 1s
-[Severity] done in 1s
-Severity predictions: (5288,), mean 897 EUR</code></pre>
-</div>
-</div>
-<div id="a21dcf41" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:47:04.635055Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:47:04.634778Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:47:09.021382Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:47:09.020861Z&quot;}}" data-execution_count="9">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Frequency net — 543k rows, larger batches; should finish in ~2-3 minutes on CPU</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>nn_freq, freq_scaler <span class="op">=</span> train_nn(</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    X_fr_tr, y_rate_tr, X_fr_te, y_rate_te,</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span><span class="dv">20</span>, batch_size<span class="op">=</span><span class="dv">4096</span>, weighted<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    weights_tr<span class="op">=</span>exp_tr.astype(np.float32),</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">'Frequency'</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>nn_freq.<span class="bu">eval</span>()</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    nn_freq_pred_rate <span class="op">=</span> np.clip(</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        nn_freq(torch.from_numpy(freq_scaler.transform(X_fr_te).astype(np.float32))).numpy().flatten(),</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>        <span class="dv">0</span>, <span class="va">None</span></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Frequency predictions: </span><span class="sc">{</span>nn_freq_pred_rate<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">, mean rate </span><span class="sc">{</span>nn_freq_pred_rate<span class="sc">.</span>mean()<span class="sc">:.4f}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[Frequency] start (543,610 rows)
-[Frequency] tensors ready (0.2s) — training 20 epochs
-  epoch   1/20 | train: 0.40290 | val: 18.41304 | 0s
-  epoch   5/20 | train: 0.39982 | val: 18.40756 | 1s
-  epoch  10/20 | train: 0.39648 | val: 18.36731 | 2s
-  epoch  15/20 | train: 0.38989 | val: 18.27180 | 3s
-  epoch  20/20 | train: 0.38093 | val: 18.22296 | 4s
-[Frequency] done in 4s
-Frequency predictions: (135903,), mean rate 0.1261</code></pre>
-</div>
-</div>
-<div id="7bd36f23" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:47:09.023023Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:47:09.022913Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:47:09.040971Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:47:09.040605Z&quot;}}" data-execution_count="10">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pure premium = frequency rate × severity</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>X_te_all <span class="op">=</span> X_freq[<span class="bu">len</span>(X_fr_tr):]</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    nn_sev_all <span class="op">=</span> np.expm1(nn_sev(torch.from_numpy(sev_scaler.transform(X_te_all).astype(np.float32))).numpy().flatten())</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>nn_pp <span class="op">=</span> nn_freq_pred_rate <span class="op">*</span> nn_sev_all</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Neural Net mean pure premium: </span><span class="sc">{</span>nn_pp<span class="sc">.</span>mean()<span class="sc">:.2f}</span><span class="ss"> EUR'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Neural Net mean pure premium: 120.90 EUR</code></pre>
-</div>
-</div>
-</section>
 <section id="pure-premium-comparison" class="level3">
 <h3 class="anchored" data-anchor-id="pure-premium-comparison">2.4 Pure Premium Comparison</h3>
-<div id="pp-charts" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:47:09.042134Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:47:09.042066Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:47:09.428288Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:47:09.427851Z&quot;}}" data-execution_count="11">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pp_models <span class="op">=</span> {<span class="st">'GLM'</span>: glm_pp, <span class="st">'XGBoost'</span>: xgb_pp, <span class="st">'Neural Net'</span>: nn_pp}</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>colors_map <span class="op">=</span> {<span class="st">'GLM'</span>: <span class="st">'#4C72B0'</span>, <span class="st">'XGBoost'</span>: <span class="st">'#DD8452'</span>, <span class="st">'Neural Net'</span>: <span class="st">'#55A868'</span>}</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">5</span>))</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Distribution of pure premiums</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>cap <span class="op">=</span> np.percentile(np.concatenate(<span class="bu">list</span>(pp_models.values())), <span class="dv">99</span>)</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, pp <span class="kw">in</span> pp_models.items():</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].hist(</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>        np.clip(pp, <span class="dv">0</span>, cap), bins<span class="op">=</span><span class="dv">80</span>, alpha<span class="op">=</span><span class="fl">0.6</span>,</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="ss">f'</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss"> (mean=</span><span class="sc">{</span>pp<span class="sc">.</span>mean()<span class="sc">:.0f}</span><span class="ss">)'</span>, color<span class="op">=</span>colors_map[name], edgecolor<span class="op">=</span><span class="st">'none'</span></span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Pure Premium (EUR, capped at 99th pct)'</span>)</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Policies'</span>)</span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'Distribution of Pure Premiums by Model'</span>)</span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend()</span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Mean by BonusMalus band</span></span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>bm_bins   <span class="op">=</span> pd.cut(df_policies.iloc[<span class="bu">len</span>(X_fr_tr):][<span class="st">'BonusMalus'</span>],</span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>                   bins<span class="op">=</span>[<span class="dv">49</span>,<span class="dv">60</span>,<span class="dv">80</span>,<span class="dv">100</span>,<span class="dv">150</span>,<span class="dv">230</span>], labels<span class="op">=</span>[<span class="st">'50-60'</span>,<span class="st">'61-80'</span>,<span class="st">'81-100'</span>,<span class="st">'101-150'</span>,<span class="st">'150+'</span>])</span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="bu">range</span>(<span class="dv">5</span>)</span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>width <span class="op">=</span> <span class="fl">0.25</span></span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, (name, pp) <span class="kw">in</span> <span class="bu">enumerate</span>(pp_models.items()):</span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>    band_mean <span class="op">=</span> pd.Series(pp).groupby(bm_bins.values).mean()</span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].bar([j <span class="op">+</span> i <span class="op">*</span> width <span class="cf">for</span> j <span class="kw">in</span> x], band_mean, width<span class="op">=</span>width,</span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>                label<span class="op">=</span>name, color<span class="op">=</span>colors_map[name], edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xticks([j <span class="op">+</span> width <span class="cf">for</span> j <span class="kw">in</span> x])</span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xticklabels([<span class="st">'50-60'</span>,<span class="st">'61-80'</span>,<span class="st">'81-100'</span>,<span class="st">'101-150'</span>,<span class="st">'150+'</span>])</span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">'BonusMalus Band'</span>)</span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">'Mean Pure Premium (EUR)'</span>)</span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'Mean Pure Premium by BonusMalus Band'</span>)</span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend()</span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/19_pure_premium_comparison.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="pp-charts" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">5</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Distribution of pure premiums</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>cap <span class="op">=</span> np.percentile(np.concatenate(<span class="bu">list</span>(pp_models.values())), <span class="dv">99</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, pp <span class="kw">in</span> pp_models.items():</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].hist(</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        np.clip(pp, <span class="dv">0</span>, cap), bins<span class="op">=</span><span class="dv">80</span>, alpha<span class="op">=</span><span class="fl">0.6</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="ss">f'</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss"> (mean=</span><span class="sc">{</span>pp<span class="sc">.</span>mean()<span class="sc">:.0f}</span><span class="ss">)'</span>, color<span class="op">=</span>colors_map[name], edgecolor<span class="op">=</span><span class="st">'none'</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].axvline(emp_pp, color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, linewidth<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>                label<span class="op">=</span><span class="ss">f'Empirical (</span><span class="sc">{</span>emp_pp<span class="sc">:.0f}</span><span class="ss">)'</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Pure Premium (EUR, capped at 99th pct)'</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Policies'</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'Distribution of Pure Premiums by Model'</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend()</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Mean by BonusMalus band — bm_te is aligned to the same test rows as pp</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>bm_labels <span class="op">=</span> [<span class="st">'50-60'</span>, <span class="st">'61-80'</span>, <span class="st">'81-100'</span>, <span class="st">'101-150'</span>, <span class="st">'150+'</span>]</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>bm_bins <span class="op">=</span> pd.cut(bm_te, bins<span class="op">=</span>[<span class="dv">49</span>, <span class="dv">60</span>, <span class="dv">80</span>, <span class="dv">100</span>, <span class="dv">150</span>, <span class="dv">230</span>], labels<span class="op">=</span>bm_labels)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="bu">range</span>(<span class="bu">len</span>(bm_labels))</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>width <span class="op">=</span> <span class="fl">0.25</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>bm_table <span class="op">=</span> {}</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, (name, pp) <span class="kw">in</span> <span class="bu">enumerate</span>(pp_models.items()):</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    band_mean <span class="op">=</span> pd.Series(pp).groupby(bm_bins, observed<span class="op">=</span><span class="va">False</span>).mean()</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    bm_table[name] <span class="op">=</span> band_mean</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].bar([j <span class="op">+</span> i <span class="op">*</span> width <span class="cf">for</span> j <span class="kw">in</span> x], band_mean, width<span class="op">=</span>width,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>                label<span class="op">=</span>name, color<span class="op">=</span>colors_map[name], edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xticks([j <span class="op">+</span> width <span class="cf">for</span> j <span class="kw">in</span> x])</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xticklabels(bm_labels)</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">'BonusMalus Band'</span>)</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">'Mean Pure Premium (EUR)'</span>)</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'Mean Pure Premium by BonusMalus Band'</span>)</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend()</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/19_pure_premium_comparison.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Mean pure premium by BonusMalus band (EUR):'</span>)</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pd.DataFrame(bm_table).<span class="bu">round</span>(<span class="dv">0</span>).to_string())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="05_comparison_files/figure-html/cell-12-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="05_comparison_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean pure premium by BonusMalus band (EUR):
+            GLM  XGBoost  Neural Net
+50-60     136.0     89.0        89.0
+61-80     203.0    135.0       117.0
+81-100    325.0    201.0       182.0
+101-150   620.0    407.0       361.0
+150+     2132.0    543.0       871.0</code></pre>
 </div>
-<div id="pp-by-age" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:47:09.431964Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:47:09.431851Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:47:09.540877Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:47:09.540517Z&quot;}}" data-execution_count="12">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Mean pure premium by driver age band</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>age_bins <span class="op">=</span> pd.cut(</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    df_policies.iloc[<span class="bu">len</span>(X_fr_tr):][<span class="st">'DrivAge'</span>],</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    bins<span class="op">=</span>[<span class="dv">17</span>,<span class="dv">25</span>,<span class="dv">35</span>,<span class="dv">45</span>,<span class="dv">55</span>,<span class="dv">65</span>,<span class="dv">100</span>], labels<span class="op">=</span>[<span class="st">'18-25'</span>,<span class="st">'26-35'</span>,<span class="st">'36-45'</span>,<span class="st">'46-55'</span>,<span class="st">'56-65'</span>,<span class="st">'65+'</span>]</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">5</span>))</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>width <span class="op">=</span> <span class="fl">0.25</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="bu">range</span>(<span class="dv">6</span>)</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, (name, pp) <span class="kw">in</span> <span class="bu">enumerate</span>(pp_models.items()):</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    band_mean <span class="op">=</span> pd.Series(pp).groupby(age_bins.values).mean()</span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    ax.bar([j <span class="op">+</span> i <span class="op">*</span> width <span class="cf">for</span> j <span class="kw">in</span> x], band_mean, width<span class="op">=</span>width,</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span>name, color<span class="op">=</span>colors_map[name], edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>ax.set_xticks([j <span class="op">+</span> width <span class="cf">for</span> j <span class="kw">in</span> x])</span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels([<span class="st">'18-25'</span>,<span class="st">'26-35'</span>,<span class="st">'36-45'</span>,<span class="st">'46-55'</span>,<span class="st">'56-65'</span>,<span class="st">'65+'</span>])</span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Driver Age Band'</span>)</span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Mean Pure Premium (EUR)'</span>)</span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Mean Pure Premium by Driver Age Band'</span>)</span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/20_pure_premium_by_age.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="pp-by-age" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Mean pure premium by driver age band — age_te is aligned to the same test rows</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>age_labels <span class="op">=</span> [<span class="st">'18-25'</span>, <span class="st">'26-35'</span>, <span class="st">'36-45'</span>, <span class="st">'46-55'</span>, <span class="st">'56-65'</span>, <span class="st">'65+'</span>]</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>age_bins <span class="op">=</span> pd.cut(age_te, bins<span class="op">=</span>[<span class="dv">17</span>, <span class="dv">25</span>, <span class="dv">35</span>, <span class="dv">45</span>, <span class="dv">55</span>, <span class="dv">65</span>, <span class="dv">100</span>], labels<span class="op">=</span>age_labels)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">5</span>))</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>width <span class="op">=</span> <span class="fl">0.25</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="bu">range</span>(<span class="bu">len</span>(age_labels))</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>age_table <span class="op">=</span> {}</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, (name, pp) <span class="kw">in</span> <span class="bu">enumerate</span>(pp_models.items()):</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    band_mean <span class="op">=</span> pd.Series(pp).groupby(age_bins, observed<span class="op">=</span><span class="va">False</span>).mean()</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    age_table[name] <span class="op">=</span> band_mean</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    ax.bar([j <span class="op">+</span> i <span class="op">*</span> width <span class="cf">for</span> j <span class="kw">in</span> x], band_mean, width<span class="op">=</span>width,</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span>name, color<span class="op">=</span>colors_map[name], edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>ax.set_xticks([j <span class="op">+</span> width <span class="cf">for</span> j <span class="kw">in</span> x])</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels(age_labels)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Driver Age Band'</span>)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Mean Pure Premium (EUR)'</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Mean Pure Premium by Driver Age Band'</span>)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/20_pure_premium_by_age.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>age_df <span class="op">=</span> pd.DataFrame(age_table)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Mean pure premium by driver age band (EUR):'</span>)</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(age_df.<span class="bu">round</span>(<span class="dv">0</span>).to_string())</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">Young-driver loading (18-25 relative to 36-45):'</span>)</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> MODELS:</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'  </span><span class="sc">{</span>name<span class="sc">:12}</span><span class="ss"> </span><span class="sc">{</span>age_df<span class="sc">.</span>loc[<span class="st">"18-25"</span>, name] <span class="op">/</span> age_df<span class="sc">.</span>loc[<span class="st">"36-45"</span>, name]<span class="sc">:.2f}</span><span class="ss">x'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="05_comparison_files/figure-html/cell-13-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="05_comparison_files/figure-html/cell-7-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean pure premium by driver age band (EUR):
+         GLM  XGBoost  Neural Net
+18-25  275.0    198.0       167.0
+26-35  192.0    103.0       110.0
+36-45  155.0    104.0        99.0
+46-55  154.0    113.0       100.0
+56-65  168.0    104.0       106.0
+65+    177.0    115.0       108.0
+
+Young-driver loading (18-25 relative to 36-45):
+  GLM          1.78x
+  XGBoost      1.90x
+  Neural Net   1.70x</code></pre>
 </div>
-<p><strong>Pure premium analysis:</strong></p>
-<p>Mean pure premiums diverge substantially across models — <strong>GLM 220 EUR vs XGBoost 135 EUR vs Neural Net 129 EUR</strong>. XGBoost and the neural net converge near the empirical mean, while the GLM systematically over-predicts at the portfolio level by ~60%.</p>
-<p>The driver of the gap is <strong>BonusMalus tail behaviour</strong>:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>BonusMalus band</th>
-<th>GLM</th>
-<th>XGBoost</th>
-<th>Neural Net</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>50–60 (clean)</td>
-<td>170</td>
-<td>106</td>
-<td>107</td>
-</tr>
-<tr class="even">
-<td>61–80</td>
-<td>257</td>
-<td>161</td>
-<td>141</td>
-</tr>
-<tr class="odd">
-<td>81–100</td>
-<td>407</td>
-<td>238</td>
-<td>215</td>
-</tr>
-<tr class="even">
-<td>101–150</td>
-<td>782</td>
-<td>442</td>
-<td>409</td>
-</tr>
-<tr class="odd">
-<td><strong>150+ (worst)</strong></td>
-<td><strong>3,317</strong></td>
-<td><strong>786</strong></td>
-<td><strong>1,168</strong></td>
-</tr>
-</tbody>
-</table>
-<p>The GLM’s log-link specification extrapolates exponentially: each additional unit of BonusMalus multiplies expected claims by <span class="math inline">\(\exp(\beta \cdot \Delta\text{BM})\)</span>. For the small tail of policies in the 150+ band, this produces premiums 4× higher than XGBoost’s. XGBoost’s tree structure naturally caps the tail — no single split can produce arbitrarily large predictions. The neural net sits between, closer to XGBoost.</p>
-<p>This is not a bug, it is a <strong>fundamental modelling assumption colliding with sparse tail data</strong>. From a pricing perspective, GLM’s extrapolation may be either prudent (under-priced tail risk is dangerous) or unfair (charging 3,300 EUR for a small subset based on a parametric assumption). Actuarial judgment is needed.</p>
-<p><strong>Driver age</strong> tells the opposite story. The GLM cannot capture the U-shaped age curve and <strong>compresses the young-driver risk</strong>:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Age band</th>
-<th>GLM</th>
-<th>XGBoost</th>
-<th>Neural Net</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>18–25</strong></td>
-<td>359</td>
-<td><strong>248</strong></td>
-<td>202</td>
-</tr>
-<tr class="even">
-<td>26–35</td>
-<td>252</td>
-<td>135</td>
-<td>136</td>
-</tr>
-<tr class="odd">
-<td>36–45</td>
-<td>195</td>
-<td>124</td>
-<td>121</td>
-</tr>
-<tr class="even">
-<td>46–55</td>
-<td>190</td>
-<td>130</td>
-<td>120</td>
-</tr>
-<tr class="odd">
-<td>56–65</td>
-<td>210</td>
-<td>120</td>
-<td>123</td>
-</tr>
-<tr class="even">
-<td>65+</td>
-<td>223</td>
-<td>130</td>
-<td>123</td>
-</tr>
-</tbody>
-</table>
-<p>Here the GLM is too high in absolute terms because of its inflated baseline, but the <em>relative</em> gap between 18–25 and 36–45 is only 1.8× for GLM vs 2.0× for XGBoost. XGBoost and the neural net better isolate young drivers as a distinct risk segment. For pricing, this matters — under-pricing 18–25 drivers leaks premium to a known high-risk group.</p>
+</div>
+</section>
+<section id="reading-the-pure-premium-comparison" class="level3">
+<h3 class="anchored" data-anchor-id="reading-the-pure-premium-comparison">Reading the pure premium comparison</h3>
+<p>The empirical benchmark (157.52 EUR/policy-year) is the observed claim rate times the mean observed severity across the test set — a naive, model-free reference point. Against it: the GLM overshoots by about 10% (173.75 EUR), while XGBoost and the Neural Net undershoot by about 29% and 32% respectively (112.46 EUR, 107.18 EUR).</p>
+<p>That asymmetry is the severity collapse from Part 1 propagating through the multiplication. All three models see the same claim frequency signal; what differs is severity, and XGBoost/NN’s tighter, lower predictions drag the whole portfolio estimate down. Read literally, deploying either ML model’s severity stage as-is would systematically <strong>underprice</strong> the book — a more consequential failure mode for an insurer than a modest overshoot.</p>
+<p><strong>A caveat that applies to every number in this section, including the empirical benchmark.</strong> Pure premium here is <code>freq_test_rate × sev_on_freq_test</code>: frequency counts every claim event (<code>ClaimNb</code>, ~36,056 across the full dataset), while severity is fit only on the ~26,439 claims that have a matching cost record. About 26.8% of claim events have no price attached, concentrated in specific segments (<code>VehBrand</code> and <code>VehGas</code> in particular — see the frequency/severity join-gap finding). That inflates every pure premium figure in this section by a similar amount, since the mechanism is identical for the empirical benchmark and all three models. It does <strong>not</strong> change which model wins or the Gini/lift comparisons in Part 3, which depend only on relative ranking — but none of the EUR figures here should be read as a calibrated rate card without correcting for it (e.g.&nbsp;a <code>P(priced | claim)</code> stage multiplied in).</p>
+<p><strong>BonusMalus and age bands.</strong> The young-driver loading is directionally consistent across all three models (1.70–1.90x for 18–25 vs 36–45) — reassuring, since the qualitative pricing story doesn’t depend on model choice even though its exact size does. The BonusMalus 150+ band is the exception worth flagging: the GLM’s premium there (2,132 EUR) is roughly 4x XGBoost’s (543 EUR) and 2.4x the Neural Net’s (871 EUR), a far larger gap than at any other band. The GLM’s log link extrapolates multiplicatively without bound for extreme covariate values; the tree-based and neural models are bounded by what they saw in training and can’t extrapolate past it. That makes the GLM the most responsive to BonusMalus at the top of the scale, but also the most exposed to a small number of high-leverage records driving that band’s estimate.</p>
 </section>
 </section>
 <section id="part-3-risk-discrimination" class="level2">
 <h2 class="anchored" data-anchor-id="part-3-risk-discrimination">Part 3: Risk Discrimination</h2>
 <p>The Gini coefficient (or normalised Gini) measures how well a model rank-orders policies by risk. A model with a Gini of 0 cannot distinguish high from low risk; a model with Gini of 1 is a perfect ranker. This is more relevant for pricing than MAE or RMSE.</p>
-<div id="gini" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:47:09.542233Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:47:09.542144Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:47:09.631056Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:47:09.630609Z&quot;}}" data-execution_count="13">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gini(actual, predicted):</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Normalised Gini coefficient — 1 is perfect ranking, 0 is random."""</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pd.DataFrame({<span class="st">'actual'</span>: actual, <span class="st">'predicted'</span>: predicted})</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    df_sorted <span class="op">=</span> df.sort_values(<span class="st">'predicted'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">len</span>(df_sorted)</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    cum_actual <span class="op">=</span> df_sorted[<span class="st">'actual'</span>].cumsum() <span class="op">/</span> df_sorted[<span class="st">'actual'</span>].<span class="bu">sum</span>()</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    gini_model <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> <span class="dv">2</span> <span class="op">*</span> cum_actual.mean()</span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    df_perfect <span class="op">=</span> df.sort_values(<span class="st">'actual'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    cum_perfect <span class="op">=</span> df_perfect[<span class="st">'actual'</span>].cumsum() <span class="op">/</span> df_perfect[<span class="st">'actual'</span>].<span class="bu">sum</span>()</span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    gini_perfect <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> <span class="dv">2</span> <span class="op">*</span> cum_perfect.mean()</span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> gini_model <span class="op">/</span> gini_perfect</span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Frequency Gini: how well does each model rank policies by actual claim count?</span></span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>glm_freq_pred_count_te  <span class="op">=</span> glm_freq.predict(sm.add_constant(X_fr_te), offset<span class="op">=</span>np.log(exp_te))</span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>gini_results <span class="op">=</span> pd.DataFrame([</span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'Model'</span>: <span class="st">'GLM'</span>,        <span class="st">'Frequency Gini'</span>: gini(y_fr_te, glm_freq_pred_count_te),</span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>                            <span class="st">'Pure Premium Gini'</span>: gini(y_fr_te, glm_pp)},</span>
-<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'Model'</span>: <span class="st">'XGBoost'</span>,    <span class="st">'Frequency Gini'</span>: gini(y_fr_te, xgb_freq_pred_rate <span class="op">*</span> exp_te),</span>
-<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>                            <span class="st">'Pure Premium Gini'</span>: gini(y_fr_te, xgb_pp)},</span>
-<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'Model'</span>: <span class="st">'Neural Net'</span>, <span class="st">'Frequency Gini'</span>: gini(y_fr_te, nn_freq_pred_rate <span class="op">*</span> exp_te),</span>
-<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>                            <span class="st">'Pure Premium Gini'</span>: gini(y_fr_te, nn_pp)},</span>
-<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>]).set_index(<span class="st">'Model'</span>)</span>
-<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(gini_results.to_string())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="gini" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gini(actual, predicted):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Normalised Gini coefficient — 1 is perfect ranking, 0 is random.</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Ranks policies by predicted risk, then measures how much of the actual claim</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">    volume is concentrated in the top-ranked policies. Normalising by the score a</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">    perfect ranker would achieve makes the result comparable across datasets.</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pd.DataFrame({<span class="st">'actual'</span>: actual, <span class="st">'predicted'</span>: predicted})</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    df_sorted <span class="op">=</span> df.sort_values(<span class="st">'predicted'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    cum_actual <span class="op">=</span> df_sorted[<span class="st">'actual'</span>].cumsum() <span class="op">/</span> df_sorted[<span class="st">'actual'</span>].<span class="bu">sum</span>()</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    gini_model <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> <span class="dv">2</span> <span class="op">*</span> cum_actual.mean()</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    df_perfect <span class="op">=</span> df.sort_values(<span class="st">'actual'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    cum_perfect <span class="op">=</span> df_perfect[<span class="st">'actual'</span>].cumsum() <span class="op">/</span> df_perfect[<span class="st">'actual'</span>].<span class="bu">sum</span>()</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    gini_perfect <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> <span class="dv">2</span> <span class="op">*</span> cum_perfect.mean()</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> gini_model <span class="op">/</span> gini_perfect</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Frequency Gini ranks by expected claim COUNT (rate x exposure), since the actual</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="co"># being ranked is a count. Pure premium Gini ranks by expected cost.</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>gini_results <span class="op">=</span> pd.DataFrame([</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Model'</span>: m,</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Frequency Gini'</span>:    gini(y_fr_te, preds[m][<span class="st">'freq_test_rate'</span>] <span class="op">*</span> exp_te),</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Pure Premium Gini'</span>: gini(y_fr_te, pp_models[m]),</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> m <span class="kw">in</span> MODELS</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>]).set_index(<span class="st">'Model'</span>)</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(gini_results.<span class="bu">round</span>(<span class="dv">4</span>).to_string())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>            Frequency Gini  Pure Premium Gini
 Model                                        
-GLM               0.264610           0.155267
-XGBoost           0.381149           0.277778
-Neural Net        0.321164           0.201463</code></pre>
+GLM                 0.2660             0.1365
+XGBoost             0.3565             0.2433
+Neural Net          0.3254             0.1853</code></pre>
 </div>
 </div>
-<div id="lorenz-curves" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:47:09.632074Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:47:09.632015Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:47:10.025286Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:47:10.024843Z&quot;}}" data-execution_count="14">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lorenz(actual, predicted):</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns (x, y) Lorenz curve coordinates."""</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pd.DataFrame({<span class="st">'actual'</span>: actual, <span class="st">'predicted'</span>: predicted})</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> df.sort_values(<span class="st">'predicted'</span>, ascending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="bu">len</span>(df))</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> df[<span class="st">'actual'</span>].cumsum() <span class="op">/</span> df[<span class="st">'actual'</span>].<span class="bu">sum</span>()</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x, y.values</span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">7</span>))</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], <span class="st">'k--'</span>, label<span class="op">=</span><span class="st">'Random'</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, freq_pred <span class="kw">in</span> [</span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'GLM'</span>,        glm_freq_pred_count_te),</span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'XGBoost'</span>,    xgb_freq_pred_rate <span class="op">*</span> exp_te),</span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'Neural Net'</span>, nn_freq_pred_rate <span class="op">*</span> exp_te),</span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>]:</span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> gini(y_fr_te, freq_pred)</span>
-<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> lorenz(y_fr_te, freq_pred)</span>
-<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>    ax.plot(x, y, label<span class="op">=</span><span class="ss">f'</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss"> (Gini=</span><span class="sc">{</span>g<span class="sc">:.3f}</span><span class="ss">)'</span>, color<span class="op">=</span>colors_map[name])</span>
-<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Proportion of Policies (ranked by predicted risk, low to high)'</span>)</span>
-<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Proportion of Claims'</span>)</span>
-<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Lorenz Curves — Frequency Model Risk Discrimination'</span>)</span>
-<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
-<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/21_lorenz_curves.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="lorenz-curves" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lorenz(actual, predicted):</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns (x, y) Lorenz curve coordinates."""</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pd.DataFrame({<span class="st">'actual'</span>: actual, <span class="st">'predicted'</span>: predicted})</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> df.sort_values(<span class="st">'predicted'</span>, ascending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="bu">len</span>(df))</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> df[<span class="st">'actual'</span>].cumsum() <span class="op">/</span> df[<span class="st">'actual'</span>].<span class="bu">sum</span>()</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x, y.values</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">7</span>))</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], <span class="st">'k--'</span>, label<span class="op">=</span><span class="st">'Random'</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> MODELS:</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    freq_pred <span class="op">=</span> preds[name][<span class="st">'freq_test_rate'</span>] <span class="op">*</span> exp_te</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> gini_results.loc[name, <span class="st">'Frequency Gini'</span>]</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> lorenz(y_fr_te, freq_pred)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    ax.plot(x, y, label<span class="op">=</span><span class="ss">f'</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss"> (Gini=</span><span class="sc">{</span>g<span class="sc">:.3f}</span><span class="ss">)'</span>, color<span class="op">=</span>colors_map[name])</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Proportion of Policies (ranked by predicted risk, low to high)'</span>)</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Proportion of Claims'</span>)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Lorenz Curves — Frequency Model Risk Discrimination'</span>)</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/21_lorenz_curves.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="05_comparison_files/figure-html/cell-15-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="05_comparison_files/figure-html/cell-9-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="decile-lift" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:47:10.026321Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:47:10.026251Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:47:10.144954Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:47:10.144579Z&quot;}}" data-execution_count="15">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Decile lift chart comparing all three frequency models</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">5</span>))</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>models_freq <span class="op">=</span> [</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'GLM'</span>,        glm_freq_pred_count_te <span class="op">/</span> exp_te),</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'XGBoost'</span>,    xgb_freq_pred_rate),</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'Neural Net'</span>, nn_freq_pred_rate),</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>width <span class="op">=</span> <span class="fl">0.25</span></span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="dv">11</span>)</span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, (name, pred_rate) <span class="kw">in</span> <span class="bu">enumerate</span>(models_freq):</span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    df_lift <span class="op">=</span> pd.DataFrame({<span class="st">'actual'</span>: y_fr_te, <span class="st">'predicted'</span>: pred_rate})</span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>    df_lift[<span class="st">'decile'</span>] <span class="op">=</span> pd.qcut(df_lift[<span class="st">'predicted'</span>], q<span class="op">=</span><span class="dv">10</span>, labels<span class="op">=</span><span class="va">False</span>) <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>    lift <span class="op">=</span> df_lift.groupby(<span class="st">'decile'</span>)[<span class="st">'actual'</span>].mean()</span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>    ax.bar(x <span class="op">+</span> i <span class="op">*</span> width <span class="op">-</span> width, lift, width<span class="op">=</span>width,</span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span>name, color<span class="op">=</span>colors_map[name], edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(x)</span>
-<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Decile (1 = lowest predicted risk, 10 = highest)'</span>)</span>
-<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Mean Actual Claim Count'</span>)</span>
-<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Decile Lift Chart — Frequency Models'</span>)</span>
-<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
-<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/22_decile_lift_comparison.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="decile-lift" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Decile lift chart comparing all three frequency models.</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># duplicates='drop' matters here: the neural net clips negative rates to zero, so</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># many predictions are tied and some decile boundaries land on the same value.</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Without it qcut raises, or (worse) produces wildly unequal groups that distort</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co"># the gradient. A model with ties may therefore end up with fewer than 10 groups.</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">5</span>))</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>width <span class="op">=</span> <span class="fl">0.25</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>lift_table <span class="op">=</span> {}</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, name <span class="kw">in</span> <span class="bu">enumerate</span>(MODELS):</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    df_lift <span class="op">=</span> pd.DataFrame({<span class="st">'actual'</span>: y_fr_te, <span class="st">'predicted'</span>: preds[name][<span class="st">'freq_test_rate'</span>]})</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    df_lift[<span class="st">'decile'</span>] <span class="op">=</span> pd.qcut(df_lift[<span class="st">'predicted'</span>], q<span class="op">=</span><span class="dv">10</span>, labels<span class="op">=</span><span class="va">False</span>, duplicates<span class="op">=</span><span class="st">'drop'</span>) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    lift <span class="op">=</span> df_lift.groupby(<span class="st">'decile'</span>)[<span class="st">'actual'</span>].mean()</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    lift_table[name] <span class="op">=</span> lift</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    ax.bar(lift.index <span class="op">+</span> i <span class="op">*</span> width <span class="op">-</span> width, lift.values, width<span class="op">=</span>width,</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span>name, color<span class="op">=</span>colors_map[name], edgecolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(np.arange(<span class="dv">1</span>, <span class="bu">max</span>(<span class="bu">len</span>(v) <span class="cf">for</span> v <span class="kw">in</span> lift_table.values()) <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Decile (1 = lowest predicted risk, highest = riskiest)'</span>)</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Mean Actual Claim Count'</span>)</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Decile Lift Chart — Frequency Models'</span>)</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/22_decile_lift_comparison.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>lift_df <span class="op">=</span> pd.DataFrame(lift_table)</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Mean actual claim count by predicted-risk decile:'</span>)</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(lift_df.<span class="bu">round</span>(<span class="dv">4</span>).to_string())</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">Top-to-bottom lift (riskiest group / safest group):'</span>)</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> MODELS:</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> lift_table[name].dropna()</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>    n_groups <span class="op">=</span> <span class="bu">len</span>(s)</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>    note <span class="op">=</span> <span class="st">''</span> <span class="cf">if</span> n_groups <span class="op">==</span> <span class="dv">10</span> <span class="cf">else</span> <span class="ss">f'  [</span><span class="sc">{</span>n_groups<span class="sc">}</span><span class="ss"> groups — tied predictions]'</span></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'  </span><span class="sc">{</span>name<span class="sc">:12}</span><span class="ss"> </span><span class="sc">{</span>s<span class="sc">.</span>iloc[<span class="op">-</span><span class="dv">1</span>] <span class="op">/</span> s<span class="sc">.</span>iloc[<span class="dv">0</span>]<span class="sc">:.2f}</span><span class="ss">x</span><span class="sc">{</span>note<span class="sc">}</span><span class="ss">'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="05_comparison_files/figure-html/cell-16-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="05_comparison_files/figure-html/cell-10-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean actual claim count by predicted-risk decile:
+           GLM  XGBoost  Neural Net
+decile                             
+1       0.0321   0.0264      0.0294
+2       0.0393   0.0317      0.0372
+3       0.0485   0.0379      0.0402
+4       0.0490   0.0375      0.0395
+5       0.0498   0.0491      0.0457
+6       0.0540   0.0468      0.0504
+7       0.0519   0.0538      0.0535
+8       0.0585   0.0516      0.0568
+9       0.0648   0.0703      0.0649
+10      0.0860   0.1288      0.1178
+
+Top-to-bottom lift (riskiest group / safest group):
+  GLM          2.68x
+  XGBoost      4.88x
+  Neural Net   4.01x</code></pre>
 </div>
-<p><strong>Risk discrimination analysis:</strong></p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Model</th>
-<th>Frequency Gini</th>
-<th>Pure Premium Gini</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>GLM</td>
-<td>0.265</td>
-<td>0.110</td>
-</tr>
-<tr class="even">
-<td><strong>XGBoost</strong></td>
-<td><strong>0.381</strong></td>
-<td><strong>0.179</strong></td>
-</tr>
-<tr class="odd">
-<td>Neural Net</td>
-<td>0.321</td>
-<td>0.103</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Frequency Gini:</strong> XGBoost wins decisively (0.381 vs GLM’s 0.265 — a <strong>44% relative improvement</strong>). The neural net captures most of XGBoost’s gain (0.321) but doesn’t reach it. This quantifies what the Poisson Deviance suggested: non-linear models extract meaningfully more signal from BonusMalus and DrivAge.</p>
-<p><strong>Pure premium Gini</strong> tells a more interesting story. XGBoost is still the clear winner (0.179), but <strong>the GLM (0.110) actually beats the neural net (0.103)</strong> despite having the worst frequency Gini. This is because the GLM’s severity component is the best-calibrated of the three (Gamma Deviance 1.03 vs 1.36/1.40) — when frequency × severity is combined, the severity advantage partially offsets the frequency disadvantage. The neural net’s weaker severity model drags its end-to-end discrimination down.</p>
-<p><strong>Practical reading:</strong> - XGBoost ranks risk best end-to-end. The 0.179 Gini means it can identify ~50% more claim cost concentrated in the top deciles than a random selector at the same volume. - The Lorenz curve gap between XGBoost and GLM is largest in the top three deciles — exactly where pricing decisions are most consequential. - The neural net is not justified on this dataset: it costs interpretability without delivering ranking power.</p>
+</div>
+<section id="reading-the-discrimination-results" class="level3">
+<h3 class="anchored" data-anchor-id="reading-the-discrimination-results">Reading the discrimination results</h3>
+<p><strong>Frequency Gini:</strong> XGBoost leads clearly — 0.357 vs the GLM’s 0.266, a +34% relative improvement, matched by the lift chart (top-decile/bottom-decile ratio of 4.88x vs 2.68x). The Neural Net sits between the two on both measures (Gini 0.325, lift 4.01x). Unlike the severity race, this gap is real and reproduces outside a single split — treat it at face value rather than discounting it the way Appendix B’s severity result had to be discounted.</p>
+<p><strong>Pure premium Gini follows the same ranking but compresses for the ML models</strong> (GLM 0.137, XGBoost 0.243, Neural Net 0.185): XGBoost’s frequency-driven ranking advantage carries through, but its collapsed severity predictions from Part 1 dilute how much of that advantage survives the multiplication into pure premium.</p>
+<p><strong>The lift table has a discontinuity worth naming.</strong> Deciles 1–9 rise gradually and fairly evenly for all three models (roughly 0.03 → 0.06–0.07 actual claim rate), but decile 10 jumps sharply above decile 9 in every model (GLM 0.054 → 0.086, XGBoost 0.070 → 0.129, Neural Net 0.065 → 0.118). Most of each model’s discrimination is concentrated in isolating the riskiest ~10% of the book rather than fine ranking across the rest. Practically, this means a coarse “top-decile surcharge” captures most of the available signal regardless of which of these three models sets the tiers — the choice of model matters far more for <em>how large</em> that top tier’s premium should be than for <em>identifying</em> who belongs in it.</p>
+</section>
 </section>
 <section id="part-4-interpretability-vs-accuracy" class="level2">
 <h2 class="anchored" data-anchor-id="part-4-interpretability-vs-accuracy">Part 4: Interpretability vs Accuracy</h2>
 <p>In an Australian APRA-regulated context, pricing models must be explainable. APRA’s Prudential Standard GPS 116 requires that premium rating factors are documented and defensible. This section evaluates each model’s regulatory viability alongside its predictive performance.</p>
-<div id="interpretability-table" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:47:10.146047Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:47:10.145982Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:47:10.149466Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:47:10.149121Z&quot;}}" data-execution_count="16">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>interp <span class="op">=</span> pd.DataFrame([</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Model'</span>:              <span class="st">'GLM'</span>,</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Frequency Deviance'</span>: <span class="dv">46581</span>,</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Severity Deviance'</span>:  <span class="fl">1.03</span>,</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Freq Gini'</span>:          <span class="fl">0.265</span>,</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">'PP Gini'</span>:            <span class="fl">0.110</span>,</span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Interpretability'</span>:   <span class="st">'High'</span>,</span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Regulatory risk'</span>:    <span class="st">'Low'</span>,</span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Notes'</span>:              <span class="st">'Coefficients directly auditable; multiplicative rating factors standard in industry'</span></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Model'</span>:              <span class="st">'XGBoost'</span>,</span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Frequency Deviance'</span>: <span class="dv">43579</span>,</span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Severity Deviance'</span>:  <span class="fl">1.36</span>,</span>
-<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Freq Gini'</span>:          <span class="fl">0.381</span>,</span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">'PP Gini'</span>:            <span class="fl">0.179</span>,</span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Interpretability'</span>:   <span class="st">'Medium'</span>,</span>
-<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Regulatory risk'</span>:    <span class="st">'Medium'</span>,</span>
-<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Notes'</span>:              <span class="st">'SHAP values provide local explanations; partial dependence shows learned relationships'</span></span>
-<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Model'</span>:              <span class="st">'Neural Net'</span>,</span>
-<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Frequency Deviance'</span>: <span class="dv">44368</span>,</span>
-<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Severity Deviance'</span>:  <span class="fl">1.40</span>,</span>
-<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Freq Gini'</span>:          <span class="fl">0.321</span>,</span>
-<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>        <span class="st">'PP Gini'</span>:            <span class="fl">0.103</span>,</span>
-<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Interpretability'</span>:   <span class="st">'Low'</span>,</span>
-<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Regulatory risk'</span>:    <span class="st">'High'</span>,</span>
-<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Notes'</span>:              <span class="st">'Black-box; requires additional explanation tooling (SHAP, LIME) before regulatory submission'</span></span>
-<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>]).set_index(<span class="st">'Model'</span>)</span>
-<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(interp[[<span class="st">'Frequency Deviance'</span>, <span class="st">'Severity Deviance'</span>, <span class="st">'Freq Gini'</span>, <span class="st">'PP Gini'</span>, <span class="st">'Interpretability'</span>, <span class="st">'Regulatory risk'</span>]].to_string())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="interpretability-table" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Interpretability and regulatory risk are judgement calls, not measurements —</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># they are the only hardcoded values here. Everything quantitative is loaded.</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>qualitative <span class="op">=</span> {</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'GLM'</span>: {</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Interpretability'</span>: <span class="st">'High'</span>,   <span class="st">'Regulatory risk'</span>: <span class="st">'Low'</span>,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Notes'</span>: <span class="st">'Coefficients directly auditable; multiplicative rating factors standard in industry'</span>,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'XGBoost'</span>: {</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Interpretability'</span>: <span class="st">'Medium'</span>, <span class="st">'Regulatory risk'</span>: <span class="st">'Medium'</span>,</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Notes'</span>: <span class="st">'SHAP values provide local explanations; partial dependence shows learned relationships'</span>,</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Neural Net'</span>: {</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Interpretability'</span>: <span class="st">'Low'</span>,    <span class="st">'Regulatory risk'</span>: <span class="st">'High'</span>,</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Notes'</span>: <span class="st">'Black-box; requires additional explanation tooling (SHAP, LIME) before regulatory submission'</span>,</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>interp <span class="op">=</span> pd.DataFrame([</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Model'</span>:              m,</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Frequency Deviance'</span>: metrics[m][<span class="st">'frequency'</span>][<span class="st">'PoissonDeviance'</span>],</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Severity Deviance'</span>:  metrics[m][<span class="st">'severity'</span>][<span class="st">'GammaDeviance'</span>],</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Freq Gini'</span>:          gini_results.loc[m, <span class="st">'Frequency Gini'</span>],</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">'PP Gini'</span>:            gini_results.loc[m, <span class="st">'Pure Premium Gini'</span>],</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>qualitative[m],</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> m <span class="kw">in</span> MODELS</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>]).set_index(<span class="st">'Model'</span>)</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(interp[[<span class="st">'Frequency Deviance'</span>, <span class="st">'Severity Deviance'</span>, <span class="st">'Freq Gini'</span>, <span class="st">'PP Gini'</span>,</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>              <span class="st">'Interpretability'</span>, <span class="st">'Regulatory risk'</span>]].<span class="bu">round</span>(<span class="dv">4</span>).to_string())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>            Frequency Deviance  Severity Deviance  Freq Gini  PP Gini Interpretability Regulatory risk
 Model                                                                                                 
-GLM                      46581               1.03      0.265    0.110             High             Low
-XGBoost                  43579               1.36      0.381    0.179           Medium          Medium
-Neural Net               44368               1.40      0.321    0.103              Low            High</code></pre>
+GLM                 43585.7326             1.0595     0.2660   0.1365             High             Low
+XGBoost             41478.6442             1.3611     0.3565   0.2433           Medium          Medium
+Neural Net          42250.4597             1.4114     0.3254   0.1853              Low            High</code></pre>
 </div>
 </div>
-<div id="radar-chart" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-05-12T05:47:10.150502Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-05-12T05:47:10.150437Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-05-12T05:47:10.258642Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-05-12T05:47:10.258300Z&quot;}}" data-execution_count="17">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Spider / radar chart: accuracy vs interpretability tradeoff</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.patches <span class="im">import</span> FancyArrowPatch</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalise metrics to [0, 1] (higher = better for all dimensions)</span></span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Frequency Deviance: lower is better → invert</span></span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>freq_devs <span class="op">=</span> np.array([<span class="dv">46581</span>, <span class="dv">43579</span>, <span class="dv">44368</span>])</span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>sev_devs  <span class="op">=</span> np.array([<span class="fl">1.03</span>, <span class="fl">1.36</span>, <span class="fl">1.40</span>])</span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>interp_score <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">0.5</span>, <span class="fl">0.2</span>])  <span class="co"># subjective</span></span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>reg_score    <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">0.6</span>, <span class="fl">0.2</span>])  <span class="co"># subjective</span></span>
-<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>freq_norm  <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> (freq_devs <span class="op">-</span> freq_devs.<span class="bu">min</span>()) <span class="op">/</span> (freq_devs.<span class="bu">max</span>() <span class="op">-</span> freq_devs.<span class="bu">min</span>())</span>
-<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>sev_norm   <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> (sev_devs  <span class="op">-</span> sev_devs.<span class="bu">min</span>())  <span class="op">/</span> (sev_devs.<span class="bu">max</span>()  <span class="op">-</span> sev_devs.<span class="bu">min</span>())</span>
-<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>categories <span class="op">=</span> [<span class="st">'Freq</span><span class="ch">\n</span><span class="st">Deviance'</span>, <span class="st">'Sev</span><span class="ch">\n</span><span class="st">Deviance'</span>, <span class="st">'Interpretability'</span>, <span class="st">'Regulatory</span><span class="ch">\n</span><span class="st">Readiness'</span>]</span>
-<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="bu">len</span>(categories)</span>
-<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>angles <span class="op">=</span> [n <span class="op">/</span> <span class="bu">float</span>(N) <span class="op">*</span> <span class="dv">2</span> <span class="op">*</span> np.pi <span class="cf">for</span> n <span class="kw">in</span> <span class="bu">range</span>(N)]</span>
-<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>angles <span class="op">+=</span> angles[:<span class="dv">1</span>]</span>
-<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">7</span>), subplot_kw<span class="op">=</span>{<span class="st">'polar'</span>: <span class="va">True</span>})</span>
-<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>models_scores <span class="op">=</span> [</span>
-<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'GLM'</span>,        [freq_norm[<span class="dv">0</span>], sev_norm[<span class="dv">0</span>], interp_score[<span class="dv">0</span>], reg_score[<span class="dv">0</span>]]),</span>
-<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'XGBoost'</span>,    [freq_norm[<span class="dv">1</span>], sev_norm[<span class="dv">1</span>], interp_score[<span class="dv">1</span>], reg_score[<span class="dv">1</span>]]),</span>
-<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'Neural Net'</span>, [freq_norm[<span class="dv">2</span>], sev_norm[<span class="dv">2</span>], interp_score[<span class="dv">2</span>], reg_score[<span class="dv">2</span>]]),</span>
-<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, scores <span class="kw">in</span> models_scores:</span>
-<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a>    vals <span class="op">=</span> scores <span class="op">+</span> scores[:<span class="dv">1</span>]</span>
-<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a>    ax.plot(angles, vals, label<span class="op">=</span>name, color<span class="op">=</span>colors_map[name], linewidth<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a>    ax.fill(angles, vals, alpha<span class="op">=</span><span class="fl">0.1</span>, color<span class="op">=</span>colors_map[name])</span>
-<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(angles[:<span class="op">-</span><span class="dv">1</span>])</span>
-<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels(categories)</span>
-<span id="cb28-33"><a href="#cb28-33" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb28-34"><a href="#cb28-34" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Accuracy vs Interpretability Tradeoff'</span>, size<span class="op">=</span><span class="dv">13</span>, pad<span class="op">=</span><span class="dv">20</span>)</span>
-<span id="cb28-35"><a href="#cb28-35" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">'upper right'</span>, bbox_to_anchor<span class="op">=</span>(<span class="fl">1.3</span>, <span class="fl">1.1</span>))</span>
-<span id="cb28-36"><a href="#cb28-36" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb28-37"><a href="#cb28-37" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/23_radar_chart.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb28-38"><a href="#cb28-38" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="radar-chart" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Spider / radar chart: accuracy vs interpretability tradeoff</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalise each axis to [0, 1] with 1 = best. Deviances are lower-is-better, so</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># they are inverted. Note this is a RELATIVE scale — the best model scores 1 on</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># each axis by construction, so the chart shows ranking, not absolute quality.</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>freq_devs <span class="op">=</span> interp[<span class="st">'Frequency Deviance'</span>].values</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>sev_devs  <span class="op">=</span> interp[<span class="st">'Severity Deviance'</span>].values</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>interp_score <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">0.5</span>, <span class="fl">0.2</span>])  <span class="co"># subjective, matches the High/Medium/Low above</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>reg_score    <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">0.6</span>, <span class="fl">0.2</span>])  <span class="co"># subjective</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> invert_norm(v):</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    span <span class="op">=</span> v.<span class="bu">max</span>() <span class="op">-</span> v.<span class="bu">min</span>()</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.ones_like(v) <span class="cf">if</span> span <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">1</span> <span class="op">-</span> (v <span class="op">-</span> v.<span class="bu">min</span>()) <span class="op">/</span> span</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>freq_norm <span class="op">=</span> invert_norm(freq_devs)</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>sev_norm  <span class="op">=</span> invert_norm(sev_devs)</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>categories <span class="op">=</span> [<span class="st">'Freq</span><span class="ch">\n</span><span class="st">Deviance'</span>, <span class="st">'Sev</span><span class="ch">\n</span><span class="st">Deviance'</span>, <span class="st">'Interpretability'</span>, <span class="st">'Regulatory</span><span class="ch">\n</span><span class="st">Readiness'</span>]</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="bu">len</span>(categories)</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>angles <span class="op">=</span> [n <span class="op">/</span> <span class="bu">float</span>(N) <span class="op">*</span> <span class="dv">2</span> <span class="op">*</span> np.pi <span class="cf">for</span> n <span class="kw">in</span> <span class="bu">range</span>(N)]</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>angles <span class="op">+=</span> angles[:<span class="dv">1</span>]</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">7</span>), subplot_kw<span class="op">=</span>{<span class="st">'polar'</span>: <span class="va">True</span>})</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, name <span class="kw">in</span> <span class="bu">enumerate</span>(MODELS):</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> [freq_norm[i], sev_norm[i], interp_score[i], reg_score[i]]</span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>    vals <span class="op">=</span> scores <span class="op">+</span> scores[:<span class="dv">1</span>]</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>    ax.plot(angles, vals, label<span class="op">=</span>name, color<span class="op">=</span>colors_map[name], linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>    ax.fill(angles, vals, alpha<span class="op">=</span><span class="fl">0.1</span>, color<span class="op">=</span>colors_map[name])</span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(angles[:<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>ax.set_xticklabels(categories)</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Accuracy vs Interpretability Tradeoff'</span>, size<span class="op">=</span><span class="dv">13</span>, pad<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">'upper right'</span>, bbox_to_anchor<span class="op">=</span>(<span class="fl">1.3</span>, <span class="fl">1.1</span>))</span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'../results/23_radar_chart.png'</span>, dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="05_comparison_files/figure-html/cell-18-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="05_comparison_files/figure-html/cell-12-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1023,28 +753,20 @@ Neural Net               44368               1.40      0.321    0.103           
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
 <section id="model-recommendation" class="level3">
 <h3 class="anchored" data-anchor-id="model-recommendation">Model recommendation</h3>
-<p><strong>XGBoost for frequency, GLM for severity — a hybrid two-stage pricer.</strong></p>
-<p>For frequency, XGBoost is the clear winner: lowest Poisson Deviance (43,579 vs 46,581 for GLM), highest frequency Gini (0.381 vs 0.265 — a 44% relative improvement in risk discrimination), and the highest pure premium Gini end-to-end (0.179 vs 0.110). These gains come from capturing the U-shaped DrivAge curve and bounded tail behaviour on BonusMalus that the GLM’s log-linear form cannot represent.</p>
-<p>For severity, the GLM is preferred. All three severity models have indistinguishable MAE (938–1,079 EUR), but the Gamma GLM has the best distributional calibration (Gamma Deviance 1.03 vs 1.36/1.40) and is fully auditable. There is no accuracy gain from a more complex severity model on this data — the signal ceiling is set by the policy features, not the model.</p>
-<p>The neural net does not earn its place on this dataset. It trails XGBoost on every frequency metric, ties on severity, and has the <em>worst</em> end-to-end pure premium Gini (0.103, behind even the GLM). Tabular insurance data with bounded numeric features and one-hot categoricals plays to tree models’ strengths; neural networks need either much more data or richer feature interactions to compete.</p>
+<p><strong>Frequency: recommend XGBoost.</strong> The Gini improvement (0.357 vs 0.266, +34% relative) and lift improvement (4.88x vs 2.68x) are large enough that “defer to interpretability when close” doesn’t apply here — this isn’t close. The honest recommendation is two-track: keep the GLM where full coefficient-level auditability is required today, and treat XGBoost (with SHAP-based local explanations) as the target once that explainability work is done, since the accuracy left on the table by staying with the GLM indefinitely is real.</p>
+<p><strong>Severity: recommend the Gamma GLM, unambiguously.</strong> XGBoost and the Neural Net both fail to beat an intercept-only baseline (Gamma Deviance 1.36 and 1.41 vs ≈ 1.06 for predicting the mean for everyone); the GLM is the only one of the three that has extracted any real signal from the covariates. This isn’t a close call resolved by interpretability — it’s the only model of the three that works, and it matches the wider investigation in notebook 02’s Appendix B: six error distributions cluster within 0.03 percentage points of each other, a tuned gradient booster’s edge doesn’t survive cross-validation, and the severity ceiling here is a property of the data (near-zero premium information in claim size given these covariates), not of model class.</p>
+<p><strong>Because severity dominates the pure premium multiplication and only the GLM is severity-sound, the practical recommendation is a hybrid</strong>: pair XGBoost’s frequency model with the GLM’s severity model, rather than reading the three “pure” columns compared above as the only options. That combination isn’t benchmarked directly above — it would need its own pure premium column to confirm — but it follows directly from treating frequency and severity as the separate decisions they are, which the metrics in Parts 1 and 3 support independently of each other.</p>
+<p><strong>One number that doesn’t belong in a rate card yet:</strong> the pure premium EUR figures in Part 2 (all models, and the empirical benchmark) carry the frequency/severity join-gap inflation described there — roughly 27% of claim events have no matching cost record, and none of the models above correct for it. That’s a fix to make before any of these premium levels are quoted as absolute pricing, not a reason to revisit the model rankings above.</p>
 </section>
 <section id="regulatory-framing-apra-gps-116" class="level3">
 <h3 class="anchored" data-anchor-id="regulatory-framing-apra-gps-116">Regulatory framing (APRA / GPS 116)</h3>
-<p>Under APRA’s Prudential Standard GPS 116, premium rating factors must be documented and defensible. The hybrid design is regulator-friendly:</p>
+<p>Under APRA’s Prudential Standard GPS 116, premium rating factors must be documented and defensible. This is a property of the model class, not of this dataset’s results, so it holds regardless of what the rerun shows:</p>
 <ul>
-<li><strong>GLM severity:</strong> standard actuarial practice. Multiplicative rating factors readable straight from coefficients.</li>
-<li><strong>XGBoost frequency:</strong> defensible with SHAP values for individual-policy explanations, partial dependence plots for feature-level transparency, and (if required) monotonicity constraints on BonusMalus to guarantee that worse driving never lowers premium.</li>
-<li><strong>Neural network:</strong> would require materially more documentation and explanation tooling to satisfy GPS 116. Not worth the cost given it does not outperform XGBoost.</li>
+<li><strong>GLM:</strong> standard actuarial practice. With a log link, coefficients exponentiate directly into multiplicative rating factors — the form regulators and pricing actuaries already expect, with no additional explanation layer required.</li>
+<li><strong>XGBoost:</strong> SHAP values and partial dependence plots make the model locally and globally interpretable, but that interpretation is a derived artefact, not the model itself — an extra layer of tooling and documentation a regulator has to be walked through, rather than a coefficient table they can read directly.</li>
+<li><strong>Neural Net:</strong> the least defensible of the three without significant additional explainability work (SHAP, LIME, or similar), and the SHAP background/summary artefacts for it are not currently part of this notebook’s pipeline.</li>
 </ul>
-</section>
-<section id="key-findings" class="level3">
-<h3 class="anchored" data-anchor-id="key-findings">Key findings</h3>
-<ol type="1">
-<li><p><strong>Severity is data-limited, not model-limited.</strong> All three models converge to similar MAE (938–1,079 EUR). Adding complexity from GLM to XGBoost to a neural network moves the needle by ~2%. Policy features do not predict individual claim cost — the ceiling is in the data.</p></li>
-<li><p><strong>Frequency benefits from non-linearity.</strong> XGBoost’s Gini of 0.381 vs the GLM’s 0.265 quantifies the pricing advantage. The GLM’s monotone log-linear assumption misses the young-driver spike and over-extrapolates to the 150+ BonusMalus tier (predicting 3,317 EUR per policy vs XGBoost’s 786 EUR — a 4× difference driven entirely by parametric form, not data).</p></li>
-<li><p><strong>XGBoost is the practical choice.</strong> Best frequency metrics, best pure-premium Gini, mid-tier interpretability via SHAP, and the smallest gap-to-production for a regulated insurer. Hybrid with the GLM severity model gives the cleanest two-stage design.</p></li>
-<li><p><strong>The GLM remains the baseline to beat — and it does beat the NN on pure premium Gini.</strong> Its severity calibration is strong enough that, despite frequency under-performance, it ranks pure premium risk <em>better</em> than the neural net. This is a useful caution against assuming “deeper = better” on tabular data.</p></li>
-</ol>
+<p>None of this changes with the numbers above — a materially more accurate frequency model is still worth adopting, but adopting it means budgeting for the explainability work GPS 116 requires, not treating XGBoost’s Gini advantage as a free win.</p>
 
 
 </section>
