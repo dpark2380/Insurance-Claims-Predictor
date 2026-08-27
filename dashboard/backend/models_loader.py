@@ -34,37 +34,44 @@ class Bundle:
     def __init__(self):
         with open(os.path.join(MODELS_DIR, 'preprocessing.pkl'), 'rb') as f:
             self.preprocessing = pickle.load(f)
-        self.feature_columns = self.preprocessing['feature_columns']
-        self.numeric_features = self.preprocessing['numeric_features']
-        self.categorical_features = self.preprocessing['categorical_features']
+        self.feature_columns = self.preprocessing['columns']
+        self.categorical_features = self.preprocessing['cat_cols']
+        self.numeric_features = [c for c in self.preprocessing['features']
+                                  if c not in self.categorical_features]
 
         with open(os.path.join(MODELS_DIR, 'portfolio_stats.json')) as f:
             self.portfolio_stats = json.load(f)
 
+        # Plain coefficient arrays: [const, then one per column in self.feature_columns].
         with open(os.path.join(MODELS_DIR, 'glm_freq.pkl'), 'rb') as f:
-            self.glm_freq_params = pickle.load(f)['params']
+            self.glm_freq_params = pickle.load(f)
         with open(os.path.join(MODELS_DIR, 'glm_sev.pkl'), 'rb') as f:
-            self.glm_sev_params = pickle.load(f)['params']
+            self.glm_sev_params = pickle.load(f)
 
         self.xgb_freq = xgb.XGBRegressor()
         self.xgb_freq.load_model(os.path.join(MODELS_DIR, 'xgb_freq.json'))
         self.xgb_sev = xgb.XGBRegressor()
         self.xgb_sev.load_model(os.path.join(MODELS_DIR, 'xgb_sev.json'))
 
-        self.nn_freq, self.nn_freq_mean, self.nn_freq_scale = self._load_nn('nn_freq.pt')
-        self.nn_sev,  self.nn_sev_mean,  self.nn_sev_scale  = self._load_nn('nn_sev.pt')
+        self.nn_freq, self.nn_freq_mean, self.nn_freq_scale = self._load_nn('nn_freq.pt', 'nn_freq_scaler.pkl')
+        self.nn_sev,  self.nn_sev_mean,  self.nn_sev_scale  = self._load_nn('nn_sev.pt', 'nn_sev_scaler.pkl')
 
         # SHAP explainers
         self.bg = np.load(os.path.join(MODELS_DIR, 'shap_background.npy'))
         self.xgb_freq_explainer = shap.TreeExplainer(self.xgb_freq)
         self.xgb_sev_explainer  = shap.TreeExplainer(self.xgb_sev)
 
-    def _load_nn(self, fname):
-        ckpt = torch.load(os.path.join(MODELS_DIR, fname), weights_only=False)
-        net = ClaimNet(ckpt['input_dim'])
-        net.load_state_dict(ckpt['state_dict'])
+    def _load_nn(self, fname, scaler_fname):
+        # Saved as a raw state_dict (torch.save(model.state_dict(), ...)); the fitted
+        # StandardScaler lives separately since a network alone can't rescale new inputs.
+        state_dict = torch.load(os.path.join(MODELS_DIR, fname), weights_only=False)
+        input_dim = state_dict['net.0.weight'].shape[1]
+        net = ClaimNet(input_dim)
+        net.load_state_dict(state_dict)
         net.eval()
-        return net, np.asarray(ckpt['mean'], dtype=np.float32), np.asarray(ckpt['scale'], dtype=np.float32)
+        with open(os.path.join(MODELS_DIR, scaler_fname), 'rb') as f:
+            scaler = pickle.load(f)
+        return net, np.asarray(scaler.mean_, dtype=np.float32), np.asarray(scaler.scale_, dtype=np.float32)
 
     # ── Encoding ──────────────────────────────────────────────────────────────
     def encode(self, policy: dict) -> np.ndarray:
