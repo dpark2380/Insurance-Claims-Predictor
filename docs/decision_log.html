@@ -1,0 +1,1330 @@
+<title>Pricing Decision Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap">
+
+<style>
+:root {
+  --paper:        #f4f6f7;
+  --surface:      #ffffff;
+  --surface-sunk: #e8edef;
+  --ink:          #16202b;
+  --ink-soft:     #42525f;
+  --ink-faint:    #6d7d8b;
+  --rule:         #ccd6dc;
+  --rule-soft:    #e0e7ea;
+  --accent:       #0d6a70;
+  --accent-soft:  #d7e9e9;
+  --accent-ink:   #0a5257;
+  --caution:      #8a5c12;
+  --caution-soft: #f3e7cf;
+  --good:         #2b6a4a;
+  --bad:          #9a3b32;
+  --shadow:       0 1px 2px rgba(22,32,43,.05), 0 10px 28px -20px rgba(22,32,43,.35);
+  --measure: 68ch;
+  --s1: .375rem; --s2: .75rem; --s3: 1.125rem; --s4: 1.75rem;
+  --s5: 2.75rem; --s6: 4.25rem; --s7: 6.5rem;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:  "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono:  "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:        #101820;
+    --surface:      #17212b;
+    --surface-sunk: #0b1219;
+    --ink:          #dce4ea;
+    --ink-soft:     #a1b0bc;
+    --ink-faint:    #778793;
+    --rule:         #2b3945;
+    --rule-soft:    #1f2a34;
+    --accent:       #58b3b6;
+    --accent-soft:  #16383a;
+    --accent-ink:   #8fd2d3;
+    --caution:      #d3a85a;
+    --caution-soft: #2e2617;
+    --good:         #6dbb92;
+    --bad:          #e0857c;
+    --shadow:       0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px rgba(0,0,0,.8);
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper:        #101820;
+  --surface:      #17212b;
+  --surface-sunk: #0b1219;
+  --ink:          #dce4ea;
+  --ink-soft:     #a1b0bc;
+  --ink-faint:    #778793;
+  --rule:         #2b3945;
+  --rule-soft:    #1f2a34;
+  --accent:       #58b3b6;
+  --accent-soft:  #16383a;
+  --accent-ink:   #8fd2d3;
+  --caution:      #d3a85a;
+  --caution-soft: #2e2617;
+  --good:         #6dbb92;
+  --bad:          #e0857c;
+  --shadow:       0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px rgba(0,0,0,.8);
+}
+</style>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0 var(--s4) var(--s7);
+}
+
+.wrap { max-width: 82ch; margin: 0 auto; }
+
+/* ── Type scale ─────────────────────────────────────────────── */
+h1, h2, h3, h4 { font-family: var(--serif); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.4rem, 5.5vw, 3.4rem); font-weight: 700; line-height: 1.08; letter-spacing: -.015em; }
+h2 { font-size: clamp(1.7rem, 3.4vw, 2.15rem); font-weight: 600; line-height: 1.18; letter-spacing: -.01em; }
+h3 { font-size: 1.24rem; font-weight: 600; line-height: 1.3; }
+h4 { font-size: 1.02rem; font-weight: 600; font-family: var(--sans); line-height: 1.4; }
+
+p { margin: 0; max-width: var(--measure); }
+a { color: var(--accent); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px;
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: .7rem;
+  font-weight: 500;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.lede { font-family: var(--serif); font-size: 1.28rem; line-height: 1.55; color: var(--ink-soft); }
+
+.stack       { display: flex; flex-direction: column; gap: var(--s3); }
+.stack-tight { display: flex; flex-direction: column; gap: var(--s2); }
+.stack-wide  { display: flex; flex-direction: column; gap: var(--s4); }
+
+code, .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+code {
+  font-size: .86em;
+  background: var(--surface-sunk);
+  padding: .12em .38em;
+  border-radius: 3px;
+}
+.num { font-weight: 500; color: var(--ink); }
+
+/* ── Masthead ───────────────────────────────────────────────── */
+.masthead { padding: var(--s6) 0 var(--s5); border-bottom: 2px solid var(--ink); }
+.masthead .eyebrow { display: block; margin-bottom: var(--s2); }
+.masthead h1 { margin-bottom: var(--s3); }
+.masthead .lede { max-width: 60ch; }
+
+.formula {
+  margin-top: var(--s4);
+  padding: var(--s3) var(--s4);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: .92rem;
+  color: var(--ink-soft);
+  overflow-x: auto;
+}
+.formula b { color: var(--accent); font-weight: 600; }
+
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4);
+  margin-top: var(--s4);
+  font-family: var(--mono); font-size: .76rem; color: var(--ink-faint);
+}
+
+/* ── Sections ───────────────────────────────────────────────── */
+section { padding-top: var(--s6); }
+.section-head { display: flex; flex-direction: column; gap: var(--s2); margin-bottom: var(--s4); }
+
+/* Notebook headers carry a real sequence number — 01 through 05 is the run order. */
+.nb-head {
+  display: grid;
+  grid-template-columns: 3.4rem 1fr;
+  gap: 0 var(--s3);
+  align-items: start;
+  padding-top: var(--s6);
+  margin-bottom: var(--s4);
+  border-top: 1px solid var(--rule);
+}
+.nb-num {
+  font-family: var(--mono); font-size: 1.9rem; font-weight: 600;
+  line-height: 1; color: var(--accent); padding-top: .18em;
+  font-variant-numeric: tabular-nums;
+}
+.nb-title { display: flex; flex-direction: column; gap: var(--s1); }
+.nb-file { font-family: var(--mono); font-size: .78rem; color: var(--ink-faint); }
+.nb-body { display: flex; flex-direction: column; gap: var(--s4); }
+@media (min-width: 800px) { .nb-body { padding-left: calc(3.4rem + var(--s3)); } }
+
+/* ── Decision cards ─────────────────────────────────────────── */
+.decision {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.decision > .d-head {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2);
+  padding: var(--s3) var(--s3) var(--s2);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.d-id {
+  font-family: var(--mono); font-size: .72rem; font-weight: 600;
+  color: var(--accent-ink); background: var(--accent-soft);
+  padding: .18em .45em; border-radius: 3px; letter-spacing: .03em;
+}
+.d-head h4 { flex: 1 1 20ch; }
+.d-body { padding: var(--s3); display: flex; flex-direction: column; gap: var(--s3); }
+
+.d-part { display: grid; grid-template-columns: 5.5rem 1fr; gap: var(--s3); align-items: start; }
+@media (max-width: 640px) { .d-part { grid-template-columns: 1fr; gap: var(--s1); } }
+.d-label {
+  font-family: var(--mono); font-size: .68rem; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-faint); padding-top: .32em;
+}
+.d-part p { font-size: .96rem; }
+.d-part.evidence .d-label { color: var(--accent); }
+.d-part.evidence p { color: var(--ink-soft); }
+
+/* ── Tables ─────────────────────────────────────────────────── */
+.table-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+caption {
+  caption-side: top; text-align: left; padding: var(--s2) var(--s3);
+  font-family: var(--mono); font-size: .72rem; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-faint);
+  border-bottom: 1px solid var(--rule-soft);
+}
+th, td { padding: .58rem var(--s3); text-align: left; border-bottom: 1px solid var(--rule-soft); }
+thead th {
+  font-family: var(--mono); font-size: .72rem; font-weight: 500;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint);
+  background: var(--surface-sunk); border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+tbody tr:last-child td { border-bottom: none; }
+td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.model { font-weight: 500; white-space: nowrap; }
+.win { color: var(--good); font-weight: 600; }
+.win::after { content: " ◂"; font-size: .8em; }
+
+/* ── Callouts ───────────────────────────────────────────────── */
+.note, .caveat {
+  border-radius: 4px; padding: var(--s3);
+  display: flex; flex-direction: column; gap: var(--s1);
+  font-size: .93rem;
+}
+.note   { background: var(--accent-soft);  border-left: 3px solid var(--accent); }
+.caveat { background: var(--caution-soft); border-left: 3px solid var(--caution); }
+.note p, .caveat p { max-width: none; }
+.note .eyebrow   { color: var(--accent-ink); }
+.caveat .eyebrow { color: var(--caution); }
+
+/* ── Run-order rail ─────────────────────────────────────────── */
+.runorder { display: flex; flex-wrap: wrap; align-items: stretch; gap: var(--s2); }
+.ro-step {
+  flex: 1 1 8.5rem; background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 4px; padding: var(--s2) var(--s3);
+  display: flex; flex-direction: column; gap: .2rem;
+}
+.ro-step .n { font-family: var(--mono); font-size: .72rem; color: var(--accent); font-weight: 600; }
+.ro-step .t { font-size: .88rem; font-weight: 500; }
+.ro-step .s { font-family: var(--mono); font-size: .68rem; color: var(--ink-faint); }
+.ro-step.terminal { border-color: var(--accent); }
+
+/* ── Key/value strip ────────────────────────────────────────── */
+.kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+.kv > div { background: var(--surface); padding: var(--s2) var(--s3); display: flex; flex-direction: column; gap: .1rem; }
+.kv dt, .kv .k { font-family: var(--mono); font-size: .66rem; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-faint); }
+.kv dd, .kv .v { margin: 0; font-family: var(--mono); font-size: 1.02rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+ul.plain { margin: 0; padding-left: 1.15rem; max-width: var(--measure); }
+ul.plain li { margin-bottom: var(--s1); }
+ul.plain li:last-child { margin-bottom: 0; }
+
+details { border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); }
+summary { cursor: pointer; padding: var(--s2) var(--s3); font-weight: 500; font-size: .93rem; }
+details[open] summary { border-bottom: 1px solid var(--rule-soft); }
+.details-body { padding: var(--s3); display: flex; flex-direction: column; gap: var(--s2); }
+
+footer {
+  margin-top: var(--s7); padding-top: var(--s4);
+  border-top: 2px solid var(--ink);
+  font-family: var(--mono); font-size: .74rem; color: var(--ink-faint);
+  display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+<div class="wrap">
+
+<header class="masthead">
+  <span class="eyebrow">French MTPL · Two-stage pure premium framework</span>
+  <h1>Every decision, and why it was made</h1>
+  <p class="lede">
+    A walkthrough of the five notebooks in this project — what each one decides, the
+    statistical reasoning behind the decision, and the number from the notebook that
+    either backs it up or complicates it.
+  </p>
+
+  <div class="formula">
+    <b>Pure premium</b> = E[number of claims per year] &times; E[cost of a claim | a claim happened]
+    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    = <b>frequency</b> &nbsp;&times;&nbsp; <b>severity</b>
+  </div>
+
+  <div class="meta-row">
+    <span>678,013 policies</span>
+    <span>26,439 claims</span>
+    <span>3 model families</span>
+    <span>5 notebooks</span>
+  </div>
+</header>
+
+<section id="orientation">
+  <div class="section-head">
+    <span class="eyebrow">Start here</span>
+    <h2>The one idea the whole project rests on</h2>
+  </div>
+
+  <div class="stack">
+    <p>
+      An insurer needs to know the expected annual cost of covering a policy. That single
+      number is called the <strong>pure premium</strong> — pure because it excludes expenses,
+      profit and capital loadings. You could try to predict it directly, but almost every
+      policy costs zero (no claim), and the few that don't are wildly variable. That mix of
+      "mostly zeros plus a heavy tail" is hard for one model to fit.
+    </p>
+    <p>
+      So the problem is split in two. <strong>Frequency</strong> asks how often a policy
+      claims. <strong>Severity</strong> asks what a claim costs once it happens. Multiply
+      the two and you have the pure premium. The split isn't just a modelling convenience —
+      the two halves are driven by genuinely different things:
+    </p>
+
+    <div class="kv">
+      <div><span class="k">Frequency driven by</span><span class="v" style="font-size:.9rem">driving behaviour</span></div>
+      <div><span class="k">Severity driven by</span><span class="v" style="font-size:.9rem">vehicle &amp; repair market</span></div>
+      <div><span class="k">Frequency distribution</span><span class="v" style="font-size:.9rem">Poisson (counts)</span></div>
+      <div><span class="k">Severity distribution</span><span class="v" style="font-size:.9rem">Gamma (positive, skewed)</span></div>
+    </div>
+
+    <p>
+      A driver with a bad claims history crashes <em>more often</em>. But when they do crash,
+      the repair bill isn't systematically bigger than a careful driver's. Notebook 01 shows
+      this empirically, and it turns out to be the single most important finding in the whole
+      project — it explains why every severity model in notebooks 02–04 performs about the same.
+    </p>
+
+    <h3 style="margin-top:var(--s2)">The three models, and why three</h3>
+    <p>
+      The same two-stage problem is solved three times, with methods of increasing flexibility
+      and decreasing transparency. The point is not to crown a winner on accuracy; it is to
+      measure what the extra flexibility actually buys, so that the accuracy-versus-explainability
+      trade-off becomes a number rather than an opinion.
+    </p>
+
+    <div class="table-scroll">
+      <table>
+        <caption>The three model families</caption>
+        <thead>
+          <tr><th>Model</th><th>What it can represent</th><th>What you give up</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="model">GLM</td>
+            <td>Straight-line effects on a log scale; every effect is one coefficient</td>
+            <td>Cannot bend to curves or interactions unless you build them in by hand</td>
+          </tr>
+          <tr>
+            <td class="model">XGBoost</td>
+            <td>Curves, thresholds and interactions, found automatically</td>
+            <td>No single coefficient to quote; needs SHAP and partial dependence to explain</td>
+          </tr>
+          <tr>
+            <td class="model">Neural net</td>
+            <td>Any smooth function, in principle</td>
+            <td>Effectively a black box; hardest to defend to a regulator</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin-top:var(--s2)">Run order</h3>
+    <p>
+      The notebooks are a genuine sequence. 01 produces the cleaned data everything else reads.
+      02, 03 and 04 each fit their own models and write predictions to disk. 05 fits nothing —
+      it only loads and compares.
+    </p>
+
+    <div class="runorder">
+      <div class="ro-step"><span class="n">01</span><span class="t">EDA</span><span class="s">writes cleaned CSVs</span></div>
+      <div class="ro-step"><span class="n">02</span><span class="t">GLM</span><span class="s">writes the test split</span></div>
+      <div class="ro-step"><span class="n">03</span><span class="t">XGBoost</span><span class="s">reuses seed 42</span></div>
+      <div class="ro-step"><span class="n">04</span><span class="t">Neural net</span><span class="s">reuses seed 42</span></div>
+      <div class="ro-step terminal"><span class="n">05</span><span class="t">Comparison</span><span class="s">loads only</span></div>
+    </div>
+
+    <div class="note">
+      <span class="eyebrow">How to read a decision below</span>
+      <p>
+        Each decision is stated first, then <strong>Theory</strong> — the statistical reason —
+        then <strong>Evidence</strong>, the actual number the notebook printed. Where the
+        evidence undercuts the theory, that is said plainly rather than smoothed over.
+      </p>
+    </div>
+  </div>
+</section>
+<section id="nb01">
+  <div class="nb-head">
+    <span class="nb-num">01</span>
+    <div class="nb-title">
+      <h2>Exploratory data analysis</h2>
+      <span class="nb-file">notebooks/01_eda.ipynb → data/claims_cleaned.csv, data/policies_cleaned.csv</span>
+    </div>
+  </div>
+
+  <div class="nb-body">
+    <p>
+      This notebook does two jobs: it cleans the raw data into the two tables every other
+      notebook reads, and it checks the assumptions the later models will depend on. Getting
+      the cleaning wrong here quietly poisons everything downstream, so most of the decisions
+      below are about data integrity rather than analysis.
+    </p>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">1.1</span><h4>Keep two separate tables, not one joined table</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          The raw data comes in two files: one row per <em>policy</em> (frequency) and one row
+          per <em>claim</em> (severity). Joining them on policy ID fans a policy with two claims
+          out into two rows. That is exactly right for a severity dataset — two claims really are
+          two observations of claim cost. It is wrong for a frequency dataset, where those two
+          rows would let one policy's features vote twice.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          The join produces <span class="num">26,444</span> claim records across only
+          <span class="num">24,944</span> distinct policies — about 1,500 policies would have been
+          silently duplicated in the frequency table. The notebook keeps the pre-join,
+          one-row-per-policy table as the frequency source and uses the fanned-out join only for severity.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">1.2</span><h4>Cap implausible claim counts and exposures rather than deleting the rows</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          A few records report more than 4 claims, or more than a full year of exposure, on a
+          one-year policy. These are data-entry artefacts, not real risk. But the rest of each
+          record — driver age, vehicle, region — is still perfectly usable, so capping preserves
+          information that deletion would throw away. This is the standard treatment for this
+          dataset in the literature.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          <span class="num">9</span> policies capped at 4 claims; <span class="num">1,224</span>
+          capped at 1 year of exposure, out of <span class="num">678,013</span>. A tiny fraction —
+          but decision 1.5 shows it mattered a great deal.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">1.3</span><h4>Cap claim amounts at the 99th percentile</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          Claim costs have an extremely heavy right tail, running up to about €4 million. A
+          handful of catastrophic claims would dominate any squared-error loss and make the model
+          chase noise. In practice these are handled separately through reinsurance, not through
+          the everyday rating model, so removing their influence from the pricing model reflects
+          how insurers actually work.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          The 99th percentile is <span class="num">€16,451.22</span>. Only
+          <span class="num">265</span> claims (1.0%) sit above it and are pulled down to that
+          value. Post-cap the distribution has mean <span class="num">€1,569</span> against
+          median <span class="num">€1,172</span> — still right-skewed, which is the shape that
+          justifies the Gamma model in notebook 02.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">1.4</span><h4>Drop records where age is 99</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          A vehicle age or driver age of exactly 99 is a placeholder for "unknown", not a real
+          value. Unlike the capped fields above there is no sensible substitute, and the count is
+          negligible, so deletion is cleaner than imputation.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          <span class="num">1</span> record with vehicle age 99 and <span class="num">4</span>
+          with driver age 99, leaving <span class="num">26,439</span> clean claims. No missing
+          values anywhere else.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">1.5</span><h4>Test for overdispersion before committing to Poisson</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          A Poisson model assumes the variance of the count equals its mean. Real claim counts
+          are often <em>overdispersed</em> — more variable than that — which doesn't bias the
+          coefficients but does understate their standard errors, making effects look more
+          statistically certain than they are. If the ratio were well above 1, a Negative Binomial
+          model would be the defensible choice instead.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Mean <span class="num">0.0532</span>, variance <span class="num">0.0566</span>, ratio
+          <span class="num">1.065</span> — close enough to 1 that Poisson stands. Notably, this
+          ratio was <span class="num">1.33</span> before the capping in decision 1.2. Most of the
+          apparent overdispersion was a handful of bad records, not genuine variability. A
+          "model limitation" that turned out to be a data problem.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">1.6</span><h4>Check features against severity and against frequency separately</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          Before fitting anything, look at whether the available features relate to each target at
+          all. If a feature has no marginal relationship with the target, no model can conjure one
+          from it — the ceiling on performance is set by the data, not the algorithm.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Against <strong>severity</strong>, every numeric feature fits with an R² of roughly zero.
+          Against <strong>frequency</strong>, the same features separate risk sharply: claim rate
+          runs <span class="num">4.5%</span> for the cleanest bonus-malus band up to
+          <span class="num">19.1%</span> for the worst; young drivers claim at
+          <span class="num">6.7%</span> against <span class="num">4.2%</span> for the 26–35 group,
+          with an uptick again at 65+; regions span <span class="num">3.2%</span> to
+          <span class="num">6.1%</span>. Overall claim rate is <span class="num">5.02%</span>.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <span class="eyebrow">The finding that shapes the rest of the project</span>
+      <p>
+        These features predict <em>whether</em> you claim, not <em>how much</em> your claim costs.
+        Bonus-malus is a record of how often you have crashed; it says nothing about the price of
+        the bumper. So expect the frequency models to separate on skill, and the severity models
+        to converge on roughly the same mediocre performance regardless of complexity. Notebooks
+        02–04 confirm exactly that.
+      </p>
+    </div>
+
+    <p>
+      The notebook ends by writing <code>claims_cleaned.csv</code> (26,439 rows, one per claim) and
+      <code>policies_cleaned.csv</code> (678,013 rows, one per policy). Every later notebook starts
+      from these two files and nothing else.
+    </p>
+  </div>
+</section>
+<section id="nb02">
+  <div class="nb-head">
+    <span class="nb-num">02</span>
+    <div class="nb-title">
+      <h2>GLM — the actuarial baseline</h2>
+      <span class="nb-file">notebooks/02_glm.ipynb → models/glm_*.pkl, results/test_split.npz, results/predictions_glm.npz</span>
+    </div>
+  </div>
+
+  <div class="nb-body">
+    <p>
+      A generalised linear model is the industry standard for insurance pricing, and this notebook
+      fits two: a Gamma GLM for severity and a Poisson GLM for frequency. It is the baseline every
+      later model is judged against, and it is also the only model whose logic can be read straight
+      off the coefficient table.
+    </p>
+
+    <h3>Shared setup</h3>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">2.1</span><h4>One-hot encode categoricals with the first level dropped</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          A linear model needs numbers, so each category becomes its own 0/1 column. Dropping one
+          level per variable avoids the <em>dummy variable trap</em>: if every level had a column,
+          they would sum to the intercept column and the design matrix would be singular. The
+          dropped level becomes the reference, and every remaining coefficient is read as an effect
+          <em>relative to that reference</em>.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          9 raw features (5 numeric, 4 categorical) expand to <span class="num">42</span> model
+          columns. The same encoding is repeated identically in notebooks 03 and 04 so all three
+          models see the same design matrix.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">2.2</span><h4>Split 80/20 with a fixed random seed of 42</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          Test-set metrics are only comparable across models if the models were tested on the
+          <em>same rows</em>. Fixing the seed makes the split reproducible in three separate
+          notebooks running on three separate days, without them having to pass data between each other.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Severity: <span class="num">21,151</span> train / <span class="num">5,288</span> test.
+          Frequency: <span class="num">542,410</span> train / <span class="num">135,603</span> test.
+          This notebook also writes <code>test_split.npz</code> so notebook 05 can index everything
+          against one shared, explicit definition of the test set.
+        </p></div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:var(--s2)">Part 1 — Severity, with a Gamma GLM</h3>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">2.3</span><h4>Gamma distribution with a log link</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          Three properties of claim cost point at Gamma. It is strictly positive. It is
+          right-skewed. And its errors are <em>proportional</em> — being €500 wrong on a €1,000
+          claim is a far worse miss than being €500 wrong on a €10,000 claim, and Gamma's variance
+          grows with the mean, so it penalises errors that way automatically. The log link then
+          guarantees positive predictions and makes the model multiplicative: each feature scales
+          the expected claim by a factor rather than adding a fixed number of euros. Multiplicative
+          rating factors are exactly the form actuaries and regulators already work in.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Test MAE <span class="num">€1,102.26</span>, RMSE <span class="num">€2,261.57</span>,
+          Gamma deviance <span class="num">1.0595</span>. Pseudo-R² is
+          <span class="num">0.0069</span> — essentially no variance explained, precisely as
+          notebook 01 predicted.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">2.4</span><h4>Read the coefficients as multiplicative rating factors</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          Under a log link, exponentiating a coefficient converts it into a multiplier. A
+          coefficient of 0.10 means "multiply the expected claim by e<sup>0.10</sup> = 1.11", i.e.
+          an 11% loading. This is the single biggest practical advantage of the GLM: the model
+          <em>is</em> its rate table.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Baseline claim (the intercept) is <span class="num">€1,162</span>. Vehicle age is
+          significant and negative (−0.0085, p&lt;0.001) — older cars are worth less to repair.
+          Bonus-malus is significant and positive but tiny (+0.0030). Several regions load claims
+          by 24–34% (R94 ×<span class="num">1.34</span>, R41 ×<span class="num">1.27</span>,
+          R93 ×<span class="num">1.25</span>), which is plausible as regional labour and parts costs.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">2.5</span><h4>Fit an OLS regression alongside it, as a control</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          Claiming Gamma is the right choice is more convincing if you show what the naive
+          alternative does. Ordinary least squares assumes symmetric, constant-variance errors and
+          has no positivity constraint, so in principle it can predict a negative claim amount —
+          an obviously meaningless answer.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          On this data the demonstration doesn't land: OLS produced
+          <span class="num">0</span> negative predictions and near-identical error
+          (MAE <span class="num">€1,102.44</span> vs the GLM's <span class="num">€1,102.26</span>).
+          The cell prints a conclusion claiming OLS was worse, but that text is hardcoded and
+          contradicts the output above it. The honest reading: because the features barely predict
+          severity at all, both models collapse toward the same near-constant prediction, and the
+          distributional choice has almost nothing to bite on. Gamma remains the right
+          <em>principled</em> choice — the case for it is theoretical here, not empirical.
+        </p></div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:var(--s2)">Part 2 — Frequency, with a Poisson GLM</h3>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">2.6</span><h4>Poisson distribution with a log link</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          The target is a count of claims — a non-negative integer — which is what Poisson is for.
+          The log link again keeps predictions positive and makes risk factors multiplicative.
+          Decision 1.5 already verified the variance-equals-mean assumption holds here.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Test MAE <span class="num">0.0988</span>, RMSE <span class="num">0.2370</span>,
+          Poisson deviance <span class="num">43,585.73</span>. Unlike severity, the coefficients
+          are strongly significant: bonus-malus at z = <span class="num">66.0</span>, vehicle age
+          at z = <span class="num">−29.8</span>, driver age at z = <span class="num">15.5</span>.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">2.7</span><h4>Include log(Exposure) as an offset — supplied at fit time</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          Policies run for different fractions of a year. A policy active for six months has half
+          the opportunity to claim, so comparing raw counts across policies is unfair. An
+          <em>offset</em> is a predictor whose coefficient is forced to exactly 1; with a log link,
+          adding log(Exposure) as an offset converts the model from one of claim <em>counts</em>
+          into one of claim <em>rates per year</em>. That is what makes the coefficients mean
+          "risk per unit time" rather than "risk per policy record".
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          The offset must be passed when <em>fitting</em>, not only when predicting. An earlier
+          version of this notebook supplied it only at predict time, which left the coefficients
+          estimated on the wrong scale and made every frequency comparison in notebook 05 invalid.
+          Bonus-malus now reads +<span class="num">0.0226</span> per point, i.e. each point
+          multiplies the expected annual claim rate by <span class="num">1.023</span>.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">2.8</span><h4>Diagnose with calibration plots by risk band, not just headline error</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          MAE tells you the average size of an error but not <em>where</em> the model goes wrong.
+          Grouping policies into bands and plotting actual against predicted rate within each band
+          exposes systematic bias — the kind that makes a pricing model unfair to a specific
+          customer segment even when its overall error looks fine.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Two clear failures. Across bonus-malus bands the GLM underpredicts everywhere, by
+          roughly 50–60% in the three lowest-risk bands. Across driver age it fits a gentle upward
+          slope, completely missing the U-shape — the sharp spike at 18–25 and the uptick at 65+.
+          Both are the direct consequence of forcing a straight-line effect: driver age enters as
+          one linear term, so the model literally cannot bend.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <span class="eyebrow">Why this is the interesting result</span>
+      <p>
+        The GLM's failures are structural, not accidental. It compresses predictions toward the
+        mean and cannot represent a non-monotonic relationship. That is the precise gap notebooks
+        03 and 04 exist to test — and it sets up a clean hypothesis: if flexible models help
+        anywhere, they should help on frequency and driver age specifically.
+      </p>
+    </div>
+  </div>
+</section>
+<section id="nb03">
+  <div class="nb-head">
+    <span class="nb-num">03</span>
+    <div class="nb-title">
+      <h2>XGBoost — testing whether flexibility pays</h2>
+      <span class="nb-file">notebooks/03_xgboost.ipynb → models/xgb_*.json, results/predictions_xgb.npz</span>
+    </div>
+  </div>
+
+  <div class="nb-body">
+    <p>
+      Gradient boosted trees build many shallow decision trees in sequence, each one correcting
+      the errors of the ensemble so far. Because trees split on thresholds, they find curves,
+      cut-points and interactions without being told to — which is exactly what the GLM could not do.
+    </p>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">3.1</span><h4>Train severity on log(ClaimAmount), then exponentiate back</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          XGBoost's default squared-error loss treats a €500 miss identically whether the claim was
+          €1,000 or €10,000, and the heavy right tail would let a few huge claims dominate training.
+          Taking logs makes the target roughly symmetric — notebook 01 showed the log distribution is
+          close to normal — so squared error on the log scale approximates <em>proportional</em>
+          error on the euro scale, which is what Gamma achieves by design.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          MAE <span class="num">€938.56</span>, a genuine <span class="num">15%</span> improvement
+          on the GLM. But RMSE rises to <span class="num">€2,340.31</span> and Gamma deviance rises
+          to <span class="num">1.3611</span> from the GLM's <span class="num">1.0595</span>. That
+          isn't a contradiction — it is the loss function showing through. Log-scale squared error
+          and Gamma deviance are different objectives, so each model wins on the metric closest to
+          what it optimised.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">3.2</span><h4>Handle exposure by modelling the rate and weighting by exposure</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          XGBoost has no native offset the way a GLM does, so the same adjustment has to be
+          engineered. Setting the target to ClaimNb ÷ Exposure makes it a per-year rate, and setting
+          each row's sample weight to its exposure restores the right influence — a policy observed
+          for a full year counts more than one observed for a month. It reaches the same place as an
+          offset by a different route.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          With <code>objective='count:poisson'</code>, validation log-likelihood improves steadily
+          from <span class="num">1.4119</span> to <span class="num">1.2526</span> over 500 rounds.
+          Test Poisson deviance <span class="num">41,478.64</span> — a
+          <span class="num">4.8%</span> improvement on the GLM, and the best of the three models.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">3.3</span><h4>Constrain the trees: depth 4, 500 rounds, learning rate 0.05, 80% subsampling</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          Boosting overfits readily. Four levels of depth limits each tree to fairly simple
+          interactions; a low learning rate makes each tree contribute a small correction so the
+          ensemble converges gradually rather than lurching; and sampling 80% of rows and 80% of
+          columns per tree decorrelates the trees, which is the same variance-reduction idea behind
+          random forests.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          The severity model stops early — validation RMSE bottoms out around round 50 at
+          <span class="num">1.0983</span> and drifts up after — confirming there is little signal to
+          extract. The frequency model was still improving at round 500, so it may be slightly
+          under-trained.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="caveat">
+      <span class="eyebrow">Methodological caveat worth knowing</span>
+      <p>
+        Early stopping here uses the <em>test set</em> as its evaluation set. That leaks a small
+        amount of test information into the choice of how many trees to keep, so XGBoost's reported
+        numbers are mildly optimistic relative to a fully clean holdout. The fix is a three-way
+        train/validation/test split. The effect is small at this depth, but it should be stated
+        rather than assumed away.
+      </p>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">3.4</span><h4>Report permutation importance alongside built-in gain importance</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          XGBoost's default importance measures total loss reduction from splits on a feature, which
+          systematically favours features that get split on often — continuous variables, and
+          high-frequency one-hot categories. Permutation importance instead shuffles one feature and
+          measures how much performance degrades, which answers the question you actually care
+          about: how much does the model rely on this?
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Gain importance puts <code>VehBrand_B12</code> on top of the severity model by a wide
+          margin, which mostly reflects it being a very common brand. The notebook flags this and
+          adds a permutation run (10 repeats, scored on MAE) as the less biased view. On frequency,
+          bonus-malus dominates on both measures — which is what a variable engineered to summarise
+          claims history should do.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">3.5</span><h4>Use partial dependence plots to make the learned curve visible</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          A tree ensemble has no coefficient to quote, so its relationships must be recovered by
+          probing it: vary one feature across its range, hold the others at their observed values,
+          and plot the average prediction. This is the tooling that makes a tree model auditable
+          instead of opaque, and it is what a regulator would expect to see in place of a
+          coefficient table.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          This is the clearest win in the project. The driver-age curve shows the real U-shape — a
+          sharp spike at 18–22, a minimum around 25–30, and a rise again for older drivers — which
+          the GLM's single linear term erased entirely. The bonus-malus curve rises steeply with no
+          plateau. Calibration by band improves to match: XGBoost tracks actual rates closely across
+          all five bonus-malus bands including the 150+ tail, where the GLM badly underpredicted.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">3.6</span><h4>Judge the frequency model on lift and spread, not on MAE</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          For pricing, what matters is <em>rank ordering</em> — does the model put the riskier policy
+          above the safer one? A model that predicts the base rate for everyone has excellent MAE and
+          zero commercial value, because MAE rewards compressing predictions toward the mean. A lift
+          chart sorts policies into deciles by predicted risk and checks whether actual claim rates
+          climb across them.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Actual claim rate rises monotonically from <span class="num">0.0264</span> in the safest
+          decile to <span class="num">0.1288</span> in the riskiest — roughly
+          <span class="num">4.9×</span>. Predicted rates span <span class="num">0.017</span> to
+          <span class="num">1.388</span>, with a 90th-to-10th-percentile spread of
+          <span class="num">3.6×</span>. The top decile is over-predicted, though: an artefact of the
+          rate target, since a short policy with one claim implies an inflated annualised rate the
+          model partly learns.
+        </p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="nb04">
+  <div class="nb-head">
+    <span class="nb-num">04</span>
+    <div class="nb-title">
+      <h2>Neural network — the flexibility ceiling</h2>
+      <span class="nb-file">notebooks/04_neural_net.ipynb → models/nn_*.pt, models/nn_*_scaler.pkl, results/predictions_nn.npz</span>
+    </div>
+  </div>
+
+  <div class="nb-body">
+    <p>
+      A feedforward network is the most flexible of the three and the least interpretable. Including
+      it tests whether there is signal in this data that trees are leaving behind — and, if not,
+      settles the question of whether the ceiling is the model or the data.
+    </p>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">4.1</span><h4>Standardise every feature before training</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          Gradient descent is sensitive to feature scale in a way that trees are not. Population
+          density runs into the tens of thousands while driver age tops out at 99; without
+          standardising, the loss surface is stretched along one axis and a single learning rate
+          cannot suit both. Rescaling to mean 0 and standard deviation 1 makes the gradients
+          comparable across features.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          The fitted scaler is saved next to each network. This matters more than it looks: a
+          network without its scaler is unusable, because scoring new data requires the exact
+          training mean and variance. The frequency and severity networks get separate scalers, each
+          fitted on its own training distribution.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">4.2</span><h4>Keep the architecture small: two hidden layers, 64 and 32 units, dropout 0.2</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          Capacity should match the signal available. With 42 input columns and — as notebook 01
+          established — very weak severity signal, a deeper network would have more parameters to
+          memorise noise with and nothing extra to learn. Dropout randomly zeroes 20% of activations
+          during training, forcing the network not to depend on any single pathway.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Severity: MAE <span class="num">€957.42</span>, RMSE <span class="num">€2,349.08</span>,
+          Gamma deviance <span class="num">1.4114</span>. Statistically indistinguishable from
+          XGBoost's <span class="num">€938.56</span> — a 2% gap. Three quite different model families
+          landing in the same place is strong evidence that the limit is the data.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">4.3</span><h4>Read the training curve for underfitting, not just overfitting</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          The usual worry is validation loss turning upward while training loss keeps falling. The
+          opposite pattern — both curves flattening at a similar level early — means the model has
+          extracted everything the features contain and is limited by information, not capacity.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Severity validation loss moves from <span class="num">1.2710</span> to
+          <span class="num">1.2059</span> over 100 epochs and plateaus after roughly 60. The
+          frequency network is more striking: validation loss goes
+          <span class="num">0.30249</span> → <span class="num">0.30190</span> across the entire run —
+          essentially flat from epoch 10, meaning it learned little beyond the base rate. Note the
+          training loss prints <em>higher</em> than validation loss; that is dropout being active
+          during training and switched off at evaluation, not a bug.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">4.4</span><h4>Reproduce the exposure adjustment as a custom weighted loss</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          The same exposure problem, solved a third way. The network predicts a rate, and the loss
+          multiplies each sample's squared error by its exposure, so long policies dominate the
+          gradient. Consistency across all three models here is what keeps the comparison fair.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Test Poisson deviance <span class="num">42,250.46</span> — better than the GLM's
+          <span class="num">43,585.73</span>, worse than XGBoost's <span class="num">41,478.64</span>.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">4.5</span><h4>Clip negative predicted rates to zero, and flag it as a design flaw</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          The output layer is a plain linear unit, so nothing stops it producing a negative claim
+          rate — a meaningless quantity. This is precisely the constraint a GLM's log link enforces
+          structurally and a network does not. Clipping patches the symptom; a softplus or
+          exponential output activation would fix the cause.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Predicted rates run <span class="num">0.0000</span> to <span class="num">4.5948</span>,
+          with enough values pinned at exactly zero that decile boundaries collapse and the lift chart
+          needs <code>duplicates='drop'</code> to build honest groups. The 90th-to-10th-percentile
+          spread is only <span class="num">2.4×</span>, against XGBoost's <span class="num">3.6×</span> —
+          measurably weaker risk discrimination.
+        </p></div>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="nb05">
+  <div class="nb-head">
+    <span class="nb-num">05</span>
+    <div class="nb-title">
+      <h2>Comparison and pure premium</h2>
+      <span class="nb-file">notebooks/05_comparison.ipynb → results/18–23_*.png</span>
+    </div>
+  </div>
+
+  <div class="nb-body">
+    <p>
+      The final notebook combines the two stages into a price and decides which model to
+      recommend. Its most important design decisions are about discipline rather than statistics.
+    </p>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">5.1</span><h4>Fit nothing here — load everything</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          If a comparison notebook refits the models it is comparing, it produces a
+          <em>different</em> fit from the one each modelling notebook reported, and the two sets of
+          numbers drift apart with nobody noticing. Loading saved predictions makes the comparison
+          provably about the same models the earlier notebooks documented.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          The notebook imports only numpy, pandas, matplotlib and json — no torch, xgboost,
+          statsmodels or sklearn. An earlier version refitted all six models here, duplicating every
+          fit and stalling the kernel. Each modelling notebook now writes
+          <code>predictions_*.npz</code> and <code>metrics_*.json</code>, and this one asserts the
+          array shapes match before comparing anything.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">5.2</span><h4>Score the severity model on the frequency test rows, inside the modelling notebook</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          Pure premium is frequency × severity <em>for the same policy</em>. The frequency and
+          severity models are trained on different tables with different row counts, so the severity
+          model has to be re-scored on the frequency test policies to produce a matched pair. Doing
+          that where the row identity is unambiguous — inside the notebook that owns the split — is
+          what keeps the two halves aligned.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          An earlier version built the severity half by taking a positional tail slice of the
+          unshuffled matrix while the frequency half came from the shuffled split. The two row sets
+          overlapped by <span class="num">0.1997</span> — pure chance. Every pure premium figure and
+          every band table derived from it was wrong. This is the most instructive bug in the
+          project: it produced plausible-looking numbers and no error message.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">5.3</span><h4>Lead the comparison with Gini, not with MAE</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          The Gini coefficient measures how well a model rank-orders risk: sort policies by
+          prediction, then ask how concentrated actual claims are among the top-ranked. It is
+          normalised so 1 is a perfect ranker and 0 is random. This is the right lead metric because
+          a rating structure only has to get <em>relativities</em> right — a model can be
+          mis-calibrated at every level and still price fairly, whereas a model with good MAE and no
+          discrimination cannot price at all.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Computed from the saved GLM artifacts for this document: frequency Gini
+          <span class="num">0.266</span>, pure premium Gini <span class="num">0.137</span>. The drop
+          between them is the severity stage diluting a decent frequency ranking — a direct
+          consequence of severity being near-unpredictable.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">5.4</span><h4>Anchor pure premium against an empirical benchmark</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          A modelled premium needs a sanity check that doesn't come from a model. Portfolio claim
+          rate × mean claim size gives the average cost per policy-year the test portfolio actually
+          incurred. A model landing an order of magnitude away from that is signalling a bug, not a
+          finding — exactly the check that would have caught the misalignment in 5.2.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          Benchmark: <span class="num">0.1011</span> claims/year × <span class="num">€1,558</span> =
+          <span class="num">€157.52</span>. The GLM's mean pure premium is
+          <span class="num">€173.75</span> (median <span class="num">€147.83</span>) — the right
+          order of magnitude, and slightly above the benchmark as a mean pulled by a right tail
+          should be.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">5.5</span><h4>Treat interpretability as a judgement, and say so</h4></div>
+      <div class="d-body">
+        <div class="d-part"><span class="d-label">Theory</span><p>
+          Under APRA's Prudential Standard GPS 116, rating factors must be documented and defensible.
+          That is a real constraint with no natural numeric scale, so the notebook hardcodes
+          High/Medium/Low ratings and labels them explicitly as the only non-computed values on the
+          page. Dressing a judgement up as a measurement would be worse than stating it as a judgement.
+        </p></div>
+        <div class="d-part evidence"><span class="d-label">Evidence</span><p>
+          GLM — high interpretability, low regulatory risk: coefficients exponentiate straight into
+          the multiplicative rating factors regulators already read. XGBoost — medium: defensible
+          with SHAP, partial dependence and monotonicity constraints, but not self-documenting.
+          Neural net — low: materially more explanation work with no structural guarantees, so it
+          must clear a higher accuracy bar to be worth the cost.
+        </p></div>
+      </div>
+    </div>
+
+    <div class="caveat">
+      <span class="eyebrow">Current state of this notebook</span>
+      <p>
+        Notebook 05 has not been re-run since the bugs in 5.2 and 2.7 were fixed. Its cells are
+        unexecuted and its analysis sections are deliberate placeholders that say what to write once
+        the numbers regenerate. The band tables, Gini values and pure premium figures quoted here for
+        the GLM were computed directly from the saved artifacts for this document; the XGBoost and
+        neural net equivalents do not exist yet, because those notebooks' save cells have not been
+        run either. See the checklist at the end.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="scoreboard">
+  <div class="nb-head">
+    <span class="nb-num">↔</span>
+    <div class="nb-title">
+      <h2>The scoreboard</h2>
+      <span class="nb-file">test-set metrics as printed by notebooks 02, 03 and 04</span>
+    </div>
+  </div>
+
+  <div class="nb-body">
+    <div class="table-scroll">
+      <table>
+        <caption>Severity — 5,288 held-out claims, target in EUR</caption>
+        <thead>
+          <tr><th>Model</th><th class="n">MAE</th><th class="n">RMSE</th><th class="n">Gamma deviance</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="model">GLM</td><td class="n">1,102.26</td><td class="n win">2,261.57</td><td class="n win">1.0595</td></tr>
+          <tr><td class="model">XGBoost</td><td class="n win">938.56</td><td class="n">2,340.31</td><td class="n">1.3611</td></tr>
+          <tr><td class="model">Neural net</td><td class="n">957.42</td><td class="n">2,349.08</td><td class="n">1.4114</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <caption>Frequency — 135,603 held-out policies, target ClaimNb</caption>
+        <thead>
+          <tr><th>Model</th><th class="n">MAE</th><th class="n">RMSE</th><th class="n">Poisson deviance</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="model">GLM</td><td class="n">0.0988</td><td class="n">0.2370</td><td class="n">43,585.73</td></tr>
+          <tr><td class="model">XGBoost</td><td class="n win">0.0966</td><td class="n win">0.2352</td><td class="n win">41,478.64</td></tr>
+          <tr><td class="model">Neural net</td><td class="n">0.0972</td><td class="n">0.2371</td><td class="n">42,250.46</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="stack" style="margin-top:var(--s4)">
+      <h3>Reading the table</h3>
+      <p>
+        <strong>Frequency has a clear winner.</strong> XGBoost leads on all three metrics, improving
+        Poisson deviance by <span class="num">4.8%</span> over the GLM. Small in absolute terms, but
+        it is the actuarially correct metric and the direction is unambiguous — and the partial
+        dependence plots show exactly where the gain comes from, in the driver-age curve the GLM
+        could not bend around.
+      </p>
+      <p>
+        <strong>Severity has no winner, and that is the finding.</strong> XGBoost takes MAE by 15%,
+        the GLM takes Gamma deviance by 28%, and each wins on the metric nearest its own loss
+        function. Three model families spanning a huge range of flexibility land within a few percent
+        of each other. The ceiling is in the features, not the algorithms.
+      </p>
+      <p>
+        <strong>MAE and RMSE disagreeing is informative, not noisy.</strong> RMSE squares errors, so
+        it punishes the occasional large miss; MAE does not. XGBoost winning MAE while losing RMSE
+        means it is closer on typical claims and further out on extreme ones — which is what you would
+        expect from a model that is allowed to spread its predictions instead of hugging the mean.
+      </p>
+    </div>
+  </div>
+</section>
+<section id="takeaways">
+  <div class="nb-head">
+    <span class="nb-num">◆</span>
+    <div class="nb-title">
+      <h2>What the project actually shows</h2>
+      <span class="nb-file">five conclusions a student should leave with</span>
+    </div>
+  </div>
+
+  <div class="nb-body stack">
+    <div class="decision">
+      <div class="d-head"><span class="d-id">i</span><h4>Know which half of your problem is predictable</h4></div>
+      <div class="d-body"><div class="d-part"><span class="d-label">Why</span><p>
+        Frequency is learnable from these features; severity is very nearly not. Splitting the problem
+        made that visible. A single model of total cost would have averaged a strong signal with a
+        non-existent one and left you unable to tell which was which — and unable to know where extra
+        modelling effort would pay.
+      </p></div></div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">ii</span><h4>Model complexity buys ranking power, not accuracy</h4></div>
+      <div class="d-body"><div class="d-part"><span class="d-label">Why</span><p>
+        The headline error metrics barely move between a GLM and a neural network. What moves is the
+        shape of what the model can represent: the driver-age U-curve, calibration in the worst
+        bonus-malus band, a 3.6× spread of predicted rates instead of a compressed one. For pricing,
+        relativities are the product — so measure discrimination, not average error.
+      </p></div></div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">iii</span><h4>Match the metric to the loss, and read disagreements carefully</h4></div>
+      <div class="d-body"><div class="d-part"><span class="d-label">Why</span><p>
+        The GLM wins Gamma deviance because it optimises Gamma deviance. XGBoost wins MAE because it
+        optimises squared error on a log scale, which is closer to absolute error in euros. Neither
+        result is evidence that one model "understands" the data better. When metrics disagree,
+        the first question is always which objective each model was actually minimising.
+      </p></div></div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">iv</span><h4>Data bugs impersonate model limitations</h4></div>
+      <div class="d-body"><div class="d-part"><span class="d-label">Why</span><p>
+        Overdispersion of 1.33 looked like grounds for switching to a Negative Binomial model. It was
+        nine bad records; after capping, the ratio fell to 1.065 and Poisson was fine. The misaligned
+        pure premium rows produced numbers that looked entirely reasonable and were meaningless.
+        Neither announced itself. Sanity anchors — an empirical benchmark, a shape assertion, an
+        overlap check — are what turn silent wrongness into a visible failure.
+      </p></div></div>
+    </div>
+
+    <div class="decision">
+      <div class="d-head"><span class="d-id">v</span><h4>In a regulated market, explainability is a constraint, not a preference</h4></div>
+      <div class="d-body"><div class="d-part"><span class="d-label">Why</span><p>
+        A 4.8% deviance gain has to be weighed against the documentation burden of defending a tree
+        ensemble under GPS 116. The defensible reading of these results is a split decision: XGBoost
+        for frequency, where the gain is real and traceable to a specific learned curve, and the GLM
+        for severity, where nothing outperforms it on its own metric and it costs nothing to explain.
+        The reasonable alternative — GLM throughout, with XGBoost used as a challenger model to find
+        the non-linearities and then encoding them as GLM terms — is standard practice, and worth
+        considering before reaching for the more complex production model.
+      </p></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="state">
+  <div class="nb-head">
+    <span class="nb-num">✓</span>
+    <div class="nb-title">
+      <h2>State of the repository</h2>
+      <span class="nb-file">what is current, and what needs a re-run</span>
+    </div>
+  </div>
+
+  <div class="nb-body stack">
+    <p>
+      Notebooks 02–04 were re-run after the offset and alignment fixes, so their printed metrics are
+      current and are what this document quotes. Three things are still outstanding:
+    </p>
+
+    <ul class="plain">
+      <li>
+        The final save cell in <strong>notebook 03</strong> has not been executed, so
+        <code>results/predictions_xgb.npz</code> and <code>results/metrics_xgb.json</code> do not exist.
+      </li>
+      <li>
+        The lift-chart cell and the save cell in <strong>notebook 04</strong> have not been executed,
+        so <code>results/predictions_nn.npz</code> and <code>results/metrics_nn.json</code> do not exist.
+      </li>
+      <li>
+        <strong>Notebook 05</strong> is entirely unexecuted and will fail on its first cell until the
+        two above are run. Its analysis prose is placeholder text awaiting those numbers.
+      </li>
+    </ul>
+
+    <div class="note">
+      <span class="eyebrow">To bring the project current</span>
+      <p>
+        Run the last cell of notebook 03, then the last two cells of notebook 04, then notebook 05
+        end to end. No refitting of 01 or 02 is required — the cleaned CSVs and the shared test split
+        are already on disk and current.
+      </p>
+    </div>
+
+    <details>
+      <summary>Stale figures still embedded in notebook prose</summary>
+      <div class="details-body">
+        <p style="font-size:.93rem">
+          Several markdown cells in notebooks 02–04 quote numbers from earlier runs that no longer
+          match the outputs directly above them. Where they conflict, the printed cell output is
+          authoritative — and is what this document uses.
+        </p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Quoted in prose</th><th class="n">Stale</th><th class="n">Current</th></tr></thead>
+            <tbody>
+              <tr><td>GLM severity MAE</td><td class="n">1,079</td><td class="n">1,102.26</td></tr>
+              <tr><td>GLM frequency MAE</td><td class="n">0.0770</td><td class="n">0.0988</td></tr>
+              <tr><td>GLM Poisson deviance</td><td class="n">46,581</td><td class="n">43,585.73</td></tr>
+              <tr><td>XGBoost frequency MAE</td><td class="n">0.1046</td><td class="n">0.0966</td></tr>
+              <tr><td>XGBoost Poisson deviance</td><td class="n">43,579</td><td class="n">41,478.64</td></tr>
+              <tr><td>Neural net frequency MAE</td><td class="n">0.1055</td><td class="n">0.0972</td></tr>
+              <tr><td>Neural net Poisson deviance</td><td class="n">44,368</td><td class="n">42,250.46</td></tr>
+              <tr><td>Dataset claim rate</td><td class="n">3.9%</td><td class="n">5.02%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:.93rem">
+          The OLS comparison cell in notebook 02 also prints a hardcoded conclusion that contradicts
+          its own output — see decision 2.5.
+        </p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<footer>
+  <span>Insurance Claims Predictor</span>
+  <span>French MTPL (freMTPL2freq / freMTPL2sev), via OpenML</span>
+  <span>Figures from notebook outputs at the current commit</span>
+</footer>
+
+</div>
+
+
+
+
+
+
+
