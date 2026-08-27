@@ -11,3 +11,6 @@ __pycache__/
 
 # Node dependencies
 node_modules/
+
+# Jupyter
+.ipynb_checkpoints/
